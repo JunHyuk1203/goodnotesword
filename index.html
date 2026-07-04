@@ -48,14 +48,11 @@
     </header>
 
 
-    <!-- Global Navigation -->
-    <div class="global-nav" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
-      <button class="nav-btn active" id="nav-extract-btn" style="background: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">✨ AI 추출 및 변환</button>
-      <button class="nav-btn" id="nav-library-btn" style="background: transparent; color: var(--text-light); border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">📚 내 단어장 (라이브러리)</button>
-    </div>
+    
     
     <!-- EXTRACT SECTION -->
-    <div id="extract-section">
+    <div id="extract-section" class="hidden">
+      <div style="margin-bottom:1rem;"><button id="close-extract-btn" class="sample-btn">← 단원 목록으로 돌아가기</button></div>
     <!-- Step 2: Input (tabbed: text / image) -->
     <section class="card step-card" id="step-input">
       <div class="step-header">
@@ -239,7 +236,7 @@ Ex: The region has abundant natural resources."
       </div>
 
       <!-- Download Actions -->
-      <div class="download-section">
+      <div class="download-section hidden">
         <div class="download-info">
           <div class="download-format-info">
             <span class="format-badge">CSV</span>
