@@ -1,20 +1,20 @@
 /**
  * GoodNotes Vocabulary Study Set Generator
- * app.js â€“ v3 (fix: progressSection ref, improved 429 handling)
+ * app.js ??v3 (fix: progressSection ref, improved 429 handling)
  *
  * Modes:
- *  - Text mode: user pastes vocab text â†’ sends as text prompt to Gemini
- *  - Image mode: user uploads image(s) â†’ sends as inline_data to Gemini Vision
+ *  - Text mode: user pastes vocab text ??sends as text prompt to Gemini
+ *  - Image mode: user uploads image(s) ??sends as inline_data to Gemini Vision
  */
 
 'use strict';
 
-// â”€â”€â”€ API Key (stored in localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ API Key (stored in localStorage) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 const STORAGE_KEY = 'gn_gemini_api_key';
 function getApiKey() { return localStorage.getItem(STORAGE_KEY) || ''; }
 function setApiKey(k) { localStorage.setItem(STORAGE_KEY, k); }
 
-// â”€â”€â”€ DOM refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ DOM refs ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 // API key modal
 const apiModal          = document.getElementById('api-modal');
 const apiModalInput     = document.getElementById('api-modal-input');
@@ -65,42 +65,40 @@ const previewCount      = document.getElementById('preview-count');
 const addMoreBtn        = document.getElementById('add-more-btn');
 const clearImagesBtn    = document.getElementById('clear-images-btn');
 
-// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ State ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 let generatedData = [];
 let activeTab = 'text'; // 'text' | 'image'
 let uploadedImages = []; // Array of { file, dataUrl, mimeType }
 
-// â”€â”€â”€ Sample text â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const SAMPLE_TEXT = `accomplish [É™kÊŒmplÉªÊƒ] v. ì„±ì·¨í•˜ë‹¤, ë‹¬ì„±í•˜ë‹¤
+// ?€?€?€ Sample text ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+const SAMPLE_TEXT = `accomplish [?k?mplÉª?] v. ?±ì·¨?˜ë‹¤, ?¬ì„±?˜ë‹¤
 Syn: achieve, attain, fulfill, complete, carry out
 Ant: fail, abandon, neglect, give up
 Ex: She accomplished her goal of running a marathon in under four hours.
 Ex: The team accomplished the project ahead of schedule.
 
-abundant [É™bÊŒndÉ™nt] adj. í’ë¶€í•œ, ë„‰ë„‰í•œ
-Syn: plentiful, ample, copious, bountiful, profuse
+abundant [?b?nd?nt] adj. ?ë??? ?‰ë„‰??Syn: plentiful, ample, copious, bountiful, profuse
 Ant: scarce, rare, insufficient, lacking, meager
 Ex: The region has abundant natural resources, including oil and minerals.
 Related: abundance (n.), abundantly (adv.)
 
-ambiguous [Ã¦mbÉªÉ¡juÉ™s] adj. ëª¨í˜¸í•œ, ë¶ˆë¶„ëª…í•œ
+ambiguous [Ã¦mbÉªÉ¡ju?s] adj. ëª¨í˜¸?? ë¶ˆë¶„ëª…í•œ
 Syn: unclear, vague, equivocal, obscure, uncertain
 Ant: clear, definite, explicit, unambiguous, certain
 Ex: The contract contained several ambiguous clauses that led to disputes.
 Related: ambiguity (n.), ambiguously (adv.)
 
-scrutinize [skruËtÉªnaÉªz] v. ë©´ë°€íˆ ì¡°ì‚¬í•˜ë‹¤, ìì„¸íˆ ì‚´í”¼ë‹¤
-Syn: examine, inspect, analyze, probe, investigate
+scrutinize [skru?tÉªnaÉªz] v. ë©´ë???ì¡°ì‚¬?˜ë‹¤, ?ì„¸???´í”¼??Syn: examine, inspect, analyze, probe, investigate
 Ant: ignore, overlook, neglect, skim
 Ex: The auditors scrutinized every financial record in the company.
 
-resilient [rÉªzÉªliÉ™nt] adj. íšŒë³µë ¥ì´ ìˆëŠ”, íƒ„ë ¥ ìˆëŠ”
+resilient [rÉªzÉªli?nt] adj. ?Œë³µ?¥ì´ ?ˆëŠ”, ?„ë ¥ ?ˆëŠ”
 Syn: tough, strong, adaptable, flexible, buoyant
 Ant: weak, fragile, vulnerable, brittle
 Ex: Children are often more resilient than adults when it comes to change.
 Related: resilience (n.), resiliently (adv.)`;
 
-// â”€â”€â”€ Tab switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Tab switching ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 tabTextBtn.addEventListener('click', () => switchTab('text'));
 tabImageBtn.addEventListener('click', () => switchTab('image'));
 
@@ -115,24 +113,24 @@ function switchTab(tab) {
   updateGenerateButton();
 }
 
-// â”€â”€â”€ Text mode events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Text mode events ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 vocabInput.addEventListener('input', () => {
-  charCount.textContent = `${vocabInput.value.length.toLocaleString()}ì`;
+  charCount.textContent = `${vocabInput.value.length.toLocaleString()}??;
   onInputChange();
 });
 loadSampleBtn.addEventListener('click', () => {
   vocabInput.value = SAMPLE_TEXT;
-  charCount.textContent = `${SAMPLE_TEXT.length.toLocaleString()}ì`;
+  charCount.textContent = `${SAMPLE_TEXT.length.toLocaleString()}??;
   vocabInput.scrollTop = 0;
   onInputChange();
 });
 clearBtn.addEventListener('click', () => {
   vocabInput.value = '';
-  charCount.textContent = '0ì';
+  charCount.textContent = '0??;
   onInputChange();
 });
 
-// â”€â”€â”€ Image mode events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Image mode events ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 // Drag and drop on dropzone
 imageDropzone.addEventListener('dragover', e => {
@@ -182,9 +180,9 @@ pasteImageBtn.addEventListener('click', async () => {
       }
       if (found) break;
     }
-    if (!found) showError('í´ë¦½ë³´ë“œ ì˜¤ë¥˜', 'í´ë¦½ë³´ë“œì— ì´ë¯¸ì§€ê°€ ì—†ìŠµë‹ˆë‹¤. ì´ë¯¸ì§€ë¥¼ ë³µì‚¬í•œ ë’¤ ë‹¤ì‹œ ì‹œë„í•´ì£¼ì„¸ìš”.');
+    if (!found) showError('?´ë¦½ë³´ë“œ ?¤ë¥˜', '?´ë¦½ë³´ë“œ???´ë?ì§€ê°€ ?†ìŠµ?ˆë‹¤. ?´ë?ì§€ë¥?ë³µì‚¬?????¤ì‹œ ?œë„?´ì£¼?¸ìš”.');
   } catch (e) {
-    showError('í´ë¦½ë³´ë“œ ì ‘ê·¼ ì‹¤íŒ¨', 'ë¸Œë¼ìš°ì € ê¶Œí•œì´ í•„ìš”í•©ë‹ˆë‹¤. íŒŒì¼ ì„ íƒì„ ì´ìš©í•´ì£¼ì„¸ìš”.');
+    showError('?´ë¦½ë³´ë“œ ?‘ê·¼ ?¤íŒ¨', 'ë¸Œë¼?°ì? ê¶Œí•œ???„ìš”?©ë‹ˆ?? ?Œì¼ ? íƒ???´ìš©?´ì£¼?¸ìš”.');
   }
 });
 
@@ -204,14 +202,14 @@ clearImagesBtn.addEventListener('click', () => {
   onInputChange();
 });
 
-// â”€â”€â”€ Image file handling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Image file handling ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function addImageFiles(files) {
   const promises = files.map(file => {
     return new Promise(resolve => {
       // 50MB per image
       if (file.size > 50 * 1024 * 1024) {
-        showError('íŒŒì¼ í¬ê¸° ì´ˆê³¼', `"${file.name}" íŒŒì¼ì´ 50MBë¥¼ ì´ˆê³¼í•©ë‹ˆë‹¤.`);
+        showError('?Œì¼ ?¬ê¸° ì´ˆê³¼', `"${file.name}" ?Œì¼??50MBë¥?ì´ˆê³¼?©ë‹ˆ??`);
         resolve(null);
         return;
       }
@@ -243,7 +241,7 @@ function renderImagePreviews() {
     return;
   }
   imagePreviews.classList.remove('hidden');
-  previewCount.textContent = `${uploadedImages.length}ì¥ ì„ íƒë¨ (ìë™ìœ¼ë¡œ ë°°ì¹˜ ì²˜ë¦¬)`;
+  previewCount.textContent = `${uploadedImages.length}??? íƒ??(?ë™?¼ë¡œ ë°°ì¹˜ ì²˜ë¦¬)`;
 
   uploadedImages.forEach((img, idx) => {
     const wrap = document.createElement('div');
@@ -256,8 +254,8 @@ function renderImagePreviews() {
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'img-thumb-remove';
-    removeBtn.textContent = 'âœ•';
-    removeBtn.title = 'ì´ë¯¸ì§€ ì œê±°';
+    removeBtn.textContent = '??;
+    removeBtn.title = '?´ë?ì§€ ?œê±°';
     removeBtn.addEventListener('click', e => {
       e.stopPropagation();
       uploadedImages.splice(idx, 1);
@@ -276,7 +274,7 @@ function renderImagePreviews() {
   });
 }
 
-// â”€â”€â”€ Generate button state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Generate button state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function onInputChange() {
   updateGenerateButton();
@@ -288,20 +286,20 @@ function updateGenerateButton() {
     (activeTab === 'image' && uploadedImages.length > 0);
   generateBtn.disabled = !ready;
   generateHint.textContent = ready
-    ? `AIê°€ ì´ë¯¸ì§€/í…ìŠ¤íŠ¸ì—ì„œ ë‹¨ì–´ì™€ ëœ»ì„ ìë™ ì¶”ì¶œí•©ë‹ˆë‹¤${
+    ? `AIê°€ ?´ë?ì§€/?ìŠ¤?¸ì—???¨ì–´?€ ?»ì„ ?ë™ ì¶”ì¶œ?©ë‹ˆ??{
         activeTab === 'image' && uploadedImages.length > 0
-          ? ` (${uploadedImages.length}ì¥ â†’ ${Math.ceil(uploadedImages.length / BATCH_SIZE)}ë°°ì¹˜)`
+          ? ` (${uploadedImages.length}????${Math.ceil(uploadedImages.length / BATCH_SIZE)}ë°°ì¹˜)`
           : ''
       }`
     : activeTab === 'image'
-      ? 'ì´ë¯¸ì§€ë¥¼ ì—…ë¡œë“œí•˜ë©´ ë²„íŠ¼ì´ í™œì„±í™”ë©ë‹ˆë‹¤ (ì—¬ëŸ¬ ì¥ ê°€ëŠ¥)'
-      : 'í…ìŠ¤íŠ¸ë¥¼ ì…ë ¥í•˜ë©´ ë²„íŠ¼ì´ í™œì„±í™”ë©ë‹ˆë‹¤';
+      ? '?´ë?ì§€ë¥??…ë¡œ?œí•˜ë©?ë²„íŠ¼???œì„±?”ë©?ˆë‹¤ (?¬ëŸ¬ ??ê°€??'
+      : '?ìŠ¤?¸ë? ?…ë ¥?˜ë©´ ë²„íŠ¼???œì„±?”ë©?ˆë‹¤';
 }
 
-// â”€â”€â”€ Batch size (images per API call) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Batch size (images per API call) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 const BATCH_SIZE = 4; // Gemini handles 4 images per request comfortably
 
-// â”€â”€â”€ Generate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Generate ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 generateBtn.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
@@ -309,7 +307,7 @@ async function handleGenerate() {
   resultSection.classList.add('hidden');
   progressSection.classList.remove('hidden');
   generateBtn.disabled = true;
-  btnText.textContent = 'ìƒì„± ì¤‘...';
+  btnText.textContent = '?ì„± ì¤?..';
 
   const apiKey = getApiKey();
   if (!apiKey) { showApiModal(); return; }
@@ -339,30 +337,30 @@ async function handleGenerate() {
 
         setProgress(
           pctStart,
-          `ë°°ì¹˜ ${batchNum}/${totalBatches} ì²˜ë¦¬ ì¤‘...`,
-          `ì´ë¯¸ì§€ ${batches[b].map((_, i) => b * BATCH_SIZE + i + 1).join(', ')}ì¥ ë¶„ì„ ì¤‘`
+          `ë°°ì¹˜ ${batchNum}/${totalBatches} ì²˜ë¦¬ ì¤?..`,
+          `?´ë?ì§€ ${batches[b].map((_, i) => b * BATCH_SIZE + i + 1).join(', ')}??ë¶„ì„ ì¤?
         );
 
         const responseText = await callGeminiVision(apiKey, prompt, batches[b]);
         const batchParsed = parseResponse(responseText);
         allParsed = [...allParsed, ...batchParsed];
 
-        setProgress(pctEnd, `ë°°ì¹˜ ${batchNum}/${totalBatches} ì™„ë£Œ`, `ëˆ„ì  ${allParsed.length}ê°œ ë‹¨ì–´`);
+        setProgress(pctEnd, `ë°°ì¹˜ ${batchNum}/${totalBatches} ?„ë£Œ`, `?„ì  ${allParsed.length}ê°??¨ì–´`);
 
         // Small delay between batches to avoid rate limiting
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
-      setProgress(5, 'AIì—ê²Œ í…ìŠ¤íŠ¸ë¥¼ ì „ì†¡í•˜ëŠ” ì¤‘...', '');
-      setProgress(15, 'AIê°€ ë‹¨ì–´ë¥¼ ë¶„ì„í•˜ê³  ìˆìŠµë‹ˆë‹¤...', 'ì˜ˆë¬¸, ìœ ì˜ì–´, ë°˜ì˜ì–´ë¥¼ ì¶”ì¶œ ì¤‘');
+      setProgress(5, 'AI?ê²Œ ?ìŠ¤?¸ë? ?„ì†¡?˜ëŠ” ì¤?..', '');
+      setProgress(15, 'AIê°€ ?¨ì–´ë¥?ë¶„ì„?˜ê³  ?ˆìŠµ?ˆë‹¤...', '?ˆë¬¸, ? ì˜?? ë°˜ì˜?´ë? ì¶”ì¶œ ì¤?);
       const responseText = await callGeminiText(apiKey, prompt, vocabInput.value.trim());
       allParsed = parseResponse(responseText);
     }
 
-    setProgress(90, 'ë°ì´í„°ë¥¼ ì •ë¦¬í•˜ê³  ìˆìŠµë‹ˆë‹¤...', '');
+    setProgress(90, '?°ì´?°ë? ?•ë¦¬?˜ê³  ?ˆìŠµ?ˆë‹¤...', '');
 
     if (!allParsed || allParsed.length === 0) {
-      throw new Error('AI ì‘ë‹µì—ì„œ ë‹¨ì–´ë¥¼ ì¶”ì¶œí•˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì´ë¯¸ì§€ê°€ ì„ ëª…í•œì§€ í™•ì¸í•˜ê±°ë‚˜ ë‹¤ì‹œ ì‹œë„í•´ë³´ì„¸ìš”.');
+      throw new Error('AI ?‘ë‹µ?ì„œ ?¨ì–´ë¥?ì¶”ì¶œ?˜ì? ëª»í–ˆ?µë‹ˆ?? ?´ë?ì§€ê°€ ? ëª…?œì? ?•ì¸?˜ê±°???¤ì‹œ ?œë„?´ë³´?¸ìš”.');
     }
 
     // Deduplicate by word
@@ -376,7 +374,7 @@ async function handleGenerate() {
 
     generatedData = deduped.slice(0, maxWords).map(item => formatCard(item, frontOpt, backOpt));
 
-    setProgress(100, 'ì™„ë£Œ!', `ì´ ${generatedData.length}ê°œ ë‹¨ì–´ ì¶”ì¶œ`);
+    setProgress(100, '?„ë£Œ!', `ì´?${generatedData.length}ê°??¨ì–´ ì¶”ì¶œ`);
     await new Promise(r => setTimeout(r, 400));
 
     renderResults(generatedData, deduped.length);
@@ -385,22 +383,22 @@ async function handleGenerate() {
     console.error(err);
     const isApiErr = err.message?.includes('API') || err.message?.includes('401') || err.message?.includes('403');
     showError(
-      isApiErr ? 'API ì˜¤ë¥˜' : 'ì²˜ë¦¬ ì˜¤ë¥˜',
-      err.message || 'ì•Œ ìˆ˜ ì—†ëŠ” ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.'
+      isApiErr ? 'API ?¤ë¥˜' : 'ì²˜ë¦¬ ?¤ë¥˜',
+      err.message || '?????†ëŠ” ?¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.'
     );
   } finally {
     progressSection.classList.add('hidden');
     generateBtn.disabled = false;
-    btnText.textContent = 'AIë¡œ ìŠ¤í„°ë”” ì„¸íŠ¸ ìƒì„±';
+    btnText.textContent = 'AIë¡??¤í„°???¸íŠ¸ ?ì„±';
     updateGenerateButton();
     setProgress(0);
   }
 }
 
-// â”€â”€â”€ Prompt builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Prompt builder ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
-  const langName       = lang === 'ko' ? 'í•œêµ­ì–´' : 'ì˜ì–´';
+  const langName       = lang === 'ko' ? '?œêµ­?? : '?ì–´';
   const includeExample = backOpt === 'full' || backOpt === 'meaning_example';
   const includeSynAnt  = backOpt === 'full';
 
@@ -415,9 +413,9 @@ Each item in the array must have these fields:
 - "pos": part of speech abbreviation (e.g., "v.", "n.", "adj.", "adv.") (string)
 - "pronunciation": IPA or phonetic pronunciation if available, otherwise empty string
 - "meaning": the definition in ${langName} (string)
-- "synonyms": array of synonym strings (max 5)${includeSynAnt ? '' : ' â€” return empty array []'}
-- "antonyms": array of antonym strings (max 4)${includeSynAnt ? '' : ' â€” return empty array []'}
-- "examples": array of example sentences (max 2)${includeExample ? '' : ' â€” return empty array []'}
+- "synonyms": array of synonym strings (max 5)${includeSynAnt ? '' : ' ??return empty array []'}
+- "antonyms": array of antonym strings (max 4)${includeSynAnt ? '' : ' ??return empty array []'}
+- "examples": array of example sentences (max 2)${includeExample ? '' : ' ??return empty array []'}
 - "related": related word forms if any (string, e.g., "abundance (n.)"), or empty string
 
 Rules:
@@ -428,10 +426,10 @@ Rules:
 - If this is an image, carefully read all visible text including small print`;
 }
 
-// â”€â”€â”€ Gemini API: Text â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Gemini API: Text ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 async function callGeminiText(apiKey, prompt, text) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const body = {
     contents: [{
       parts: [
@@ -443,10 +441,10 @@ async function callGeminiText(apiKey, prompt, text) {
   return fetchGemini(url, body);
 }
 
-// â”€â”€â”€ Gemini API: Vision (Image) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Gemini API: Vision (Image) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 async function callGeminiVision(apiKey, prompt, images) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   // Build parts: [image1, image2, ..., text prompt]
   const parts = images.map(img => ({
@@ -474,23 +472,23 @@ async function fetchGemini(url, body) {
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     const msg = err?.error?.message || response.statusText;
-    if (response.status === 400) throw new Error(`API ìš”ì²­ ì˜¤ë¥˜ (400): ${msg}`);
+    if (response.status === 400) throw new Error(`API ?”ì²­ ?¤ë¥˜ (400): ${msg}`);
     if (response.status === 401 || response.status === 403)
-      throw new Error(`API í‚¤ ì¸ì¦ ì‹¤íŒ¨ (${response.status}): API í‚¤ë¥¼ í™•ì¸í•´ì£¼ì„¸ìš”.`);
+      throw new Error(`API ???¸ì¦ ?¤íŒ¨ (${response.status}): API ?¤ë? ?•ì¸?´ì£¼?¸ìš”.`);
     if (response.status === 429)
-      throw new Error(`API í‚¤ í• ë‹¹ëŸ‰ì´ ì´ˆê³¼ë˜ì—ˆìŠµë‹ˆë‹¤ (429).
-â€¢ ìš°ìƒ ìš°ì£½ í™”ë©´ [ê¸° API í‚¤] ë²„íŠ¼ì„ ëˆŒëŸ¬ ìƒˆ í‚¤ë¡œ êµì²´í•˜ì„¸ìš”.
-â€¢ ë˜ëŠ” https://aistudio.google.com/app/apikey ì—ì„œ ìƒˆ API í‚¤ë¥¼ ë°œê¸‰ë°›ìœ¼ì„¸ìš”.`);
-    throw new Error(`API ì˜¤ë¥˜ (${response.status}): ${msg}`);
+      throw new Error(`API ??? ë‹¹?‰ì´ ì´ˆê³¼?˜ì—ˆ?µë‹ˆ??(429).
+???°ìƒ ?°ì£½ ?”ë©´ [ê¸?API ?? ë²„íŠ¼???ŒëŸ¬ ???¤ë¡œ êµì²´?˜ì„¸??
+???ëŠ” https://aistudio.google.com/app/apikey ?ì„œ ??API ?¤ë? ë°œê¸‰ë°›ìœ¼?¸ìš”.`);
+    throw new Error(`API ?¤ë¥˜ (${response.status}): ${msg}`);
   }
 
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('AI ì‘ë‹µì´ ë¹„ì–´ìˆìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹œë„í•´ë³´ì„¸ìš”.');
+  if (!text) throw new Error('AI ?‘ë‹µ??ë¹„ì–´?ˆìŠµ?ˆë‹¤. ?¤ì‹œ ?œë„?´ë³´?¸ìš”.');
   return text;
 }
 
-// â”€â”€â”€ Parsing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Parsing ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function parseResponse(text) {
   let cleaned = text.trim();
@@ -498,17 +496,17 @@ function parseResponse(text) {
   const startIdx = cleaned.indexOf('[');
   const endIdx   = cleaned.lastIndexOf(']');
   if (startIdx === -1 || endIdx === -1) {
-    throw new Error('AI ì‘ë‹µì—ì„œ JSON ë°ì´í„°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹œë„í•´ì£¼ì„¸ìš”.');
+    throw new Error('AI ?‘ë‹µ?ì„œ JSON ?°ì´?°ë? ì°¾ì„ ???†ìŠµ?ˆë‹¤. ?¤ì‹œ ?œë„?´ì£¼?¸ìš”.');
   }
   cleaned = cleaned.slice(startIdx, endIdx + 1);
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    throw new Error(`JSON íŒŒì‹± ì‹¤íŒ¨: ${e.message}. ë‹¤ì‹œ ìƒì„±ì„ ëˆŒëŸ¬ì£¼ì„¸ìš”.`);
+    throw new Error(`JSON ?Œì‹± ?¤íŒ¨: ${e.message}. ?¤ì‹œ ?ì„±???ŒëŸ¬ì£¼ì„¸??`);
   }
 }
 
-// â”€â”€â”€ Card formatting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Card formatting ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function formatCard(item, frontOpt, backOpt) {
   let front = item.word || '';
@@ -521,18 +519,18 @@ function formatCard(item, frontOpt, backOpt) {
     backParts.push(`${posStr}${item.meaning}`);
   }
   if (backOpt === 'full') {
-    if (item.synonyms?.length) backParts.push(`ìœ ì˜ì–´: ${item.synonyms.join(', ')}`);
-    if (item.antonyms?.length) backParts.push(`ë°˜ì˜ì–´: ${item.antonyms.join(', ')}`);
-    if (item.related)          backParts.push(`ê´€ë ¨ì–´: ${item.related}`);
+    if (item.synonyms?.length) backParts.push(`? ì˜?? ${item.synonyms.join(', ')}`);
+    if (item.antonyms?.length) backParts.push(`ë°˜ì˜?? ${item.antonyms.join(', ')}`);
+    if (item.related)          backParts.push(`ê´€?¨ì–´: ${item.related}`);
   }
   if (backOpt === 'full' || backOpt === 'meaning_example') {
-    if (item.examples?.length) item.examples.forEach(ex => backParts.push(`ì˜ˆ) ${ex}`));
+    if (item.examples?.length) item.examples.forEach(ex => backParts.push(`?? ${ex}`));
   }
 
   return { front: front.trim(), back: backParts.join('\n').trim() };
 }
 
-// â”€â”€â”€ Render results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Render results ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function renderResults(data, totalExtracted) {
   previewTbody.innerHTML = '';
@@ -546,23 +544,23 @@ function renderResults(data, totalExtracted) {
     previewTbody.appendChild(tr);
   });
 
-  resultSummary.textContent = `ì´ ${data.length}ê°œì˜ ë‹¨ì–´ê°€ ì¶”ì¶œë˜ì—ˆìŠµë‹ˆë‹¤.${
-    totalExtracted > data.length ? ` (ì›ë³¸ ${totalExtracted}ê°œ ì¤‘ ìµœëŒ€ ${data.length}ê°œ í‘œì‹œ)` : ''
-  } ì•„ë˜ì—ì„œ ë¯¸ë¦¬ë³´ê¸° í›„ CSVë¥¼ ë‹¤ìš´ë¡œë“œí•˜ì„¸ìš”.`;
+  resultSummary.textContent = `ì´?${data.length}ê°œì˜ ?¨ì–´ê°€ ì¶”ì¶œ?˜ì—ˆ?µë‹ˆ??${
+    totalExtracted > data.length ? ` (?ë³¸ ${totalExtracted}ê°?ì¤?ìµœë? ${data.length}ê°??œì‹œ)` : ''
+  } ?„ë˜?ì„œ ë¯¸ë¦¬ë³´ê¸° ??CSVë¥??¤ìš´ë¡œë“œ?˜ì„¸??`;
 
   resultSection.classList.remove('hidden');
   previewContainer.classList.remove('collapsed');
-  togglePreviewBtn.textContent = 'ì ‘ê¸°';
+  togglePreviewBtn.textContent = '?‘ê¸°';
   resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// â”€â”€â”€ Preview toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Preview toggle ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 togglePreviewBtn.addEventListener('click', () => {
   const collapsed = previewContainer.classList.toggle('collapsed');
-  togglePreviewBtn.textContent = collapsed ? 'í¼ì¹˜ê¸°' : 'ì ‘ê¸°';
+  togglePreviewBtn.textContent = collapsed ? '?¼ì¹˜ê¸? : '?‘ê¸°';
 });
 
-// â”€â”€â”€ Download / Copy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Download / Copy ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 downloadCsvBtn.addEventListener('click', downloadCSV);
 copyCsvBtn.addEventListener('click', copyCSV);
 
@@ -601,14 +599,14 @@ async function copyCSV() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
-      ë³µì‚¬ ì™„ë£Œ!`;
+      ë³µì‚¬ ?„ë£Œ!`;
     setTimeout(() => { copyCsvBtn.innerHTML = original; }, 2000);
   } catch (e) {
-    showError('ë³µì‚¬ ì‹¤íŒ¨', 'í´ë¦½ë³´ë“œ ì ‘ê·¼ ê¶Œí•œì´ ì—†ìŠµë‹ˆë‹¤. CSV ë‹¤ìš´ë¡œë“œë¥¼ ì´ìš©í•´ì£¼ì„¸ìš”.');
+    showError('ë³µì‚¬ ?¤íŒ¨', '?´ë¦½ë³´ë“œ ?‘ê·¼ ê¶Œí•œ???†ìŠµ?ˆë‹¤. CSV ?¤ìš´ë¡œë“œë¥??´ìš©?´ì£¼?¸ìš”.');
   }
 }
 
-// â”€â”€â”€ Error helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Error helpers ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function showError(title, msg) {
   errorTitle.textContent = title;
@@ -630,7 +628,7 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// â”€â”€â”€ API Key Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ API Key Modal ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 function showApiModal() {
   apiModal.classList.remove('hidden');
@@ -676,15 +674,15 @@ function updateKeyStatus() {
   if (!apiKeyStatus) return;
   const key = getApiKey();
   if (key) {
-    apiKeyStatus.textContent = 'âœ“ API í‚¤ ì €ì¥ë¨';
+    apiKeyStatus.textContent = '??API ???€?¥ë¨';
     apiKeyStatus.className = 'key-status ok';
   } else {
-    apiKeyStatus.textContent = 'API í‚¤ í•„ìš”';
+    apiKeyStatus.textContent = 'API ???„ìš”';
     apiKeyStatus.className = 'key-status';
   }
 }
 
-// â”€â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€?€ Init ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 onInputChange();
 updateKeyStatus();
 if (!getApiKey()) showApiModal();
