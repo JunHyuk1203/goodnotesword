@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Background decoration -->
   <div class="bg-orb orb-1"></div>
   <div class="bg-orb orb-2"></div>
   <div class="bg-orb orb-3"></div>
@@ -28,14 +27,13 @@
             <path d="M28 26l1.5 1.5L32 24" stroke="#6C63FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             <defs>
               <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#6C63FF"/>
-                <stop offset="1" stop-color="#a78bfa"/>
+                <stop stop-color="#6C63FF"/><stop offset="1" stop-color="#a78bfa"/>
               </linearGradient>
             </defs>
           </svg>
         </div>
         <div>
-          <h1 class="app-title">GoodNotes 스터디 세트 생성기 <span class="version-badge">v1.2</span></h1>
+          <h1 class="app-title">GoodNotes 스터디 세트 생성기 <span class="version-badge" id="version-badge">v1.2</span></h1>
           <p class="app-subtitle">단어장 텍스트 또는 사진을 AI로 분석하여 굿노트용 플래시카드 CSV로 변환합니다</p>
         </div>
       </div>
@@ -47,147 +45,154 @@
       </div>
     </header>
 
-    <!-- MAIN APP CONTENT (Library is the ONLY global view) -->
-    <div id="library-section">
-      <div id="library-content" class="card">
-        <div class="library-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
-          <h2 class="step-title" style="margin: 0;">📚 내 단어장</h2>
+    <!-- ========== LIBRARY (단어장) ========== -->
+    <div id="library-content" class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
+        <h2 class="step-title" style="margin:0;">📚 내 단어장</h2>
+      </div>
+
+      <!-- Breadcrumb -->
+      <div id="breadcrumb" style="margin-bottom:1.5rem; font-size:0.95rem;">
+        <span id="crumb-home" style="cursor:pointer; color:var(--primary); font-weight:600;">🏠 단어장 목록</span>
+        <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
+        <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
+      </div>
+
+      <!-- Add Book Button -->
+      <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
+        <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단어장 만들기</button>
+      </div>
+
+      <!-- Books Grid -->
+      <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem;"></div>
+
+      <!-- Add Chapter Button (hidden until inside a book) -->
+      <div id="add-chapter-wrap" class="hidden" style="margin-bottom:1rem; text-align:right;">
+        <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
+      </div>
+
+      <!-- Chapters Grid -->
+      <div id="view-chapters" class="hidden" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem;"></div>
+
+      <!-- Words View -->
+      <div id="view-words" class="hidden">
+        <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span id="word-count-badge" class="badge badge-ai">0 단어</span>
+          <div style="display:flex; gap:10px;">
+            <button id="open-extract-btn" class="generate-btn" style="width:auto; padding:0.6rem 1.2rem; font-size:0.9rem;">✨ 새 단어 추출하기</button>
+            <button id="export-csv-btn" class="download-btn download-primary" style="padding:0.6rem 1.2rem; font-size:0.9rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV 내보내기
+            </button>
+          </div>
         </div>
 
-        <!-- Breadcrumb Navigation -->
-        <div id="library-breadcrumb" class="sample-row" style="margin-bottom: 1.5rem; font-size: 0.95rem;">
-          <span id="crumb-home" style="cursor: pointer; color: var(--primary); font-weight: 600;">🏠 단어장 목록</span>
-          <span id="crumb-book" class="hidden" style="color: var(--text-light);"> > <span id="crumb-book-name" style="cursor: pointer; color: var(--primary); font-weight: 600;"></span></span>
-          <span id="crumb-chapter" class="hidden" style="color: var(--text-light);"> > <span id="crumb-chapter-name" style="color: var(--text-dark); font-weight: 600;"></span></span>
-        </div>
+        <!-- EXTRACT SECTION (hidden, toggled by button) -->
+        <div id="extract-section" class="hidden" style="border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:2rem; background:var(--bg-card);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 class="step-title" style="margin:0; font-size:1.1rem;">단어 추출기</h3>
+            <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
+          </div>
 
-        
-        <div id="add-book-wrap" style="margin-bottom: 1rem; text-align: right;">
-          <button id="add-book-btn" class="generate-btn" style="width:auto; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 6px;">+ 새 단어장 만들기</button>
-        </div>
-        <!-- Books View -->
+          <!-- Tabs -->
+          <div class="tab-switcher" role="tablist">
+            <button class="tab-btn tab-active" id="tab-text-btn">✏️ 텍스트</button>
+            <button class="tab-btn" id="tab-image-btn">📷 이미지</button>
+          </div>
 
-        <div id="view-books" class="library-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;"></div>
-        
-        
-        <div id="add-chapter-wrap" class="hidden" style="margin-bottom: 1rem; text-align: right;">
-          <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 6px;">+ 새 단원 추가</button>
-        </div>
-        <!-- Chapters View -->
-
-        <div id="view-chapters" class="library-grid hidden" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;"></div>
-        
-        <!-- Words View -->
-        <div id="view-words" class="hidden">
-          <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <span id="word-count-badge" class="badge badge-ai">0 단어</span>
-            <div style="display:flex; gap:10px;">
-              <button id="open-extract-btn" class="generate-btn" style="width:auto; padding: 0.6rem 1.2rem; font-size: 0.9rem;">✨ 새 단어 추출하기</button>
-              <button id="export-library-csv-btn" class="download-btn download-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                CSV 내보내기
-              </button>
+          <!-- Text Panel -->
+          <div id="panel-text">
+            <div class="textarea-wrap">
+              <textarea id="vocab-input" class="vocab-textarea" placeholder="여기에 단어책 텍스트를 붙여넣으세요..." rows="8" spellcheck="false"></textarea>
+              <div class="textarea-footer">
+                <span id="char-count" class="char-count">0자</span>
+              </div>
             </div>
           </div>
-          
-          <!-- EXTRACT SECTION (Hidden by default, shown when "새 단어 추출하기" is clicked) -->
-          <div id="extract-section" class="hidden" style="border: 1px solid var(--border-light); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; background: rgba(255,255,255,0.5);">
-            <div style="margin-bottom:1rem; text-align:right;">
-              <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
-            </div>
-            
-            <section class="step-card" id="step-input" style="box-shadow:none; border:none; padding:0; background:transparent;">
-              <div class="step-header">
-                <div>
-                  <h2 class="step-title">단어책 입력</h2>
-                  <p class="step-desc">텍스트를 붙여넣거나 사진을 업로드하면 자동으로 단어가 추출되어 단원(챕터)에 저장됩니다.</p>
-                </div>
-              </div>
 
-              <div class="tab-switcher" role="tablist">
-                <button class="tab-btn tab-active" id="tab-text-btn" role="tab">✏️ 텍스트 붙여넣기</button>
-                <button class="tab-btn" id="tab-image-btn" role="tab">📷 이미지 업로드</button>
-              </div>
-
-              <div id="panel-text" class="tab-panel" role="tabpanel">
-                <div class="textarea-wrap">
-                  <textarea id="vocab-input" class="vocab-textarea" placeholder="여기에 텍스트를 붙여넣으세요..." rows="8" spellcheck="false"></textarea>
+          <!-- Image Panel -->
+          <div id="panel-image" class="hidden">
+            <div id="image-dropzone" class="image-dropzone" tabindex="0" role="button">
+              <input type="file" id="image-file-input" accept="image/*" class="file-input-hidden" multiple />
+              <div class="dropzone-content">
+                <p class="dropzone-title">이미지를 여기에 드래그하거나</p>
+                <div class="dropzone-buttons">
+                  <button class="sample-btn dropzone-pick-btn" id="pick-file-btn" type="button">📂 파일 선택</button>
                 </div>
-              </div>
-
-              <div id="panel-image" class="tab-panel hidden" role="tabpanel">
-                <div id="image-dropzone" class="image-dropzone" tabindex="0" role="button">
-                  <input type="file" id="image-file-input" accept="image/*" class="file-input-hidden" multiple />
-                  <div id="dropzone-content" class="dropzone-content">
-                    <p class="dropzone-title">이미지를 여기에 드래그하거나</p>
-                    <div class="dropzone-buttons">
-                      <button class="sample-btn dropzone-pick-btn" id="pick-file-btn" type="button">📂 파일 선택</button>
-                    </div>
-                  </div>
-                </div>
-                <div id="image-previews" class="image-previews hidden">
-                  <div class="preview-header">
-                    <span class="preview-count" id="preview-count">0장 선택됨</span>
-                    <button class="sample-btn danger-btn" id="clear-images-btn" type="button">🗑 모두 지우기</button>
-                  </div>
-                  <div id="image-grid" class="image-grid"></div>
-                </div>
-              </div>
-
-              <div class="options-grid" style="margin-top:1.5rem;">
-                <div class="option-card">
-                  <label class="option-label" for="card-front-sel">📌 앞면 (질문)</label>
-                  <select id="card-front-sel" class="select-input">
-                    <option value="word">단어만</option>
-                    <option value="word_pos">단어 + 품사</option>
-                    <option value="word_pron">단어 + 발음기호</option>
-                  </select>
-                </div>
-                <div class="option-card">
-                  <label class="option-label" for="card-back-sel">📝 뒷면 (정답)</label>
-                  <select id="card-back-sel" class="select-input">
-                    <option value="full" selected>뜻+예문+유의어</option>
-                    <option value="meaning_example">뜻+예문</option>
-                    <option value="meaning_only">뜻만</option>
-                  </select>
-                </div>
-              </div>
-            </section>
-
-            <div class="generate-wrap" style="margin-top:1.5rem;">
-              <button id="generate-btn" class="generate-btn" disabled>
-                <span id="btn-icon" class="btn-icon">✦</span>
-                <span id="btn-text">생성하고 즉시 저장하기</span>
-              </button>
-            </div>
-
-            <div id="progress-section" class="progress-section hidden" style="margin-top:1.5rem;">
-              <div class="progress-card">
-                <div class="progress-spinner"></div>
-                <div class="progress-info">
-                  <p id="progress-text" class="progress-text">AI가 추출 중입니다...</p>
-                </div>
-              </div>
-              <div class="progress-bar-wrap">
-                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
               </div>
             </div>
-          </div> <!-- /EXTRACT SECTION -->
+            <div id="image-previews" class="image-previews hidden">
+              <div class="preview-header">
+                <span id="preview-count">0장</span>
+                <button class="sample-btn danger-btn" id="clear-images-btn" type="button">🗑 모두 지우기</button>
+              </div>
+              <div id="image-grid" class="image-grid"></div>
+            </div>
+          </div>
 
-          <!-- Words Table -->
-          <table class="preview-table">
-            <thead><tr><th>#</th><th>앞면 (질문)</th><th>뒷면 (정답)</th></tr></thead>
-            <tbody id="library-words-tbody"></tbody>
-          </table>
-        </div> <!-- /WORDS VIEW -->
+          <!-- Options -->
+          <div class="options-grid" style="margin-top:1.5rem;">
+            <div class="option-card">
+              <label class="option-label" for="card-front-sel">📌 앞면</label>
+              <select id="card-front-sel" class="select-input">
+                <option value="word">단어만</option>
+                <option value="word_pos">단어+품사</option>
+                <option value="word_pron">단어+발음</option>
+              </select>
+            </div>
+            <div class="option-card">
+              <label class="option-label" for="card-back-sel">📝 뒷면</label>
+              <select id="card-back-sel" class="select-input">
+                <option value="full" selected>뜻+예문+유의어</option>
+                <option value="meaning_example">뜻+예문</option>
+                <option value="meaning_only">뜻만</option>
+              </select>
+            </div>
+            <div class="option-card">
+              <label class="option-label" for="max-words-sel">📊 최대 단어</label>
+              <select id="max-words-sel" class="select-input">
+                <option value="20">20개</option>
+                <option value="50" selected>50개</option>
+                <option value="100">100개</option>
+                <option value="200">200개</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <div style="margin-top:1.5rem; text-align:center;">
+            <button id="generate-btn" class="generate-btn" disabled>
+              <span id="btn-icon" class="btn-icon">✦</span>
+              <span id="btn-text">생성하고 즉시 저장하기</span>
+            </button>
+          </div>
+
+          <!-- Progress -->
+          <div id="progress-section" class="progress-section hidden" style="margin-top:1rem;">
+            <div class="progress-card">
+              <div class="progress-spinner"></div>
+              <div class="progress-info">
+                <p id="progress-text" class="progress-text">AI가 추출 중...</p>
+                <p id="progress-sub" class="progress-sub"></p>
+              </div>
+            </div>
+            <div class="progress-bar-wrap"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- Words Table -->
+        <table class="preview-table">
+          <thead><tr><th>#</th><th>앞면 (질문)</th><th>뒷면 (정답)</th></tr></thead>
+          <tbody id="words-tbody"></tbody>
+        </table>
       </div>
-    </div> <!-- /LIBRARY SECTION -->
+    </div>
 
-    <!-- Error Section -->
+    <!-- Error -->
     <div id="error-section" class="error-section hidden" role="alert">
       <div class="error-icon">⚠</div>
       <div>
-        <p class="error-title" id="error-title">오류가 발생했습니다</p>
+        <p class="error-title" id="error-title">오류 발생</p>
         <p class="error-msg" id="error-msg"></p>
       </div>
     </div>
@@ -201,16 +206,16 @@
   <div id="api-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
     <div class="modal-box">
       <div class="modal-icon">🔑</div>
-      <h2 id="modal-title" class="modal-title">Gemini API 키 입력</h2>
-      <p class="modal-desc">AI 분석을 위해 API 키가 필요합니다.<br/><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link">Google AI Studio</a>에서 무료로 발급받으세요.</p>
+      <h2 class="modal-title">Gemini API 키 입력</h2>
+      <p class="modal-desc">AI 분석을 위해 API 키가 필요합니다.<br/><a href="https://aistudio.google.com/app/apikey" target="_blank" class="link">Google AI Studio</a>에서 무료로 발급받으세요.</p>
       <div class="modal-input-wrap">
         <input type="password" id="api-modal-input" class="text-input modal-text-input" placeholder="AIza..." autocomplete="off" spellcheck="false" />
       </div>
-      <p class="modal-note">입력된 키는 기기에만 안전하게 저장됩니다 🔒</p>
+      <p class="modal-note">입력된 키는 이 기기에만 저장됩니다 🔒</p>
       <button id="api-modal-save" class="modal-save-btn">시작하기</button>
     </div>
   </div>
 
-  <script type="module" src="app.js?v=14"></script>
+  <script type="module" src="app.js?v=20"></script>
 </body>
 </html>
