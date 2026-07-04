@@ -974,23 +974,6 @@ document.getElementById('export-library-csv-btn')?.addEventListener('click', () 
   URL.revokeObjectURL(url);
 });
 
-// Extraction UI toggle
-const openExtractBtn = document.getElementById('open-extract-btn');
-const closeExtractBtn = document.getElementById('close-extract-btn');
-const extractSection = document.getElementById('extract-section');
-const viewWordsSection = document.getElementById('view-words');
-
-openExtractBtn?.addEventListener('click', () => {
-  viewWordsSection.classList.add('hidden');
-  extractSection.classList.remove('hidden');
-});
-
-closeExtractBtn?.addEventListener('click', () => {
-  extractSection.classList.add('hidden');
-  viewWordsSection.classList.remove('hidden');
-});
-
-
 // ─── Auto Save ─────────────────────────────────────────────────────────────
 async function autoSaveToLibrary(data) {
   if (!currentUser || !selectedBookId || !selectedChapterId) {
