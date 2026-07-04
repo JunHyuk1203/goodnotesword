@@ -33,6 +33,7 @@ const maxWordsSel       = document.getElementById('max-words-sel');
 const generateBtn       = document.getElementById('generate-btn');
 const btnText           = document.getElementById('btn-text');
 const generateHint      = document.getElementById('generate-hint');
+const progressSection   = document.getElementById('progress-section');
 const progressBar       = document.getElementById('progress-bar');
 const progressText      = document.getElementById('progress-text');
 const progressSub       = document.getElementById('progress-sub');
