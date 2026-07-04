@@ -1,20 +1,20 @@
 /**
  * GoodNotes Vocabulary Study Set Generator
- * app.js ??v3 (fix: progressSection ref, improved 429 handling)
+ * app.js – v3 (fix: progressSection ref, improved 429 handling)
  *
  * Modes:
- *  - Text mode: user pastes vocab text ??sends as text prompt to Gemini
- *  - Image mode: user uploads image(s) ??sends as inline_data to Gemini Vision
+ *  - Text mode: user pastes vocab text → sends as text prompt to Gemini
+ *  - Image mode: user uploads image(s) → sends as inline_data to Gemini Vision
  */
 
 'use strict';
 
-// ?�?�?� API Key (stored in localStorage) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── API Key (stored in localStorage) ───────────────────────────────────
 const STORAGE_KEY = 'gn_gemini_api_key';
 function getApiKey() { return localStorage.getItem(STORAGE_KEY) || ''; }
 function setApiKey(k) { localStorage.setItem(STORAGE_KEY, k); }
 
-// ?�?�?� DOM refs ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── DOM refs ────────────────────────────────────────────────────────────────
 // API key modal
 const apiModal          = document.getElementById('api-modal');
 const apiModalInput     = document.getElementById('api-modal-input');
@@ -65,40 +65,42 @@ const previewCount      = document.getElementById('preview-count');
 const addMoreBtn        = document.getElementById('add-more-btn');
 const clearImagesBtn    = document.getElementById('clear-images-btn');
 
-// ?�?�?� State ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── State ───────────────────────────────────────────────────────────────────
 let generatedData = [];
 let activeTab = 'text'; // 'text' | 'image'
 let uploadedImages = []; // Array of { file, dataUrl, mimeType }
 
-// ?�?�?� Sample text ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
-const SAMPLE_TEXT = `accomplish [?k?mplɪ?] v. ?�취?�다, ?�성?�다
+// ─── Sample text ─────────────────────────────────────────────────────────────
+const SAMPLE_TEXT = `accomplish [əkʌmplɪʃ] v. 성취하다, 달성하다
 Syn: achieve, attain, fulfill, complete, carry out
 Ant: fail, abandon, neglect, give up
 Ex: She accomplished her goal of running a marathon in under four hours.
 Ex: The team accomplished the project ahead of schedule.
 
-abundant [?b?nd?nt] adj. ?��??? ?�넉??Syn: plentiful, ample, copious, bountiful, profuse
+abundant [əbʌndənt] adj. 풍부한, 넉넉한
+Syn: plentiful, ample, copious, bountiful, profuse
 Ant: scarce, rare, insufficient, lacking, meager
 Ex: The region has abundant natural resources, including oil and minerals.
 Related: abundance (n.), abundantly (adv.)
 
-ambiguous [æmbɪɡju?s] adj. 모호?? 불분명한
+ambiguous [æmbɪɡjuəs] adj. 모호한, 불분명한
 Syn: unclear, vague, equivocal, obscure, uncertain
 Ant: clear, definite, explicit, unambiguous, certain
 Ex: The contract contained several ambiguous clauses that led to disputes.
 Related: ambiguity (n.), ambiguously (adv.)
 
-scrutinize [skru?tɪnaɪz] v. 면�???조사?�다, ?�세???�피??Syn: examine, inspect, analyze, probe, investigate
+scrutinize [skruːtɪnaɪz] v. 면밀히 조사하다, 자세히 살피다
+Syn: examine, inspect, analyze, probe, investigate
 Ant: ignore, overlook, neglect, skim
 Ex: The auditors scrutinized every financial record in the company.
 
-resilient [rɪzɪli?nt] adj. ?�복?�이 ?�는, ?�력 ?�는
+resilient [rɪzɪliənt] adj. 회복력이 있는, 탄력 있는
 Syn: tough, strong, adaptable, flexible, buoyant
 Ant: weak, fragile, vulnerable, brittle
 Ex: Children are often more resilient than adults when it comes to change.
 Related: resilience (n.), resiliently (adv.)`;
 
-// ?�?�?� Tab switching ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Tab switching ────────────────────────────────────────────────────────────
 tabTextBtn.addEventListener('click', () => switchTab('text'));
 tabImageBtn.addEventListener('click', () => switchTab('image'));
 
@@ -113,24 +115,24 @@ function switchTab(tab) {
   updateGenerateButton();
 }
 
-// ?�?�?� Text mode events ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Text mode events ─────────────────────────────────────────────────────────
 vocabInput.addEventListener('input', () => {
-  charCount.textContent = `${vocabInput.value.length.toLocaleString()}??;
+  charCount.textContent = `${vocabInput.value.length.toLocaleString()}자`;
   onInputChange();
 });
 loadSampleBtn.addEventListener('click', () => {
   vocabInput.value = SAMPLE_TEXT;
-  charCount.textContent = `${SAMPLE_TEXT.length.toLocaleString()}??;
+  charCount.textContent = `${SAMPLE_TEXT.length.toLocaleString()}자`;
   vocabInput.scrollTop = 0;
   onInputChange();
 });
 clearBtn.addEventListener('click', () => {
   vocabInput.value = '';
-  charCount.textContent = '0??;
+  charCount.textContent = '0자';
   onInputChange();
 });
 
-// ?�?�?� Image mode events ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Image mode events ────────────────────────────────────────────────────────
 
 // Drag and drop on dropzone
 imageDropzone.addEventListener('dragover', e => {
@@ -180,9 +182,9 @@ pasteImageBtn.addEventListener('click', async () => {
       }
       if (found) break;
     }
-    if (!found) showError('?�립보드 ?�류', '?�립보드???��?지가 ?�습?�다. ?��?지�?복사?????�시 ?�도?�주?�요.');
+    if (!found) showError('클립보드 오류', '클립보드에 이미지가 없습니다. 이미지를 복사한 뒤 다시 시도해주세요.');
   } catch (e) {
-    showError('?�립보드 ?�근 ?�패', '브라?��? 권한???�요?�니?? ?�일 ?�택???�용?�주?�요.');
+    showError('클립보드 접근 실패', '브라우저 권한이 필요합니다. 파일 선택을 이용해주세요.');
   }
 });
 
@@ -202,14 +204,14 @@ clearImagesBtn.addEventListener('click', () => {
   onInputChange();
 });
 
-// ?�?�?� Image file handling ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Image file handling ──────────────────────────────────────────────────────
 
 function addImageFiles(files) {
   const promises = files.map(file => {
     return new Promise(resolve => {
       // 50MB per image
       if (file.size > 50 * 1024 * 1024) {
-        showError('?�일 ?�기 초과', `"${file.name}" ?�일??50MB�?초과?�니??`);
+        showError('파일 크기 초과', `"${file.name}" 파일이 50MB를 초과합니다.`);
         resolve(null);
         return;
       }
@@ -241,7 +243,7 @@ function renderImagePreviews() {
     return;
   }
   imagePreviews.classList.remove('hidden');
-  previewCount.textContent = `${uploadedImages.length}???�택??(?�동?�로 배치 처리)`;
+  previewCount.textContent = `${uploadedImages.length}장 선택됨 (자동으로 배치 처리)`;
 
   uploadedImages.forEach((img, idx) => {
     const wrap = document.createElement('div');
@@ -254,8 +256,8 @@ function renderImagePreviews() {
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'img-thumb-remove';
-    removeBtn.textContent = '??;
-    removeBtn.title = '?��?지 ?�거';
+    removeBtn.textContent = '✕';
+    removeBtn.title = '이미지 제거';
     removeBtn.addEventListener('click', e => {
       e.stopPropagation();
       uploadedImages.splice(idx, 1);
@@ -274,7 +276,7 @@ function renderImagePreviews() {
   });
 }
 
-// ?�?�?� Generate button state ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Generate button state ────────────────────────────────────────────────────
 
 function onInputChange() {
   updateGenerateButton();
@@ -286,20 +288,20 @@ function updateGenerateButton() {
     (activeTab === 'image' && uploadedImages.length > 0);
   generateBtn.disabled = !ready;
   generateHint.textContent = ready
-    ? `AI가 ?��?지/?�스?�에???�어?� ?�을 ?�동 추출?�니??{
+    ? `AI가 이미지/텍스트에서 단어와 뜻을 자동 추출합니다${
         activeTab === 'image' && uploadedImages.length > 0
-          ? ` (${uploadedImages.length}????${Math.ceil(uploadedImages.length / BATCH_SIZE)}배치)`
+          ? ` (${uploadedImages.length}장 → ${Math.ceil(uploadedImages.length / BATCH_SIZE)}배치)`
           : ''
       }`
     : activeTab === 'image'
-      ? '?��?지�??�로?�하�?버튼???�성?�됩?�다 (?�러 ??가??'
-      : '?�스?��? ?�력?�면 버튼???�성?�됩?�다';
+      ? '이미지를 업로드하면 버튼이 활성화됩니다 (여러 장 가능)'
+      : '텍스트를 입력하면 버튼이 활성화됩니다';
 }
 
-// ?�?�?� Batch size (images per API call) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Batch size (images per API call) ────────────────────────────────────────
 const BATCH_SIZE = 4; // Gemini handles 4 images per request comfortably
 
-// ?�?�?� Generate ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Generate ─────────────────────────────────────────────────────────────────
 generateBtn.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
@@ -307,7 +309,7 @@ async function handleGenerate() {
   resultSection.classList.add('hidden');
   progressSection.classList.remove('hidden');
   generateBtn.disabled = true;
-  btnText.textContent = '?�성 �?..';
+  btnText.textContent = '생성 중...';
 
   const apiKey = getApiKey();
   if (!apiKey) { showApiModal(); return; }
@@ -337,30 +339,30 @@ async function handleGenerate() {
 
         setProgress(
           pctStart,
-          `배치 ${batchNum}/${totalBatches} 처리 �?..`,
-          `?��?지 ${batches[b].map((_, i) => b * BATCH_SIZE + i + 1).join(', ')}??분석 �?
+          `배치 ${batchNum}/${totalBatches} 처리 중...`,
+          `이미지 ${batches[b].map((_, i) => b * BATCH_SIZE + i + 1).join(', ')}장 분석 중`
         );
 
         const responseText = await callGeminiVision(apiKey, prompt, batches[b]);
         const batchParsed = parseResponse(responseText);
         allParsed = [...allParsed, ...batchParsed];
 
-        setProgress(pctEnd, `배치 ${batchNum}/${totalBatches} ?�료`, `?�적 ${allParsed.length}�??�어`);
+        setProgress(pctEnd, `배치 ${batchNum}/${totalBatches} 완료`, `누적 ${allParsed.length}개 단어`);
 
         // Small delay between batches to avoid rate limiting
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
-      setProgress(5, 'AI?�게 ?�스?��? ?�송?�는 �?..', '');
-      setProgress(15, 'AI가 ?�어�?분석?�고 ?�습?�다...', '?�문, ?�의?? 반의?��? 추출 �?);
+      setProgress(5, 'AI에게 텍스트를 전송하는 중...', '');
+      setProgress(15, 'AI가 단어를 분석하고 있습니다...', '예문, 유의어, 반의어를 추출 중');
       const responseText = await callGeminiText(apiKey, prompt, vocabInput.value.trim());
       allParsed = parseResponse(responseText);
     }
 
-    setProgress(90, '?�이?��? ?�리?�고 ?�습?�다...', '');
+    setProgress(90, '데이터를 정리하고 있습니다...', '');
 
     if (!allParsed || allParsed.length === 0) {
-      throw new Error('AI ?�답?�서 ?�어�?추출?��? 못했?�니?? ?��?지가 ?�명?��? ?�인?�거???�시 ?�도?�보?�요.');
+      throw new Error('AI 응답에서 단어를 추출하지 못했습니다. 이미지가 선명한지 확인하거나 다시 시도해보세요.');
     }
 
     // Deduplicate by word
@@ -374,7 +376,7 @@ async function handleGenerate() {
 
     generatedData = deduped.slice(0, maxWords).map(item => formatCard(item, frontOpt, backOpt));
 
-    setProgress(100, '?�료!', `�?${generatedData.length}�??�어 추출`);
+    setProgress(100, '완료!', `총 ${generatedData.length}개 단어 추출`);
     await new Promise(r => setTimeout(r, 400));
 
     renderResults(generatedData, deduped.length);
@@ -383,22 +385,22 @@ async function handleGenerate() {
     console.error(err);
     const isApiErr = err.message?.includes('API') || err.message?.includes('401') || err.message?.includes('403');
     showError(
-      isApiErr ? 'API ?�류' : '처리 ?�류',
-      err.message || '?????�는 ?�류가 발생?�습?�다.'
+      isApiErr ? 'API 오류' : '처리 오류',
+      err.message || '알 수 없는 오류가 발생했습니다.'
     );
   } finally {
     progressSection.classList.add('hidden');
     generateBtn.disabled = false;
-    btnText.textContent = 'AI�??�터???�트 ?�성';
+    btnText.textContent = 'AI로 스터디 세트 생성';
     updateGenerateButton();
     setProgress(0);
   }
 }
 
-// ?�?�?� Prompt builder ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Prompt builder ───────────────────────────────────────────────────────────
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
-  const langName       = lang === 'ko' ? '?�국?? : '?�어';
+  const langName       = lang === 'ko' ? '한국어' : '영어';
   const includeExample = backOpt === 'full' || backOpt === 'meaning_example';
   const includeSynAnt  = backOpt === 'full';
 
@@ -413,9 +415,9 @@ Each item in the array must have these fields:
 - "pos": part of speech abbreviation (e.g., "v.", "n.", "adj.", "adv.") (string)
 - "pronunciation": IPA or phonetic pronunciation if available, otherwise empty string
 - "meaning": the definition in ${langName} (string)
-- "synonyms": array of synonym strings (max 5)${includeSynAnt ? '' : ' ??return empty array []'}
-- "antonyms": array of antonym strings (max 4)${includeSynAnt ? '' : ' ??return empty array []'}
-- "examples": array of example sentences (max 2)${includeExample ? '' : ' ??return empty array []'}
+- "synonyms": array of synonym strings (max 5)${includeSynAnt ? '' : ' — return empty array []'}
+- "antonyms": array of antonym strings (max 4)${includeSynAnt ? '' : ' — return empty array []'}
+- "examples": array of example sentences (max 2)${includeExample ? '' : ' — return empty array []'}
 - "related": related word forms if any (string, e.g., "abundance (n.)"), or empty string
 
 Rules:
@@ -426,7 +428,7 @@ Rules:
 - If this is an image, carefully read all visible text including small print`;
 }
 
-// ?�?�?� Gemini API: Text ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Gemini API: Text ─────────────────────────────────────────────────────────
 
 async function callGeminiText(apiKey, prompt, text) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -441,7 +443,7 @@ async function callGeminiText(apiKey, prompt, text) {
   return fetchGemini(url, body);
 }
 
-// ?�?�?� Gemini API: Vision (Image) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Gemini API: Vision (Image) ───────────────────────────────────────────────
 
 async function callGeminiVision(apiKey, prompt, images) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -472,23 +474,23 @@ async function fetchGemini(url, body) {
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     const msg = err?.error?.message || response.statusText;
-    if (response.status === 400) throw new Error(`API ?�청 ?�류 (400): ${msg}`);
+    if (response.status === 400) throw new Error(`API 요청 오류 (400): ${msg}`);
     if (response.status === 401 || response.status === 403)
-      throw new Error(`API ???�증 ?�패 (${response.status}): API ?��? ?�인?�주?�요.`);
+      throw new Error(`API 키 인증 실패 (${response.status}): API 키를 확인해주세요.`);
     if (response.status === 429)
-      throw new Error(`API ???�당?�이 초과?�었?�니??(429).
-???�상 ?�죽 ?�면 [�?API ?? 버튼???�러 ???�로 교체?�세??
-???�는 https://aistudio.google.com/app/apikey ?�서 ??API ?��? 발급받으?�요.`);
-    throw new Error(`API ?�류 (${response.status}): ${msg}`);
+      throw new Error(`API 키 할당량이 초과되었습니다 (429).
+• 우상 우죽 화면 [기 API 키] 버튼을 눌러 새 키로 교체하세요.
+• 또는 https://aistudio.google.com/app/apikey 에서 새 API 키를 발급받으세요.`);
+    throw new Error(`API 오류 (${response.status}): ${msg}`);
   }
 
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('AI ?�답??비어?�습?�다. ?�시 ?�도?�보?�요.');
+  if (!text) throw new Error('AI 응답이 비어있습니다. 다시 시도해보세요.');
   return text;
 }
 
-// ?�?�?� Parsing ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Parsing ──────────────────────────────────────────────────────────────────
 
 function parseResponse(text) {
   let cleaned = text.trim();
@@ -496,17 +498,17 @@ function parseResponse(text) {
   const startIdx = cleaned.indexOf('[');
   const endIdx   = cleaned.lastIndexOf(']');
   if (startIdx === -1 || endIdx === -1) {
-    throw new Error('AI ?�답?�서 JSON ?�이?��? 찾을 ???�습?�다. ?�시 ?�도?�주?�요.');
+    throw new Error('AI 응답에서 JSON 데이터를 찾을 수 없습니다. 다시 시도해주세요.');
   }
   cleaned = cleaned.slice(startIdx, endIdx + 1);
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    throw new Error(`JSON ?�싱 ?�패: ${e.message}. ?�시 ?�성???�러주세??`);
+    throw new Error(`JSON 파싱 실패: ${e.message}. 다시 생성을 눌러주세요.`);
   }
 }
 
-// ?�?�?� Card formatting ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Card formatting ──────────────────────────────────────────────────────────
 
 function formatCard(item, frontOpt, backOpt) {
   let front = item.word || '';
@@ -519,18 +521,18 @@ function formatCard(item, frontOpt, backOpt) {
     backParts.push(`${posStr}${item.meaning}`);
   }
   if (backOpt === 'full') {
-    if (item.synonyms?.length) backParts.push(`?�의?? ${item.synonyms.join(', ')}`);
-    if (item.antonyms?.length) backParts.push(`반의?? ${item.antonyms.join(', ')}`);
-    if (item.related)          backParts.push(`관?�어: ${item.related}`);
+    if (item.synonyms?.length) backParts.push(`유의어: ${item.synonyms.join(', ')}`);
+    if (item.antonyms?.length) backParts.push(`반의어: ${item.antonyms.join(', ')}`);
+    if (item.related)          backParts.push(`관련어: ${item.related}`);
   }
   if (backOpt === 'full' || backOpt === 'meaning_example') {
-    if (item.examples?.length) item.examples.forEach(ex => backParts.push(`?? ${ex}`));
+    if (item.examples?.length) item.examples.forEach(ex => backParts.push(`예) ${ex}`));
   }
 
   return { front: front.trim(), back: backParts.join('\n').trim() };
 }
 
-// ?�?�?� Render results ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Render results ───────────────────────────────────────────────────────────
 
 function renderResults(data, totalExtracted) {
   previewTbody.innerHTML = '';
@@ -544,23 +546,23 @@ function renderResults(data, totalExtracted) {
     previewTbody.appendChild(tr);
   });
 
-  resultSummary.textContent = `�?${data.length}개의 ?�어가 추출?�었?�니??${
-    totalExtracted > data.length ? ` (?�본 ${totalExtracted}�?�?최�? ${data.length}�??�시)` : ''
-  } ?�래?�서 미리보기 ??CSV�??�운로드?�세??`;
+  resultSummary.textContent = `총 ${data.length}개의 단어가 추출되었습니다.${
+    totalExtracted > data.length ? ` (원본 ${totalExtracted}개 중 최대 ${data.length}개 표시)` : ''
+  } 아래에서 미리보기 후 CSV를 다운로드하세요.`;
 
   resultSection.classList.remove('hidden');
   previewContainer.classList.remove('collapsed');
-  togglePreviewBtn.textContent = '?�기';
+  togglePreviewBtn.textContent = '접기';
   resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ?�?�?� Preview toggle ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Preview toggle ───────────────────────────────────────────────────────────
 togglePreviewBtn.addEventListener('click', () => {
   const collapsed = previewContainer.classList.toggle('collapsed');
-  togglePreviewBtn.textContent = collapsed ? '?�치�? : '?�기';
+  togglePreviewBtn.textContent = collapsed ? '펼치기' : '접기';
 });
 
-// ?�?�?� Download / Copy ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Download / Copy ─────────────────────────────────────────────────────────
 downloadCsvBtn.addEventListener('click', downloadCSV);
 copyCsvBtn.addEventListener('click', copyCSV);
 
@@ -599,14 +601,14 @@ async function copyCSV() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
-      복사 ?�료!`;
+      복사 완료!`;
     setTimeout(() => { copyCsvBtn.innerHTML = original; }, 2000);
   } catch (e) {
-    showError('복사 ?�패', '?�립보드 ?�근 권한???�습?�다. CSV ?�운로드�??�용?�주?�요.');
+    showError('복사 실패', '클립보드 접근 권한이 없습니다. CSV 다운로드를 이용해주세요.');
   }
 }
 
-// ?�?�?� Error helpers ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Error helpers ────────────────────────────────────────────────────────────
 
 function showError(title, msg) {
   errorTitle.textContent = title;
@@ -628,7 +630,7 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ?�?�?� API Key Modal ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── API Key Modal ────────────────────────────────────────────────────────────────
 
 function showApiModal() {
   apiModal.classList.remove('hidden');
@@ -674,15 +676,15 @@ function updateKeyStatus() {
   if (!apiKeyStatus) return;
   const key = getApiKey();
   if (key) {
-    apiKeyStatus.textContent = '??API ???�?�됨';
+    apiKeyStatus.textContent = '✓ API 키 저장됨';
     apiKeyStatus.className = 'key-status ok';
   } else {
-    apiKeyStatus.textContent = 'API ???�요';
+    apiKeyStatus.textContent = 'API 키 필요';
     apiKeyStatus.className = 'key-status';
   }
 }
 
-// ?�?�?� Init ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// ─── Init ─────────────────────────────────────────────────────────────────────
 onInputChange();
 updateKeyStatus();
 if (!getApiKey()) showApiModal();
