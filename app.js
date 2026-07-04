@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
+
 const db = getFirestore(firebaseApp);
 
 let currentUser = { uid: "default_user" };
@@ -775,10 +775,10 @@ fetchLatestVersion();
 // ─── Firebase Auth & Library Logic ──────────────────────────────────────────────────────────
 
 const loginBtn = document.getElementById('google-login-btn');
-const logoutBtn = document.getElementById('google-logout-btn');
-const authPrompt = document.getElementById('library-auth-prompt');
+let logoutBtn = document.getElementById('google-logout-btn');
+let authPrompt = document.getElementById('library-auth-prompt');
 const libContent = document.getElementById('library-content');
-const userAvatar = document.getElementById('user-avatar');
+let userAvatar = document.getElementById('user-avatar');
 
 loginBtn?.addEventListener('click', async () => {
   
@@ -813,8 +813,8 @@ logoutBtn?.addEventListener('click', () => {
 
 
 // Extraction UI toggle
-const openExtractBtn = document.getElementById('open-extract-btn');
-const closeExtractBtn = document.getElementById('close-extract-btn');
+let openExtractBtn = document.getElementById("open-extract-btn");
+let closeExtractBtn = document.getElementById("close-extract-btn");
 
 openExtractBtn?.addEventListener('click', () => {
   document.getElementById('view-words').classList.add('hidden');
