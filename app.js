@@ -412,13 +412,13 @@ OUTPUT FORMAT: Return ONLY a valid JSON array. No explanation, no markdown code 
 
 Each item in the array must have these fields:
 - "word": the English word (string)
-- "pos": part of speech abbreviation (e.g., "v.", "n.", "adj.", "adv.") (string)
+- "pos": part of speech in Korean (e.g., "명사", "동사", "형용사", "부사") (string)
 - "pronunciation": IPA or phonetic pronunciation if available, otherwise empty string
-- "meaning": the definition in ${langName} (string)
-- "synonyms": array of synonym strings (max 5)${includeSynAnt ? '' : ' — return empty array []'}
-- "antonyms": array of antonym strings (max 4)${includeSynAnt ? '' : ' — return empty array []'}
-- "examples": array of example sentences (max 2)${includeExample ? '' : ' — return empty array []'}
-- "related": related word forms if any (string, e.g., "abundance (n.)"), or empty string
+- "meaning": the detailed definition in ${langName} (string)
+- "synonyms": array of synonym strings WITH THEIR MEANINGS in ${langName} (e.g., "achieve (달성하다)") (max 5)${includeSynAnt ? '' : ' — return empty array []'}
+- "antonyms": array of antonym strings WITH THEIR MEANINGS in ${langName} (e.g., "fail (실패하다)") (max 4)${includeSynAnt ? '' : ' — return empty array []'}
+- "examples": array of example sentences WITH THEIR TRANSLATIONS in ${langName} (e.g., "I love you. (나는 너를 사랑한다.)") (max 2)${includeExample ? '' : ' — return empty array []'}
+- "related": related word forms WITH THEIR MEANINGS if any (string, e.g., "abundance (풍부함)"), or empty string
 
 Rules:
 - meaning must be in ${langName}
@@ -518,18 +518,18 @@ function formatCard(item, frontOpt, backOpt) {
   const backParts = [];
   if (item.meaning) {
     const posStr = item.pos ? `[${item.pos}] ` : '';
-    backParts.push(`${posStr}${item.meaning}`);
+    backParts.push(`📌 뜻\n${posStr}${item.meaning}`);
   }
   if (backOpt === 'full') {
-    if (item.synonyms?.length) backParts.push(`유의어: ${item.synonyms.join(', ')}`);
-    if (item.antonyms?.length) backParts.push(`반의어: ${item.antonyms.join(', ')}`);
-    if (item.related)          backParts.push(`관련어: ${item.related}`);
+    if (item.synonyms?.length) backParts.push(`✅ 유의어\n• ${item.synonyms.join('\n• ')}`);
+    if (item.antonyms?.length) backParts.push(`❌ 반의어\n• ${item.antonyms.join('\n• ')}`);
+    if (item.related)          backParts.push(`🔗 관련어\n• ${item.related}`);
   }
   if (backOpt === 'full' || backOpt === 'meaning_example') {
-    if (item.examples?.length) item.examples.forEach(ex => backParts.push(`예) ${ex}`));
+    if (item.examples?.length) backParts.push(`📖 예문\n• ${item.examples.join('\n•\n')}`);
   }
 
-  return { front: front.trim(), back: backParts.join('\n').trim() };
+  return { front: front.trim(), back: backParts.join('\n\n').trim() };
 }
 
 // ─── Render results ───────────────────────────────────────────────────────────
