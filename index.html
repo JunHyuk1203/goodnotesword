@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GoodNotes 단어 스터디 세트 생성기</title>
-  <meta name="description" content="단어책 텍스트를 붙여 넣으면 AI가 자동으로 분석해 굿노트 스터디 세트(CSV) 파일을 생성해드립니다." />
+  <title>GoodNotes ?⑥뼱 ?ㅽ꽣???명듃 ?앹꽦湲?/title>
+  <meta name="description" content="?⑥뼱梨??띿뒪?몃? 遺숈뿬 ?ｌ쑝硫?AI媛 ?먮룞?쇰줈 遺꾩꽍??援용끂???ㅽ꽣???명듃(CSV) ?뚯씪???앹꽦?대뱶由쎈땲??" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -35,15 +35,15 @@
           </svg>
         </div>
         <div>
-          <h1 class="app-title">GoodNotes 스터디 세트 생성기</h1>
-          <p class="app-subtitle">단어책 텍스트 또는 사진 → AI 분석 → 굿노트 플래시카드 CSV</p>
+          <h1 class="app-title">GoodNotes ?ㅽ꽣???명듃 ?앹꽦湲?/h1>
+          <p class="app-subtitle">?⑥뼱梨??띿뒪???먮뒗 ?ъ쭊 ??AI 遺꾩꽍 ??援용끂???뚮옒?쒖뭅??CSV</p>
         </div>
       </div>
       <div class="badge-row">
-        <span class="badge badge-ai">✦ AI 자동 추출</span>
-        <span class="badge badge-compat">굿노트 호환</span>
+        <span class="badge badge-ai">??AI ?먮룞 異붿텧</span>
+        <span class="badge badge-compat">援용끂???명솚</span>
         <span id="api-key-status" class="key-status"></span>
-        <button id="change-key-btn" class="key-change-btn" title="API 키 변경">🔑 API 키</button>
+        <button id="change-key-btn" class="key-change-btn" title="API ??蹂寃?>?뵎 API ??/button>
       </div>
     </header>
 
@@ -53,46 +53,45 @@
       <div class="step-header">
         <div class="step-num">1</div>
         <div>
-          <h2 class="step-title">단어책 입력</h2>
-          <p class="step-desc">텍스트를 붙여넣거나, 단어책 사진을 업로드하세요. AI가 자동으로 단어, 예문, 유의어, 반의어를 추출합니다.</p>
+          <h2 class="step-title">?⑥뼱梨??낅젰</h2>
+          <p class="step-desc">?띿뒪?몃? 遺숈뿬?ｊ굅?? ?⑥뼱梨??ъ쭊???낅줈?쒗븯?몄슂. AI媛 ?먮룞?쇰줈 ?⑥뼱, ?덈Ц, ?좎쓽?? 諛섏쓽?대? 異붿텧?⑸땲??</p>
         </div>
       </div>
 
       <!-- Tab switcher -->
-      <div class="tab-switcher" role="tablist" aria-label="입력 방식 선택">
-        <button class="tab-btn tab-active" id="tab-text-btn" role="tab" aria-selected="true" aria-controls="panel-text">✏️ 텍스트 붙여넣기</button>
-        <button class="tab-btn" id="tab-image-btn" role="tab" aria-selected="false" aria-controls="panel-image">📷 이미지 업로드</button>
+      <div class="tab-switcher" role="tablist" aria-label="?낅젰 諛⑹떇 ?좏깮">
+        <button class="tab-btn tab-active" id="tab-text-btn" role="tab" aria-selected="true" aria-controls="panel-text">?륅툘 ?띿뒪??遺숈뿬?ｊ린</button>
+        <button class="tab-btn" id="tab-image-btn" role="tab" aria-selected="false" aria-controls="panel-image">?벜 ?대?吏 ?낅줈??/button>
       </div>
 
       <!-- Text Panel -->
       <div id="panel-text" class="tab-panel" role="tabpanel" aria-labelledby="tab-text-btn">
         <div class="sample-row">
-          <span class="sample-label">예시 텍스트 불러오기:</span>
-          <button class="sample-btn" id="load-sample-btn">📖 샘플 텍스트 로드</button>
-          <button class="sample-btn" id="clear-btn">🗑 지우기</button>
+          <span class="sample-label">?덉떆 ?띿뒪??遺덈윭?ㅺ린:</span>
+          <button class="sample-btn" id="load-sample-btn">?뱰 ?섑뵆 ?띿뒪??濡쒕뱶</button>
+          <button class="sample-btn" id="clear-btn">?뿊 吏?곌린</button>
         </div>
         <div class="textarea-wrap">
           <textarea
             id="vocab-input"
             class="vocab-textarea"
-            placeholder="여기에 단어책 내용을 붙여넣으세요...
+            placeholder="?ш린???⑥뼱梨??댁슜??遺숈뿬?ｌ쑝?몄슂...
 
-예시:
-accomplish [əkʌmplɪʃ] v. 성취하다, 달성하다
+?덉떆:
+accomplish [?k?mpl?] v. ?깆랬?섎떎, ?ъ꽦?섎떎
 Syn: achieve, attain, fulfill
 Ant: fail, abandon
 Ex: She accomplished her goal of running a marathon.
 
-abundant [əbʌndənt] adj. 풍부한, 넉넉한
-Syn: plentiful, ample, copious
+abundant [?b?nd?nt] adj. ?띾??? ?됰꼮??Syn: plentiful, ample, copious
 Ant: scarce, rare
 Ex: The region has abundant natural resources."
             rows="12"
             spellcheck="false"
           ></textarea>
           <div class="textarea-footer">
-            <span id="char-count" class="char-count">0자</span>
-            <span class="textarea-hint">모든 형식의 단어장 텍스트를 지원합니다</span>
+            <span id="char-count" class="char-count">0??/span>
+            <span class="textarea-hint">紐⑤뱺 ?뺤떇???⑥뼱???띿뒪?몃? 吏?먰빀?덈떎</span>
           </div>
         </div>
       </div>
@@ -105,7 +104,7 @@ Ex: The region has abundant natural resources."
           class="image-dropzone"
           tabindex="0"
           role="button"
-          aria-label="이미지 업로드 영역"
+          aria-label="?대?吏 ?낅줈???곸뿭"
         >
           <input type="file" id="image-file-input" accept="image/*" class="file-input-hidden" multiple />
           <div id="dropzone-content" class="dropzone-content">
@@ -117,22 +116,22 @@ Ex: The region has abundant natural resources."
                 <path d="M32 10v16M24 18l8-8 8 8" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <p class="dropzone-title">이미지를 여기에 드래그하거나</p>
-            <p class="dropzone-sub">단어책 사진, 캡처, 스캔 이미지 모두 가능합니다</p>
+            <p class="dropzone-title">?대?吏瑜??ш린???쒕옒洹명븯嫄곕굹</p>
+            <p class="dropzone-sub">?⑥뼱梨??ъ쭊, 罹≪쿂, ?ㅼ틪 ?대?吏 紐⑤몢 媛?ν빀?덈떎</p>
             <div class="dropzone-buttons">
-              <button class="sample-btn dropzone-pick-btn" id="pick-file-btn" type="button">📂 파일 선택</button>
-              <button class="sample-btn" id="paste-image-btn" type="button">📋 클립보드에서 붙여넣기</button>
+              <button class="sample-btn dropzone-pick-btn" id="pick-file-btn" type="button">?뱛 ?뚯씪 ?좏깮</button>
+              <button class="sample-btn" id="paste-image-btn" type="button">?뱥 ?대┰蹂대뱶?먯꽌 遺숈뿬?ｊ린</button>
             </div>
-            <p class="dropzone-formats">JPG · PNG · WEBP · GIF · BMP · HEIC</p>
+            <p class="dropzone-formats">JPG 쨌 PNG 쨌 WEBP 쨌 GIF 쨌 BMP 쨌 HEIC</p>
           </div>
         </div>
 
         <!-- Image previews -->
         <div id="image-previews" class="image-previews hidden">
           <div class="preview-header">
-            <span class="preview-count" id="preview-count">0장 선택됨</span>
-            <button class="sample-btn" id="add-more-btn" type="button">+ 더 추가</button>
-            <button class="sample-btn danger-btn" id="clear-images-btn" type="button">🗑 모두 지우기</button>
+            <span class="preview-count" id="preview-count">0???좏깮??/span>
+            <button class="sample-btn" id="add-more-btn" type="button">+ ??異붽?</button>
+            <button class="sample-btn danger-btn" id="clear-images-btn" type="button">?뿊 紐⑤몢 吏?곌린</button>
           </div>
           <div id="image-grid" class="image-grid"></div>
         </div>
@@ -141,35 +140,35 @@ Ex: The region has abundant natural resources."
       <!-- Options (shared) -->
       <div class="options-grid">
         <div class="option-card">
-          <label class="option-label" for="card-front-sel">📌 카드 앞면 (질문)</label>
+          <label class="option-label" for="card-front-sel">?뱦 移대뱶 ?욌㈃ (吏덈Ц)</label>
           <select id="card-front-sel" class="select-input">
-            <option value="word">영어 단어만</option>
-            <option value="word_pos">영어 단어 + 품사</option>
-            <option value="word_pron">영어 단어 + 발음기호</option>
+            <option value="word">?곸뼱 ?⑥뼱留?/option>
+            <option value="word_pos">?곸뼱 ?⑥뼱 + ?덉궗</option>
+            <option value="word_pron">?곸뼱 ?⑥뼱 + 諛쒖쓬湲고샇</option>
           </select>
         </div>
         <div class="option-card">
-          <label class="option-label" for="card-back-sel">📝 카드 뒷면 (정답)</label>
+          <label class="option-label" for="card-back-sel">?뱷 移대뱶 ?룸㈃ (?뺣떟)</label>
           <select id="card-back-sel" class="select-input">
-            <option value="full" selected>뜻 + 예문 + 유의어/반의어</option>
-            <option value="meaning_example">뜻 + 예문</option>
-            <option value="meaning_only">뜻만</option>
+            <option value="full" selected>??+ ?덈Ц + ?좎쓽??諛섏쓽??/option>
+            <option value="meaning_example">??+ ?덈Ц</option>
+            <option value="meaning_only">?삳쭔</option>
           </select>
         </div>
         <div class="option-card">
-          <label class="option-label" for="lang-sel">🌐 뜻 언어</label>
+          <label class="option-label" for="lang-sel">?뙋 ???몄뼱</label>
           <select id="lang-sel" class="select-input">
-            <option value="ko" selected>한국어</option>
-            <option value="en">영어</option>
+            <option value="ko" selected>?쒓뎅??/option>
+            <option value="en">?곸뼱</option>
           </select>
         </div>
         <div class="option-card">
-          <label class="option-label" for="max-words-sel">📊 최대 단어 수</label>
+          <label class="option-label" for="max-words-sel">?뱤 理쒕? ?⑥뼱 ??/label>
           <select id="max-words-sel" class="select-input">
-            <option value="20">20개</option>
-            <option value="50" selected>50개</option>
-            <option value="100">100개</option>
-            <option value="200">200개</option>
+            <option value="20">20媛?/option>
+            <option value="50" selected>50媛?/option>
+            <option value="100">100媛?/option>
+            <option value="200">200媛?/option>
           </select>
         </div>
       </div>
@@ -178,10 +177,10 @@ Ex: The region has abundant natural resources."
     <!-- Generate Button -->
     <div class="generate-wrap">
       <button id="generate-btn" class="generate-btn" disabled>
-        <span id="btn-icon" class="btn-icon">✦</span>
-        <span id="btn-text">AI로 스터디 세트 생성</span>
+        <span id="btn-icon" class="btn-icon">??/span>
+        <span id="btn-text">AI濡??ㅽ꽣???명듃 ?앹꽦</span>
       </button>
-      <p class="generate-hint" id="generate-hint">API 키와 텍스트 또는 이미지를 입력하면 버튼이 활성화됩니다</p>
+      <p class="generate-hint" id="generate-hint">API ?ㅼ? ?띿뒪???먮뒗 ?대?吏瑜??낅젰?섎㈃ 踰꾪듉???쒖꽦?붾맗?덈떎</p>
     </div>
 
     <!-- Progress -->
@@ -189,8 +188,8 @@ Ex: The region has abundant natural resources."
       <div class="progress-card">
         <div class="progress-spinner"></div>
         <div class="progress-info">
-          <p id="progress-text" class="progress-text">AI가 텍스트를 분석하고 있습니다...</p>
-          <p id="progress-sub" class="progress-sub">잠시만 기다려주세요</p>
+          <p id="progress-text" class="progress-text">AI媛 ?띿뒪?몃? 遺꾩꽍?섍퀬 ?덉뒿?덈떎...</p>
+          <p id="progress-sub" class="progress-sub">?좎떆留?湲곕떎?ㅼ＜?몄슂</p>
         </div>
       </div>
       <div class="progress-bar-wrap">
@@ -201,9 +200,9 @@ Ex: The region has abundant natural resources."
     <!-- Results -->
     <section id="result-section" class="card step-card hidden" aria-live="polite">
       <div class="step-header">
-        <div class="step-num step-num-success">✓</div>
+        <div class="step-num step-num-success">??/div>
         <div>
-          <h2 class="step-title">생성 완료!</h2>
+          <h2 class="step-title">?앹꽦 ?꾨즺!</h2>
           <p id="result-summary" class="step-desc"></p>
         </div>
       </div>
@@ -211,9 +210,9 @@ Ex: The region has abundant natural resources."
       <!-- Preview Table -->
       <div class="table-wrap">
         <div class="table-header-row">
-          <span class="table-section-title">📋 미리보기</span>
+          <span class="table-section-title">?뱥 誘몃━蹂닿린</span>
           <div class="table-actions">
-            <button id="toggle-preview-btn" class="small-btn">접기</button>
+            <button id="toggle-preview-btn" class="small-btn">?묎린</button>
           </div>
         </div>
         <div id="preview-container" class="preview-container">
@@ -221,8 +220,8 @@ Ex: The region has abundant natural resources."
             <thead>
               <tr>
                 <th>#</th>
-                <th>앞면 (질문)</th>
-                <th>뒷면 (정답)</th>
+                <th>?욌㈃ (吏덈Ц)</th>
+                <th>?룸㈃ (?뺣떟)</th>
               </tr>
             </thead>
             <tbody id="preview-tbody"></tbody>
@@ -235,7 +234,7 @@ Ex: The region has abundant natural resources."
         <div class="download-info">
           <div class="download-format-info">
             <span class="format-badge">CSV</span>
-            <span class="format-desc">굿노트 스터디 세트 호환 형식</span>
+            <span class="format-desc">援용끂???ㅽ꽣???명듃 ?명솚 ?뺤떇</span>
           </div>
         </div>
         <div class="download-buttons">
@@ -243,35 +242,35 @@ Ex: The region has abundant natural resources."
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            CSV 다운로드
+            CSV ?ㅼ슫濡쒕뱶
           </button>
           <button id="copy-csv-btn" class="download-btn download-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
             </svg>
-            CSV 복사
+            CSV 蹂듭궗
           </button>
         </div>
       </div>
 
       <!-- Import guide -->
       <details class="import-guide">
-        <summary class="import-guide-summary">📱 굿노트에 임포트하는 방법</summary>
+        <summary class="import-guide-summary">?벑 援용끂?몄뿉 ?꾪룷?명븯??諛⑸쾿</summary>
         <div class="import-steps">
           <div class="import-step">
             <div class="import-step-num">1</div>
-            <p>위에서 다운로드한 <strong>.csv 파일</strong>을 iPhone/iPad의 <strong>파일 앱</strong>이나 <strong>iCloud Drive</strong>로 옮겨주세요.</p>
+            <p>?꾩뿉???ㅼ슫濡쒕뱶??<strong>.csv ?뚯씪</strong>??iPhone/iPad??<strong>?뚯씪 ??/strong>?대굹 <strong>iCloud Drive</strong>濡???꺼二쇱꽭??</p>
           </div>
           <div class="import-step">
             <div class="import-step-num">2</div>
-            <p>굿노트 앱에서 <strong>라이브러리 화면</strong>으로 이동 후 <strong>+ 새로 만들기</strong> → <strong>가져오기</strong>를 탭하세요.</p>
+            <p>援용끂???깆뿉??<strong>?쇱씠釉뚮윭由??붾㈃</strong>?쇰줈 ?대룞 ??<strong>+ ?덈줈 留뚮뱾湲?/strong> ??<strong>媛?몄삤湲?/strong>瑜???븯?몄슂.</p>
           </div>
           <div class="import-step">
             <div class="import-step-num">3</div>
-            <p>CSV 파일을 선택하면 <strong>스터디 세트</strong>로 자동 생성됩니다. 완료!</p>
+            <p>CSV ?뚯씪???좏깮?섎㈃ <strong>?ㅽ꽣???명듃</strong>濡??먮룞 ?앹꽦?⑸땲?? ?꾨즺!</p>
           </div>
           <div class="import-note">
-            ⚠️ 현재 굿노트의 CSV 임포트 기능은 <strong>iOS/iPadOS</strong>에서만 지원됩니다.
+            ?좑툘 ?꾩옱 援용끂?몄쓽 CSV ?꾪룷??湲곕뒫? <strong>iOS/iPadOS</strong>?먯꽌留?吏?먮맗?덈떎.
           </div>
         </div>
       </details>
@@ -279,26 +278,26 @@ Ex: The region has abundant natural resources."
 
     <!-- Error -->
     <div id="error-section" class="error-section hidden" role="alert">
-      <div class="error-icon">⚠</div>
+      <div class="error-icon">??/div>
       <div>
-        <p class="error-title" id="error-title">오류가 발생했습니다</p>
+        <p class="error-title" id="error-title">?ㅻ쪟媛 諛쒖깮?덉뒿?덈떎</p>
         <p class="error-msg" id="error-msg"></p>
       </div>
     </div>
 
     <footer class="app-footer">
-      <p>Powered by Gemini AI ✦ 굿노트 스터디 세트 자동 생성기</p>
+      <p>Powered by Gemini AI ??援용끂???ㅽ꽣???명듃 ?먮룞 ?앹꽦湲?/p>
     </footer>
   </div>
 
   <!-- API Key Modal -->
   <div id="api-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-box">
-      <div class="modal-icon">🔑</div>
-      <h2 id="modal-title" class="modal-title">Gemini API 키 입력</h2>
+      <div class="modal-icon">?뵎</div>
+      <h2 id="modal-title" class="modal-title">Gemini API ???낅젰</h2>
       <p class="modal-desc">
-        AI 분석을 위해 API 키가 필요합니다.<br/>
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link">Google AI Studio</a>에서 무료로 발급받으세요.
+        AI 遺꾩꽍???꾪빐 API ?ㅺ? ?꾩슂?⑸땲??<br/>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link">Google AI Studio</a>?먯꽌 臾대즺濡?諛쒓툒諛쏆쑝?몄슂.
       </p>
       <div class="modal-input-wrap">
         <input
@@ -309,18 +308,18 @@ Ex: The region has abundant natural resources."
           autocomplete="off"
           spellcheck="false"
         />
-        <button id="api-modal-toggle" class="icon-btn" title="표시/숨기기">
+        <button id="api-modal-toggle" class="icon-btn" title="?쒖떆/?④린湲?>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
       </div>
-      <p class="modal-note">기업된 키는 브라우저에만 저장되며 외부로 전송되지 않습니다 🔒</p>
-      <button id="api-modal-save" class="modal-save-btn">API 키 저장 후 시작</button>
+      <p class="modal-note">湲곗뾽???ㅻ뒗 釉뚮씪?곗??먮쭔 ??λ릺硫??몃?濡??꾩넚?섏? ?딆뒿?덈떎 ?뵏</p>
+      <button id="api-modal-save" class="modal-save-btn">API ????????쒖옉</button>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
