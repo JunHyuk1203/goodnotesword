@@ -440,12 +440,11 @@ const FALLBACK_MODELS = [
 
 async function callGeminiText(apiKey, prompt, text) {
   const body = {
-    contents: [{ parts: [{ text: prompt + "
-
-TEXT TO ANALYZE:
-\"\"\"
-" + text + "
-\"\"\"" }] }],
+    contents: [{
+      parts: [
+        { text: prompt + `\n\nTEXT TO ANALYZE:\n"""\n${text}\n"""` }
+      ]
+    }],
     generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
   };
   return executeWithFallback(apiKey, body);
