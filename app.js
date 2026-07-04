@@ -1,6 +1,6 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, // onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDocs, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -17,7 +17,8 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
-let currentUser = null;
+let currentUser = { uid: "default_user" };
+setTimeout(loadBooks, 500);
 let selectedBookId = null;
 let selectedChapterId = null;
 
@@ -780,7 +781,7 @@ const libContent = document.getElementById('library-content');
 const userAvatar = document.getElementById('user-avatar');
 
 loginBtn?.addEventListener('click', async () => {
-  const provider = new GoogleAuthProvider();
+  
   try {
     await signInWithPopup(auth, provider);
   } catch (err) {
@@ -792,7 +793,7 @@ logoutBtn?.addEventListener('click', () => {
   signOut(auth);
 });
 
-onAuthStateChanged(auth, (user) => {
+// onAuthStateChanged(auth, (user) => {
   currentUser = user;
   if (user) {
     authPrompt?.classList.add('hidden');
