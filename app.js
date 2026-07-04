@@ -1,7 +1,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, // onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDocs, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, getDoc, query, orderBy, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// Firestore already imported above
 
 const firebaseConfig = {
   apiKey: "AIzaSyDToPgxyeRpAfYUqSlweugc7M5vwCwagsU",
@@ -62,13 +62,13 @@ const progressSection   = document.getElementById('progress-section');
 const progressBar       = document.getElementById('progress-bar');
 const progressText      = document.getElementById('progress-text');
 const progressSub       = document.getElementById('progress-sub');
-const resultSection     = document.getElementById('result-section');
+const resultSection     = document.getElementById('result-section') || document.createElement('div');
 const resultSummary     = document.getElementById('result-summary');
-const previewTbody      = document.getElementById('preview-tbody');
-const togglePreviewBtn  = document.getElementById('toggle-preview-btn');
-const previewContainer  = document.getElementById('preview-container');
-const downloadCsvBtn    = document.getElementById('download-csv-btn');
-const copyCsvBtn        = document.getElementById('copy-csv-btn');
+const previewTbody      = document.getElementById('preview-tbody') || document.createElement('tbody');
+const togglePreviewBtn  = document.getElementById('toggle-preview-btn') || document.createElement('button');
+const previewContainer  = document.getElementById('preview-container') || document.createElement('div');
+const downloadCsvBtn    = document.getElementById('download-csv-btn') || document.createElement('button');
+const copyCsvBtn        = document.getElementById('copy-csv-btn') || document.createElement('button');
 const errorSection      = document.getElementById('error-section');
 const errorTitle        = document.getElementById('error-title');
 const errorMsg          = document.getElementById('error-msg');
@@ -83,11 +83,11 @@ const panelImage        = document.getElementById('panel-image');
 const imageDropzone     = document.getElementById('image-dropzone');
 const imageFileInput    = document.getElementById('image-file-input');
 const pickFileBtn       = document.getElementById('pick-file-btn');
-const pasteImageBtn     = document.getElementById('paste-image-btn');
+const pasteImageBtn     = document.getElementById('paste-image-btn') || document.createElement('button');
 const imagePreviews     = document.getElementById('image-previews');
 const imageGrid         = document.getElementById('image-grid');
 const previewCount      = document.getElementById('preview-count');
-const addMoreBtn        = document.getElementById('add-more-btn');
+const addMoreBtn        = document.getElementById('add-more-btn') || document.createElement('button');
 const clearImagesBtn    = document.getElementById('clear-images-btn');
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -126,8 +126,8 @@ Ex: Children are often more resilient than adults when it comes to change.
 Related: resilience (n.), resiliently (adv.)`;
 
 // ─── Tab switching ────────────────────────────────────────────────────────────
-tabTextBtn.addEventListener('click', () => switchTab('text'));
-tabImageBtn.addEventListener('click', () => switchTab('image'));
+tabTextBtn?.addEventListener('click', () => switchTab('text'));
+tabImageBtn?.addEventListener('click', () => switchTab('image'));
 
 function switchTab(tab) {
   activeTab = tab;
@@ -141,17 +141,17 @@ function switchTab(tab) {
 }
 
 // ─── Text mode events ─────────────────────────────────────────────────────────
-vocabInput.addEventListener('input', () => {
+vocabInput?.addEventListener('input', () => {
   charCount.textContent = `${vocabInput.value.length.toLocaleString()}자`;
   onInputChange();
 });
-loadSampleBtn.addEventListener('click', () => {
+loadSampleBtn?.addEventListener('click', () => {
   vocabInput.value = SAMPLE_TEXT;
   charCount.textContent = `${SAMPLE_TEXT.length.toLocaleString()}자`;
   vocabInput.scrollTop = 0;
   onInputChange();
 });
-clearBtn.addEventListener('click', () => {
+clearBtn?.addEventListener('click', () => {
   vocabInput.value = '';
   charCount.textContent = '0자';
   onInputChange();
@@ -160,16 +160,16 @@ clearBtn.addEventListener('click', () => {
 // ─── Image mode events ────────────────────────────────────────────────────────
 
 // Drag and drop on dropzone
-imageDropzone.addEventListener('dragover', e => {
+imageDropzone?.addEventListener('dragover', e => {
   e.preventDefault();
   imageDropzone.classList.add('drag-over');
 });
-imageDropzone.addEventListener('dragleave', e => {
+imageDropzone?.addEventListener('dragleave', e => {
   if (!imageDropzone.contains(e.relatedTarget)) {
     imageDropzone.classList.remove('drag-over');
   }
 });
-imageDropzone.addEventListener('drop', e => {
+imageDropzone?.addEventListener('drop', e => {
   e.preventDefault();
   imageDropzone.classList.remove('drag-over');
   const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
@@ -177,21 +177,21 @@ imageDropzone.addEventListener('drop', e => {
 });
 
 // Keyboard accessibility for drop zone
-imageDropzone.addEventListener('keydown', e => {
+imageDropzone?.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); imageFileInput.click(); }
 });
 
 // File picker
-pickFileBtn.addEventListener('click', e => { e.stopPropagation(); imageFileInput.click(); });
-imageFileInput.addEventListener('change', () => {
+pickFileBtn?.addEventListener('click', e => { e.stopPropagation(); imageFileInput.click(); });
+imageFileInput?.addEventListener('change', () => {
   const files = Array.from(imageFileInput.files);
   if (files.length) addImageFiles(files);
   imageFileInput.value = ''; // reset so same file can be picked again
 });
-addMoreBtn.addEventListener('click', () => imageFileInput.click());
+addMoreBtn?.addEventListener('click', () => imageFileInput?.click());
 
 // Paste image from clipboard
-pasteImageBtn.addEventListener('click', async () => {
+pasteImageBtn?.addEventListener('click', async () => {
   try {
     const items = await navigator.clipboard.read();
     let found = false;
@@ -223,7 +223,7 @@ document.addEventListener('paste', e => {
 });
 
 // Clear all images
-clearImagesBtn.addEventListener('click', () => {
+clearImagesBtn?.addEventListener('click', () => {
   uploadedImages = [];
   renderImagePreviews();
   onInputChange();
@@ -309,9 +309,9 @@ function onInputChange() {
 
 function updateGenerateButton() {
   const ready =
-    (activeTab === 'text' && vocabInput.value.trim().length > 10) ||
+    (activeTab === 'text' && vocabInput?.value?.trim().length > 10) ||
     (activeTab === 'image' && uploadedImages.length > 0);
-  generateBtn.disabled = !ready;
+  if (generateBtn) generateBtn.disabled = !ready;
   generateHint.textContent = ready
     ? `AI가 이미지/텍스트에서 단어와 뜻을 자동 추출합니다${
         activeTab === 'image' && uploadedImages.length > 0
@@ -327,7 +327,7 @@ function updateGenerateButton() {
 const BATCH_SIZE = 4; // Gemini handles 4 images per request comfortably
 
 // ─── Generate ─────────────────────────────────────────────────────────────────
-generateBtn.addEventListener('click', handleGenerate);
+generateBtn?.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
   hideError();
@@ -613,14 +613,14 @@ function renderResults(data, totalExtracted) {
 }
 
 // ─── Preview toggle ───────────────────────────────────────────────────────────
-togglePreviewBtn.addEventListener('click', () => {
+togglePreviewBtn?.addEventListener('click', () => {
   const collapsed = previewContainer.classList.toggle('collapsed');
   togglePreviewBtn.textContent = collapsed ? '펼치기' : '접기';
 });
 
 // ─── Download / Copy ─────────────────────────────────────────────────────────
-downloadCsvBtn.addEventListener('click', downloadCSV);
-copyCsvBtn.addEventListener('click', copyCSV);
+downloadCsvBtn?.addEventListener('click', downloadCSV);
+copyCsvBtn?.addEventListener('click', copyCSV);
 
 function escapeCSV(str) {
   if (str == null) return '';
@@ -772,44 +772,10 @@ async function fetchLatestVersion() {
 fetchLatestVersion();
 
 
-// ─── Firebase Auth & Library Logic ──────────────────────────────────────────────────────────
-
-const loginBtn = document.getElementById('google-login-btn');
-let logoutBtn = document.getElementById('google-logout-btn');
-let authPrompt = document.getElementById('library-auth-prompt');
+// ─── No Auth: Direct Firebase access (default_user) ──────────────────────────
+// Auth completely removed. currentUser is set at top of file.
 const libContent = document.getElementById('library-content');
-let userAvatar = document.getElementById('user-avatar');
-
-loginBtn?.addEventListener('click', async () => {
-  
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (err) {
-    alert('로그인 실패: ' + err.message);
-  }
-});
-
-logoutBtn?.addEventListener('click', () => {
-  signOut(auth);
-});
-
-// onAuthStateChanged(auth, (user) => {
-  currentUser = user;
-  if (user) {
-    authPrompt?.classList.add('hidden');
-    libContent?.classList.remove('hidden');
-    if (userAvatar) {
-      userAvatar.src = user.photoURL || '';
-      userAvatar.style.display = 'block';
-    }
-    loadBooks();
-    loadSaveModalBooks();
-  } else {
-    authPrompt?.classList.remove('hidden');
-    libContent?.classList.add('hidden');
-    if (userAvatar) userAvatar.style.display = 'none';
-  }
-});
+if (libContent) libContent.classList.remove('hidden');
 
 
 // Extraction UI toggle
@@ -817,13 +783,11 @@ let openExtractBtn = document.getElementById("open-extract-btn");
 let closeExtractBtn = document.getElementById("close-extract-btn");
 
 openExtractBtn?.addEventListener('click', () => {
-  document.getElementById('view-words').classList.add('hidden');
   document.getElementById('extract-section').classList.remove('hidden');
 });
 
 closeExtractBtn?.addEventListener('click', () => {
   document.getElementById('extract-section').classList.add('hidden');
-  document.getElementById('view-words').classList.remove('hidden');
 });
 
 
@@ -982,7 +946,7 @@ async function autoSaveToLibrary(data) {
     return;
   }
   try {
-    const { collection, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+    // collection, doc, setDoc are already imported at the top
     
     // progress ui show
     const progressSection = document.getElementById('progress-section');
@@ -1034,7 +998,7 @@ addBookBtn?.addEventListener('click', async () => {
   const name = prompt('새 단어장의 이름을 입력하세요:');
   if (!name || !name.trim()) return;
   try {
-    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+    // collection, addDoc, serverTimestamp already imported at top
     await addDoc(collection(db, `users/${currentUser.uid}/books`), {
       name: name.trim(),
       createdAt: serverTimestamp()
@@ -1050,7 +1014,7 @@ addChapterBtn?.addEventListener('click', async () => {
   const name = prompt('새 단원(챕터)의 이름을 입력하세요:');
   if (!name || !name.trim() || !selectedBookId) return;
   try {
-    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+    // collection, addDoc, serverTimestamp already imported at top
     await addDoc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters`), {
       name: name.trim(),
       createdAt: serverTimestamp()
