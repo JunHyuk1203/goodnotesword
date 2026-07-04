@@ -412,13 +412,13 @@ OUTPUT FORMAT: Return ONLY a valid JSON array. No explanation, no markdown code 
 
 Each item in the array must have these fields:
 - "word": the English word (string)
-- "pos": part of speech in Korean (e.g., "명사", "동사", "형용사", "부사") (string)
+- "pos": part of speech symbol (strictly use: ⓝ for noun, ⓥ for verb, ⓐ for adjective, ad. for adverb, prep. for preposition, conj. for conjunction, pron. for pronoun) (string)
 - "pronunciation": IPA or phonetic pronunciation if available, otherwise empty string
-- "meaning": the detailed definition in ${langName} (string)
-- "synonyms": array of synonym strings WITH THEIR MEANINGS in ${langName} (e.g., "achieve (달성하다)") (max 5)${includeSynAnt ? '' : ' — return empty array []'}
-- "antonyms": array of antonym strings WITH THEIR MEANINGS in ${langName} (e.g., "fail (실패하다)") (max 4)${includeSynAnt ? '' : ' — return empty array []'}
+- "meaning": the detailed definition in ${langName}. If a word has multiple meanings, list ALL of them clearly separated by commas. If it has multiple parts of speech, include them clearly (e.g. "ⓥ 보이다, 보여 주다 ⓝ 전시품, 전시회") (string)
+- "synonyms": array of synonym strings. Each MUST include the synonym, its POS symbol, and ALL its meanings in ${langName} (e.g., "achieve ⓥ 달성하다, 성취하다") (max 5)${includeSynAnt ? '' : ' — return empty array []'}
+- "antonyms": array of antonym strings. Each MUST include the antonym, its POS symbol, and ALL its meanings in ${langName} (e.g., "fail ⓥ 실패하다") (max 4)${includeSynAnt ? '' : ' — return empty array []'}
 - "examples": array of example sentences WITH THEIR TRANSLATIONS in ${langName} (e.g., "I love you. (나는 너를 사랑한다.)") (max 2)${includeExample ? '' : ' — return empty array []'}
-- "related": related word forms WITH THEIR MEANINGS if any (string, e.g., "abundance (풍부함)"), or empty string
+- "related": related word forms WITH THEIR MEANINGS if any (string, e.g., "abundance ⓝ 풍부함"), or empty string
 
 Rules:
 - meaning must be in ${langName}
@@ -512,12 +512,12 @@ function parseResponse(text) {
 
 function formatCard(item, frontOpt, backOpt) {
   let front = item.word || '';
-  if (frontOpt === 'word_pos'  && item.pos)           front += `  [${item.pos}]`;
+  if (frontOpt === 'word_pos'  && item.pos)           front += `  ${item.pos}`;
   if (frontOpt === 'word_pron' && item.pronunciation) front += `  ${item.pronunciation}`;
 
   const backParts = [];
   if (item.meaning) {
-    const posStr = item.pos ? `[${item.pos}] ` : '';
+    const posStr = item.pos ? `${item.pos} ` : '';
     backParts.push(`📌 뜻\n${posStr}${item.meaning}`);
   }
   if (backOpt === 'full') {
