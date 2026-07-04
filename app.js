@@ -1022,3 +1022,65 @@ async function autoSaveToLibrary(data) {
     alert('자동 저장 중 오류 발생: ' + err.message);
   }
 }
+
+
+// --- Book / Chapter Creation ---
+const addBookBtn = document.getElementById('add-book-btn');
+const addChapterBtn = document.getElementById('add-chapter-btn');
+const addChapterWrap = document.getElementById('add-chapter-wrap');
+const addBookWrap = document.getElementById('add-book-wrap');
+
+addBookBtn?.addEventListener('click', async () => {
+  const name = prompt('새 단어장의 이름을 입력하세요:');
+  if (!name || !name.trim()) return;
+  try {
+    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+    await addDoc(collection(db, `users/${currentUser.uid}/books`), {
+      name: name.trim(),
+      createdAt: serverTimestamp()
+    });
+    if (typeof loadBooks === 'function') loadBooks();
+  } catch (err) {
+    console.error(err);
+    alert('단어장 생성 실패: ' + err.message);
+  }
+});
+
+addChapterBtn?.addEventListener('click', async () => {
+  const name = prompt('새 단원(챕터)의 이름을 입력하세요:');
+  if (!name || !name.trim() || !selectedBookId) return;
+  try {
+    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+    await addDoc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters`), {
+      name: name.trim(),
+      createdAt: serverTimestamp()
+    });
+    const crumbBookName = document.getElementById('crumb-book-name')?.textContent || '단어장';
+    if (typeof loadChapters === 'function') loadChapters(selectedBookId, crumbBookName);
+  } catch (err) {
+    console.error(err);
+    alert('단원 생성 실패: ' + err.message);
+  }
+});
+
+// Hook into existing navigation to show/hide buttons
+const originalLoadBooks = loadBooks;
+window.loadBooks = async function() {
+  if (addBookWrap) addBookWrap.classList.remove('hidden');
+  if (addChapterWrap) addChapterWrap.classList.add('hidden');
+  await originalLoadBooks();
+};
+
+const originalLoadChapters = loadChapters;
+window.loadChapters = async function(bookId, bookName) {
+  if (addBookWrap) addBookWrap.classList.add('hidden');
+  if (addChapterWrap) addChapterWrap.classList.remove('hidden');
+  await originalLoadChapters(bookId, bookName);
+};
+
+const originalLoadWords = loadWords;
+window.loadWords = async function(bookId, chapterId, chapterName) {
+  if (addBookWrap) addBookWrap.classList.add('hidden');
+  if (addChapterWrap) addChapterWrap.classList.add('hidden');
+  await originalLoadWords(bookId, chapterId, chapterName);
+};
