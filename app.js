@@ -1,6 +1,6 @@
 /**
  * GoodNotes Vocabulary Study Set Generator
- * app.js – Main application logic (v2 – image upload support)
+ * app.js – v3 (fix: progressSection ref, improved 429 handling)
  *
  * Modes:
  *  - Text mode: user pastes vocab text → sends as text prompt to Gemini
@@ -478,7 +478,9 @@ async function fetchGemini(url, body) {
     if (response.status === 401 || response.status === 403)
       throw new Error(`API 키 인증 실패 (${response.status}): API 키를 확인해주세요.`);
     if (response.status === 429)
-      throw new Error(`요청이 너무 많습니다 (429): 잠시 후 다시 시도해주세요.`);
+      throw new Error(`API 키 할당량이 초과되었습니다 (429).
+• 우상 우죽 화면 [기 API 키] 버튼을 눌러 새 키로 교체하세요.
+• 또는 https://aistudio.google.com/app/apikey 에서 새 API 키를 발급받으세요.`);
     throw new Error(`API 오류 (${response.status}): ${msg}`);
   }
 
