@@ -998,3 +998,14 @@ body {
   .generate-btn { padding: 14px 32px; }
   .download-section { flex-direction: column; }
 }
+
+.version-badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(108, 99, 255, 0.15);
+  color: var(--primary);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
