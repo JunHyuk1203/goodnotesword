@@ -428,32 +428,34 @@ Rules:
 - If this is an image, carefully read all visible text including small print`;
 }
 
-// ─── Gemini API: Text ─────────────────────────────────────────────────────────
+// ─── Gemini API: Multi-Model Fallback ─────────────────────────────────────────
+
+const FALLBACK_MODELS = [
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3-flash',
+  'gemini-2.5-flash'
+];
 
 async function callGeminiText(apiKey, prompt, text) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const body = {
-    contents: [{
-      parts: [
-        { text: prompt + `\n\nTEXT TO ANALYZE:\n"""\n${text}\n"""` }
-      ]
-    }],
+    contents: [{ parts: [{ text: prompt + "
+
+TEXT TO ANALYZE:
+\"\"\"
+" + text + "
+\"\"\"" }] }],
     generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
   };
-  return fetchGemini(url, body);
+  return executeWithFallback(apiKey, body);
 }
 
 // ─── Gemini API: Vision (Image) ───────────────────────────────────────────────
 
 async function callGeminiVision(apiKey, prompt, images) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-  // Build parts: [image1, image2, ..., text prompt]
   const parts = images.map(img => ({
-    inline_data: {
-      mime_type: img.mimeType,
-      data: img.dataUrl.split(',')[1] // strip the data:image/xxx;base64, prefix
-    }
+    inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] }
   }));
   parts.push({ text: prompt });
 
@@ -461,7 +463,36 @@ async function callGeminiVision(apiKey, prompt, images) {
     contents: [{ parts }],
     generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
   };
-  return fetchGemini(url, body);
+  return executeWithFallback(apiKey, body);
+}
+
+async function executeWithFallback(apiKey, body) {
+  let lastError;
+  for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+    const model = FALLBACK_MODELS[i];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      if (i > 0) {
+        console.log(`[Fallback] Retrying with ${model}...`);
+        const sub = document.getElementById('progress-sub');
+        if (sub) sub.textContent = `이전 모델 한도 초과. ${model} 모델로 우회 접속 중...`;
+      }
+      return await fetchGemini(url, body);
+    } catch (err) {
+      lastError = err;
+      if (err.status === 429 || err.status === 403 || (err.message && err.message.includes('할당량'))) {
+        continue;
+      }
+      throw err; 
+    }
+  }
+
+  if (lastError && (lastError.status === 429 || lastError.status === 403)) {
+    throw new Error(`모든 예비 모델(5개)의 API 한도가 바닥났습니다 (429/403).
+• 우측 상단 [API 키] 버튼을 눌러 새 키로 교체하세요.
+• 또는 https://aistudio.google.com/app/apikey 에서 발급받으세요.`);
+  }
+  throw lastError;
 }
 
 async function fetchGemini(url, body) {
@@ -472,16 +503,15 @@ async function fetchGemini(url, body) {
   });
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    const msg = err?.error?.message || response.statusText;
-    if (response.status === 400) throw new Error(`API 요청 오류 (400): ${msg}`);
-    if (response.status === 401 || response.status === 403)
-      throw new Error(`API 키 인증 실패 (${response.status}): API 키를 확인해주세요.`);
-    if (response.status === 429)
-      throw new Error(`API 키 할당량이 초과되었습니다 (429).
-• 우상 우죽 화면 [기 API 키] 버튼을 눌러 새 키로 교체하세요.
-• 또는 https://aistudio.google.com/app/apikey 에서 새 API 키를 발급받으세요.`);
-    throw new Error(`API 오류 (${response.status}): ${msg}`);
+    const errObj = await response.json().catch(() => ({}));
+    const msg = errObj?.error?.message || response.statusText;
+    const error = new Error(`API 오류 (${response.status}): ${msg}`);
+    error.status = response.status;
+    
+    if (response.status === 401 || (response.status === 403 && !msg.includes('quota'))) {
+      error.message = `API 키 인증 실패 (${response.status}): API 키를 확인해주세요.`;
+    }
+    throw error;
   }
 
   const data = await response.json();
@@ -489,7 +519,6 @@ async function fetchGemini(url, body) {
   if (!text) throw new Error('AI 응답이 비어있습니다. 다시 시도해보세요.');
   return text;
 }
-
 // ─── Parsing ──────────────────────────────────────────────────────────────────
 
 function parseResponse(text) {
