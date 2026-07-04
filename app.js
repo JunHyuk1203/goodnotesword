@@ -688,3 +688,29 @@ function updateKeyStatus() {
 onInputChange();
 updateKeyStatus();
 if (!getApiKey()) showApiModal();
+
+
+// ─── Auto Version Badge ───────────────────────────────────────────────────────
+async function fetchLatestVersion() {
+  try {
+    const res = await fetch('https://api.github.com/repos/JunHyuk1203/goodnotesword/commits/main');
+    if (!res.ok) return;
+    const data = await res.json();
+    const date = new Date(data.commit.author.date);
+    
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    const badge = document.querySelector('.version-badge');
+    if (badge) {
+      badge.textContent = `업데이트 ${month}.${day} ${hours}:${minutes}`;
+      badge.title = data.commit.message; // 마우스를 올리면 커밋 메시지 표시
+    }
+  } catch (err) {
+    console.error('Failed to fetch version:', err);
+  }
+}
+
+fetchLatestVersion();
