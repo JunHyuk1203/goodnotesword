@@ -32,8 +32,21 @@ let uploadedImages = [];
 
 // ─── API Key ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'gn_gemini_api_key';
-function getApiKey() { return localStorage.getItem(STORAGE_KEY) || ''; }
-function setApiKey(k) { localStorage.setItem(STORAGE_KEY, k); }
+function getApiKey() { return sessionStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY) || ''; }
+function setApiKey(k, remember) { 
+  if (k === null) {
+    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
+    return;
+  }
+  if (remember) {
+    localStorage.setItem(STORAGE_KEY, k);
+    sessionStorage.removeItem(STORAGE_KEY);
+  } else {
+    sessionStorage.setItem(STORAGE_KEY, k);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
@@ -48,6 +61,8 @@ function escapeCSV(s) {
 const apiModal = $('api-modal');
 const apiModalInput = $('api-modal-input');
 const apiModalSave = $('api-modal-save');
+const apiRememberChk = $('api-remember-chk');
+const apiDeleteBtn = $('api-delete-btn');
 const apiKeyStatus = $('api-key-status');
 const changeKeyBtn = $('change-key-btn');
 const errorSection = $('error-section');
@@ -101,7 +116,11 @@ const deleteSelectedBtn = $('delete-selected-btn');
 // API KEY MODAL
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function showApiModal() { apiModal.classList.remove('hidden'); apiModalInput.focus(); }
+function showApiModal() { 
+  apiModal.classList.remove('hidden'); 
+  apiModalInput.focus(); 
+  if(apiRememberChk) apiRememberChk.checked = localStorage.getItem(STORAGE_KEY) !== null;
+}
 function hideApiModal() { apiModal.classList.add('hidden'); }
 
 function updateKeyStatus() {
@@ -120,11 +139,24 @@ changeKeyBtn.addEventListener('click', () => { apiModalInput.value = ''; showApi
 apiModalSave.addEventListener('click', () => {
   const key = apiModalInput.value.trim();
   if (key.length < 10) { apiModalInput.style.borderColor = 'var(--danger)'; return; }
-  setApiKey(key);
+  setApiKey(key, apiRememberChk.checked);
+  apiModalInput.value = '';
   hideApiModal();
   updateKeyStatus();
   updateGenerateButton();
 });
+
+if (apiDeleteBtn) {
+  apiDeleteBtn.addEventListener('click', () => {
+    if (confirm('저장된 API 키를 브라우저에서 완전히 삭제하시겠습니까?')) {
+      setApiKey(null);
+      apiModalInput.value = '';
+      hideApiModal();
+      updateKeyStatus();
+      updateGenerateButton();
+    }
+  });
+}
 
 apiModalInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') apiModalSave.click();
