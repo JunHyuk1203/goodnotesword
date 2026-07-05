@@ -512,9 +512,13 @@ CRITICAL TRANSCRIBING RULES:
 3. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY "1. 중요한, 의미 있는 2. 상당한, 아주 큰".
 4. NEVER mix or combine definitions. NEVER omit the numbers like "1." or "2.". NEVER drop comma-separated meanings. Do exactly as written in the source.
 
-OUTPUT FORMAT: Return ONLY a valid JSON array. No markdown, no code fences, no extra text.
+OUTPUT FORMAT: Return ONLY a valid JSON array of objects. No markdown, no code fences.
 CRITICAL: You MUST escape all double quotes (") inside your strings using \".
-Each item: {"word":"","pos":"","pronunciation":"","meaning":"","synonyms":[],"antonyms":[],"examples":[],"related":[]}
+Example of the required JSON array format (return ALL words as separate objects in the array):
+[
+  {"word":"apple","pos":"ⓝ","pronunciation":"[æpl]","meaning":"사과","synonyms":[],"antonyms":[],"examples":[],"related":[]},
+  {"word":"banana","pos":"ⓝ","pronunciation":"[bənænə]","meaning":"바나나","synonyms":[],"antonyms":[],"examples":[],"related":[]}
+]
 - pos: use ⓝ ⓥ ⓐ ad. prep. conj. pron.
 - meaning: in ${langName}, exact literal transcription of the meaning from the source.
 - synonyms: ${includeSynAnt ? 'array of strings formatted as "word: meaning" (max 5)' : 'empty array []'}
