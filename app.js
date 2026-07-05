@@ -561,46 +561,47 @@ function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
   const includeExample = backOpt !== 'meaning_only';
   const includeSynAnt = backOpt === 'full';
+
+  let formatStr = `- "word": The English vocabulary word (required)\n- "meaning": The Korean meaning exactly as written (required)\n- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)\n- "pronunciation": Pronunciation symbol (optional)`;
+  
+  if (includeExample) {
+    formatStr += `\n- "examples": Array of example sentences (optional)`;
+  }
+  if (includeSynAnt) {
+    formatStr += `\n- "synonyms": Array of strings (optional)\n- "antonyms": Array of strings (optional)\n- "related": Array of related words (optional)`;
+  }
+
+  let exampleStr = `[
+  {
+    "word": "significant",
+    "meaning": "1 중요한 2 상당한"`;
+  
+  if (includeExample) {
+    exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
+  }
+  if (includeSynAnt) {
+    exampleStr += `,\n    "synonyms": ["important: 중요한"]`;
+  }
+  exampleStr += `\n  }\n]`;
+
   return `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
 
 CRITICAL EXTRACTION RULES:
-1. DO NOT SKIP ANY WORDS. You MUST extract EVERY SINGLE vocabulary word present in the source text or images. Do not summarize or omit words in the middle.
-2. Extract all words thoroughly from the very beginning to the very end of the document.
-
-CRITICAL ORDERING RULES:
-1. Maintain the EXACT ORIGINAL ORDER of the words as they appear in the source text/images.
-2. If the words have sequential numbers (e.g., 1, 2, 3...), you MUST extract and list them in that exact numerical order.
-3. For multiple images or columns, extract from the first image/column to the last, top-to-bottom, left-to-right.
+1. DO NOT SKIP ANY MAIN VOCABULARY WORDS. You MUST extract EVERY SINGLE main vocabulary word present in the source.
+2. If there are dozens of words, you MUST list them ALL. DO NOT give up after a few words.
+3. For multiple images or columns, extract from top-to-bottom, left-to-right.
 
 CRITICAL TRANSCRIBING RULES:
-1. NEVER USE YOUR OWN DICTIONARY KNOWLEDGE. Act purely as an OCR (Optical Character Recognition) engine.
-2. For the "meaning" field, you MUST copy the text EXACTLY as it appears in the image pixel-by-pixel. DO NOT summarize, DO NOT simplify, and DO NOT drop numbers or symbols.
-3. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY the same.
-
-CRITICAL REQUIREMENT: 
-You MUST output EVERY word found. Do not stop at 1 or 5 words. Extract them ALL.
+1. NEVER USE YOUR OWN DICTIONARY KNOWLEDGE. Act purely as an OCR engine.
+2. For the "meaning" field, you MUST copy the text EXACTLY as it appears. DO NOT summarize.
 
 OUTPUT FORMAT:
 You MUST output a valid JSON array of objects. Do not wrap it in markdown blockquotes.
-Each object should have the following keys:
-- "word": The English vocabulary word (required)
-- "meaning": The Korean meaning exactly as written (required)
-- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)
-- "pronunciation": Pronunciation symbol (optional)
-- "synonyms": Array of strings (optional)
-- "antonyms": Array of strings (optional)
-- "examples": Array of example sentences (optional)
-- "related": Array of related words (optional)
+Each object MUST have the following keys (and ONLY these keys if requested):
+${formatStr}
 
 Example:
-[
-  {
-    "word": "significant",
-    "meaning": "1 중요한 2 상당한",
-    "pos": "ⓐ",
-    "examples": ["This is significant! 이것은 중요하다!"]
-  }
-]
+${exampleStr}
 `;
 }
 
