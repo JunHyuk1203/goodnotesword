@@ -94,6 +94,8 @@ const imageGrid = $('image-grid');
 const previewCount = $('preview-count');
 const clearImagesBtn = $('clear-images-btn');
 const exportCsvBtn = $('export-csv-btn');
+const selectAllWords = $('select-all-words');
+const deleteSelectedBtn = $('delete-selected-btn');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // API KEY MODAL
@@ -236,8 +238,10 @@ async function loadWords(bookId, chapterId, chapterName) {
   crumbChapter.classList.remove('hidden');
   crumbChapterName.textContent = chapterName;
 
-  wordsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">로딩 중...</td></tr>';
+  wordsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">로딩 중...</td></tr>';
   currentLoadedWords = [];
+  if (selectAllWords) selectAllWords.checked = false;
+  if (deleteSelectedBtn) deleteSelectedBtn.classList.add('hidden');
   try {
     const q = query(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters/${chapterId}/words`), orderBy('order'));
     const snap = await getDocs(q);
@@ -248,7 +252,7 @@ async function loadWords(bookId, chapterId, chapterName) {
       const data = d.data();
       currentLoadedWords.push(data);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>
+      tr.innerHTML = `<td><input type="checkbox" class="word-chk" data-path="${d.ref.path}" /></td><td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>
         <td>
           <div style="display:flex;gap:4px;">
             <button class="word-edit-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">수정</button>
@@ -270,9 +274,10 @@ async function loadWords(bookId, chapterId, chapterName) {
         }
       };
       wordsTbody.appendChild(tr);
+      tr.querySelector('.word-chk').addEventListener('change', updateDeleteBtn);
     });
     if (snap.empty) {
-      wordsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">단어가 없습니다. [✨ 새 단어 추출하기] 버튼으로 추가하세요!</td></tr>';
+      wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">단어가 없습니다. [✨ 새 단어 추출하기] 버튼으로 추가하세요!</td></tr>';
     }
   } catch (e) {
     console.error(e);
@@ -318,6 +323,37 @@ exportCsvBtn.addEventListener('click', () => {
   a.download = `${crumbChapterName.textContent || 'words'}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+// ─── Multi-Delete ─────────────────────────────────────────────────────────────
+function updateDeleteBtn() {
+  const checked = document.querySelectorAll('.word-chk:checked').length;
+  const total = document.querySelectorAll('.word-chk').length;
+  deleteSelectedBtn.classList.toggle('hidden', checked === 0);
+  selectAllWords.checked = (checked === total && total > 0);
+}
+
+selectAllWords.addEventListener('change', e => {
+  document.querySelectorAll('.word-chk').forEach(chk => chk.checked = e.target.checked);
+  updateDeleteBtn();
+});
+
+deleteSelectedBtn.addEventListener('click', async () => {
+  const chks = document.querySelectorAll('.word-chk:checked');
+  if (!chks.length) return;
+  if (!confirm(`선택한 ${chks.length}개의 단어를 삭제하시겠습니까?`)) return;
+  
+  deleteSelectedBtn.disabled = true;
+  deleteSelectedBtn.textContent = '삭제 중...';
+  try {
+    await Promise.all(Array.from(chks).map(chk => deleteDoc(doc(db, chk.dataset.path))));
+    loadWords(selectedBookId, selectedChapterId, crumbChapterName.textContent);
+  } catch(e) {
+    alert('삭제 실패: ' + e.message);
+  } finally {
+    deleteSelectedBtn.disabled = false;
+    deleteSelectedBtn.textContent = '🗑 선택 삭제';
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

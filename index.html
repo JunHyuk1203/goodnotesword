@@ -79,6 +79,7 @@
         <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <span id="word-count-badge" class="badge badge-ai">0 단어</span>
           <div style="display:flex; gap:10px;">
+            <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.6rem 1.2rem; font-size:0.9rem;">🗑 선택 삭제</button>
             <button id="open-extract-btn" class="generate-btn" style="width:auto; padding:0.6rem 1.2rem; font-size:0.9rem;">✨ 새 단어 추출하기</button>
             <button id="export-csv-btn" class="download-btn download-primary" style="padding:0.6rem 1.2rem; font-size:0.9rem;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -182,7 +183,7 @@
 
         <!-- Words Table -->
         <table class="preview-table">
-          <thead><tr><th>#</th><th>앞면 (질문)</th><th>뒷면 (정답)</th><th style="width: 120px;">관리</th></tr></thead>
+          <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>앞면 (질문)</th><th>뒷면 (정답)</th><th style="width: 120px;">관리</th></tr></thead>
           <tbody id="words-tbody"></tbody>
         </table>
       </div>
