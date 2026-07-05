@@ -138,9 +138,9 @@ changeKeyBtn.addEventListener('click', () => { apiModalInput.value = ''; showApi
 
 apiModalSave.addEventListener('click', () => {
   const key = apiModalInput.value.trim();
-  if (!key.startsWith('AIza') || key.length < 30) { 
+  if (!(key.startsWith('AIza') || key.startsWith('AQ.')) || key.length < 30) { 
     apiModalInput.style.borderColor = 'var(--danger)'; 
-    alert("올바른 API 키가 아닙니다. Gemini API 키는 반드시 'AIza'로 시작해야 합니다.");
+    alert("올바른 API 키가 아닙니다. Gemini API 키는 'AIza' 또는 'AQ.'로 시작해야 합니다.");
     return; 
   }
   setApiKey(key, apiRememberChk ? apiRememberChk.checked : false);
@@ -489,7 +489,7 @@ function updateGenerateButton() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-latest'];
+const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
