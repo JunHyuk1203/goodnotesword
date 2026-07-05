@@ -485,7 +485,7 @@ function updateGenerateButton() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash'];
+const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
@@ -529,7 +529,7 @@ async function executeWithFallback(apiKey, body) {
         const err = await res.json().catch(() => ({}));
         const e = new Error(`API (${res.status}): ${err?.error?.message || res.statusText}`);
         e.status = res.status;
-        if (res.status === 429 || res.status === 403 || res.status >= 500) { lastError = e; continue; }
+        if (res.status === 429 || res.status === 403 || res.status === 404 || res.status >= 500) { lastError = e; continue; }
         throw e;
       }
       const data = await res.json();
@@ -538,7 +538,7 @@ async function executeWithFallback(apiKey, body) {
       return parseResponse(text);
     } catch (e) {
       lastError = e;
-      if (e.status === 429 || e.status === 403 || e.status >= 500 || e.message.includes('JSON')) {
+      if (e.status === 429 || e.status === 403 || e.status === 404 || e.status >= 500 || e.message.includes('JSON')) {
         progressSub.textContent = `${model} 실패 (${e.message.includes('JSON') ? '포맷 오류' : '서버 오류'}), 다음 모델 시도...`;
         continue;
       }
