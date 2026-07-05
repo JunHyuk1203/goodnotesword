@@ -212,8 +212,12 @@
       <div class="modal-input-wrap">
         <input type="password" id="api-modal-input" class="text-input modal-text-input" placeholder="AIza..." autocomplete="off" spellcheck="false" />
       </div>
-      <p class="modal-note">입력된 키는 이 기기에만 저장됩니다 🔒</p>
-      <button id="api-modal-save" class="modal-save-btn">시작하기</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:0.9rem; color:var(--text-muted);">
+        <label style="display:flex; align-items:center; cursor:pointer;" title="체크 해제 시 인터넷 창을 닫으면 키가 삭제됩니다."><input type="checkbox" id="api-remember-chk" style="margin-right:6px;"> 기기에 계속 저장</label>
+        <button id="api-delete-btn" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.9rem; padding:4px;">🗑 키 삭제</button>
+      </div>
+      <p class="modal-note" style="margin-top:15px; color:#f57c00; text-align:left; line-height:1.4;">⚠ <strong>보안 팁:</strong> 결제 카드를 등록하신 경우, <a href="https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas" target="_blank" class="link" style="color:#f57c00;text-decoration:underline;">Google Cloud Console</a>에서 <strong>일일 사용 한도(Quota)</strong>를 설정하여 예기치 않은 과금을 방지하세요.</p>
+      <button id="api-modal-save" class="modal-save-btn" style="margin-top:20px;">저장 및 시작하기</button>
     </div>
   </div>
 
