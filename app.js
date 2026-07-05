@@ -578,7 +578,29 @@ CRITICAL TRANSCRIBING RULES:
 3. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY the same.
 
 CRITICAL REQUIREMENT: 
-You MUST output EVERY word found. Do not stop at 3 or 5 words. If there are 30 words in the source, your JSON array MUST contain 30 objects.
+You MUST output EVERY word found. Do not stop at 1 or 5 words. Extract them ALL.
+
+OUTPUT FORMAT:
+You MUST output a valid JSON array of objects. Do not wrap it in markdown blockquotes.
+Each object should have the following keys:
+- "word": The English vocabulary word (required)
+- "meaning": The Korean meaning exactly as written (required)
+- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)
+- "pronunciation": Pronunciation symbol (optional)
+- "synonyms": Array of strings (optional)
+- "antonyms": Array of strings (optional)
+- "examples": Array of example sentences (optional)
+- "related": Array of related words (optional)
+
+Example:
+[
+  {
+    "word": "significant",
+    "meaning": "1 중요한 2 상당한",
+    "pos": "ⓐ",
+    "examples": ["This is significant! 이것은 중요하다!"]
+  }
+]
 `;
 }
 
@@ -684,25 +706,7 @@ async function handleGenerate() {
   const maxWords = parseInt($('max-words-sel').value, 10);
   const prompt = buildPrompt(frontOpt, backOpt, 'ko', maxWords);
 
-  const schema = {
-    type: "ARRAY",
-    description: "A complete list of ALL vocabulary words extracted from the source.",
-    items: {
-      type: "OBJECT",
-      properties: {
-        word: { type: "STRING", description: "The English vocabulary word." },
-        pos: { type: "STRING", description: "Part of speech (e.g., ⓝ, ⓥ, ⓐ, ad, prep)." },
-        pronunciation: { type: "STRING", description: "Pronunciation symbol (e.g., [æpl])." },
-        meaning: { type: "STRING", description: "The exact literal meaning in Korean as written in the source." },
-        synonyms: { type: "ARRAY", items: { type: "STRING" }, description: "Array of synonyms formatted as 'word: meaning' (max 5)." },
-        antonyms: { type: "ARRAY", items: { type: "STRING" }, description: "Array of antonyms formatted as 'word: meaning' (max 4)." },
-        examples: { type: "ARRAY", items: { type: "STRING" }, description: "Array of example sentences with translations (max 2)." },
-        related: { type: "ARRAY", items: { type: "STRING" }, description: "Array of related words formatted as 'word: meaning'." }
-      },
-      required: ["word", "meaning"]
-    }
-  };
-  const genConfig = { temperature: 0.1, maxOutputTokens: 8192, response_mime_type: "application/json", response_schema: schema };
+  const genConfig = { temperature: 0.1, maxOutputTokens: 8192, response_mime_type: "application/json" };
 
   try {
     let allParsed = [];
