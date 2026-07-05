@@ -485,7 +485,7 @@ function updateGenerateButton() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+const FALLBACK_MODELS = ['gemini-3.0-flash', 'gemini-3.0-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
