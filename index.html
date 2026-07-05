@@ -223,7 +223,31 @@
       <button id="api-modal-save" class="modal-save-btn" style="margin-top:20px;">저장 및 시작하기</button>
     </div>
   </div>
+  <!-- Custom Prompt Modal -->
+  <div id="custom-prompt-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:420px;">
+      <p id="custom-prompt-message" class="modal-desc" style="margin-bottom:14px;font-size:1rem;"></p>
+      <div class="modal-input-wrap">
+        <input type="text" id="custom-prompt-input" class="text-input modal-text-input" autocomplete="off" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+        <button id="custom-prompt-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
+        <button id="custom-prompt-ok" class="modal-save-btn" style="margin-top:0;">확인</button>
+      </div>
+    </div>
+  </div>
 
-  <script type="module" src="app.js?v=25"></script>
+  <!-- Custom Confirm Modal -->
+  <div id="custom-confirm-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:380px;">
+      <p id="custom-confirm-message" class="modal-desc" style="margin-bottom:20px;font-size:1rem;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="custom-confirm-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
+        <button id="custom-confirm-ok" style="padding:8px 20px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-weight:600;">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js?v=26"></script>
 </body>
 </html>
