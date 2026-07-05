@@ -58,6 +58,56 @@ function escapeCSV(s) {
 }
 
 // ─── DOM Refs ─────────────────────────────────────────────────────────────────
+// Custom modal helpers (replace browser prompt/confirm which get blocked)
+function showPrompt(message, defaultVal = '') {
+  return new Promise(resolve => {
+    const modal = document.getElementById('custom-prompt-modal');
+    const msgEl = document.getElementById('custom-prompt-message');
+    const input = document.getElementById('custom-prompt-input');
+    const okBtn = document.getElementById('custom-prompt-ok');
+    const cancelBtn = document.getElementById('custom-prompt-cancel');
+    msgEl.textContent = message;
+    input.value = defaultVal;
+    modal.classList.remove('hidden');
+    setTimeout(() => input.focus(), 50);
+    const cleanup = (val) => {
+      modal.classList.add('hidden');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKey);
+      resolve(val);
+    };
+    const onOk = () => cleanup(input.value.trim() || null);
+    const onCancel = () => cleanup(null);
+    const onKey = (e) => { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); };
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    input.addEventListener('keydown', onKey);
+  });
+}
+
+function showConfirm(message, okLabel = '삭제') {
+  return new Promise(resolve => {
+    const modal = document.getElementById('custom-confirm-modal');
+    const msgEl = document.getElementById('custom-confirm-message');
+    const okBtn = document.getElementById('custom-confirm-ok');
+    const cancelBtn = document.getElementById('custom-confirm-cancel');
+    msgEl.textContent = message;
+    okBtn.textContent = okLabel;
+    modal.classList.remove('hidden');
+    const cleanup = (val) => {
+      modal.classList.add('hidden');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      resolve(val);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+  });
+}
+
 const apiModal = $('api-modal');
 const apiModalInput = $('api-modal-input');
 const apiModalSave = $('api-modal-save');
@@ -205,7 +255,7 @@ async function loadBooks() {
       div.onclick = () => loadChapters(d.id, data.name);
       div.querySelector('.lib-delete-btn').onclick = async (e) => {
         e.stopPropagation();
-        if (confirm('이 단어장을 삭제하시겠습니까? (내부 단원도 함께 삭제됩니다)')) {
+        if (await showConfirm('이 단어장을 삭제하시겠습니까? (모든 단원과 함께 삭제됩니다)')) {
           try { await deleteDoc(doc(db, `users/${currentUser.uid}/books`, d.id)); loadBooks(); }
           catch(err) { alert('삭제 실패: ' + err.message); }
         }
@@ -248,7 +298,7 @@ async function loadChapters(bookId, bookName) {
       div.onclick = () => loadWords(bookId, d.id, data.name);
       div.querySelector('.lib-delete-btn').onclick = async (e) => {
         e.stopPropagation();
-        if (confirm('이 단원을 삭제하시겠습니까? (내부 단어도 함께 삭제됩니다)')) {
+        if (await showConfirm('이 단원을 삭제하시겠습니까? (모든 단어와 함께 삭제됩니다)')) {
           try { await deleteDoc(doc(db, `users/${currentUser.uid}/books/${bookId}/chapters`, d.id)); loadChapters(bookId, crumbBookName.textContent); }
           catch(err) { alert('삭제 실패: ' + err.message); }
         }
@@ -296,15 +346,15 @@ async function loadWords(bookId, chapterId, chapterName) {
           </div>
         </td>`;
       tr.querySelector('.word-edit-btn').onclick = async () => {
-        const newFront = prompt('앞면(질문):', data.front);
+        const newFront = await showPrompt('앞면(질문):', data.front);
         if (newFront === null) return;
-        const newBack = prompt('뒷면(정답):', data.back);
+        const newBack = await showPrompt('뒷면(정답):', data.back);
         if (newBack === null) return;
         try { await updateDoc(d.ref, { front: newFront, back: newBack }); loadWords(bookId, chapterId, chapterName); }
         catch(err) { alert('수정 실패: ' + err.message); }
       };
       tr.querySelector('.word-delete-btn').onclick = async () => {
-        if (confirm('이 단어를 삭제하시겠습니까?')) {
+        if (await showConfirm('이 단어를 삭제하시겠습니까?')) {
           try { await deleteDoc(d.ref); loadWords(bookId, chapterId, chapterName); }
           catch(err) { alert('삭제 실패: ' + err.message); }
         }
@@ -323,7 +373,7 @@ async function loadWords(bookId, chapterId, chapterName) {
 
 // ─── Create Book / Chapter ────────────────────────────────────────────────────
 addBookBtn.addEventListener('click', async () => {
-  const name = prompt('새 단어장의 이름을 입력하세요:');
+  const name = await showPrompt('새 단어장의 이름을 입력하세요:');
   if (!name || !name.trim()) return;
   try {
     await addDoc(collection(db, `users/${currentUser.uid}/books`), {
@@ -336,7 +386,7 @@ addBookBtn.addEventListener('click', async () => {
 });
 
 addChapterBtn.addEventListener('click', async () => {
-  const name = prompt('새 단원(챕터)의 이름을 입력하세요:');
+  const name = await showPrompt('새 단원(챕터)의 이름을 입력하세요:');
   if (!name || !name.trim() || !selectedBookId) return;
   try {
     await addDoc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters`), {
@@ -377,7 +427,7 @@ selectAllWords.addEventListener('change', e => {
 deleteSelectedBtn.addEventListener('click', async () => {
   const chks = document.querySelectorAll('.word-chk:checked');
   if (!chks.length) return;
-  if (!confirm(`선택한 ${chks.length}개의 단어를 삭제하시겠습니까?`)) return;
+  if (!await showConfirm(`선택한 ${chks.length}개의 단어를 삭제하시겠습니까?`)) return;
   
   deleteSelectedBtn.disabled = true;
   deleteSelectedBtn.textContent = '삭제 중...';
