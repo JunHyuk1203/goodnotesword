@@ -459,7 +459,11 @@ function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
   const includeExample = backOpt !== 'meaning_only';
   const includeSynAnt = backOpt === 'full';
-  return `You are an expert vocabulary extraction assistant. Extract up to ${maxWords} English vocabulary words.
+  return `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
+
+CRITICAL EXTRACTION RULES:
+1. DO NOT SKIP ANY WORDS. You MUST extract EVERY SINGLE vocabulary word present in the source text or images. Do not summarize or omit words in the middle.
+2. Extract all words thoroughly from the very beginning to the very end of the document.
 
 CRITICAL ORDERING RULES:
 1. Maintain the EXACT ORIGINAL ORDER of the words as they appear in the source text/images.
