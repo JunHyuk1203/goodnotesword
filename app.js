@@ -6,7 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
-  query, orderBy, serverTimestamp
+  query, orderBy, serverTimestamp, deleteDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -163,8 +163,15 @@ async function loadBooks() {
       const data = d.data();
       const div = document.createElement('div');
       div.className = 'lib-card';
-      div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div>`;
+      div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단어장 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
       div.onclick = () => loadChapters(d.id, data.name);
+      div.querySelector('.lib-delete-btn').onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm('이 단어장을 삭제하시겠습니까? (내부 단원도 함께 삭제됩니다)')) {
+          try { await deleteDoc(doc(db, `users/${currentUser.uid}/books`, d.id)); loadBooks(); }
+          catch(err) { alert('삭제 실패: ' + err.message); }
+        }
+      };
       viewBooks.appendChild(div);
     });
   } catch (e) {
@@ -199,8 +206,15 @@ async function loadChapters(bookId, bookName) {
       const data = d.data();
       const div = document.createElement('div');
       div.className = 'lib-card';
-      div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div>`;
+      div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
       div.onclick = () => loadWords(bookId, d.id, data.name);
+      div.querySelector('.lib-delete-btn').onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm('이 단원을 삭제하시겠습니까? (내부 단어도 함께 삭제됩니다)')) {
+          try { await deleteDoc(doc(db, `users/${currentUser.uid}/books/${bookId}/chapters`, d.id)); loadChapters(bookId, crumbBookName.textContent); }
+          catch(err) { alert('삭제 실패: ' + err.message); }
+        }
+      };
       viewChapters.appendChild(div);
     });
   } catch (e) {
@@ -234,7 +248,27 @@ async function loadWords(bookId, chapterId, chapterName) {
       const data = d.data();
       currentLoadedWords.push(data);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>`;
+      tr.innerHTML = `<td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>
+        <td>
+          <div style="display:flex;gap:4px;">
+            <button class="word-edit-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">수정</button>
+            <button class="word-delete-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid #ff4d4f;background:#fff1f0;color:#ff4d4f;">삭제</button>
+          </div>
+        </td>`;
+      tr.querySelector('.word-edit-btn').onclick = async () => {
+        const newFront = prompt('앞면(질문):', data.front);
+        if (newFront === null) return;
+        const newBack = prompt('뒷면(정답):', data.back);
+        if (newBack === null) return;
+        try { await updateDoc(d.ref, { front: newFront, back: newBack }); loadWords(bookId, chapterId, chapterName); }
+        catch(err) { alert('수정 실패: ' + err.message); }
+      };
+      tr.querySelector('.word-delete-btn').onclick = async () => {
+        if (confirm('이 단어를 삭제하시겠습니까?')) {
+          try { await deleteDoc(d.ref); loadWords(bookId, chapterId, chapterName); }
+          catch(err) { alert('삭제 실패: ' + err.message); }
+        }
+      };
       wordsTbody.appendChild(tr);
     });
     if (snap.empty) {
@@ -436,17 +470,22 @@ function parseResponse(text) {
 }
 
 function formatCard(item, frontOpt, backOpt) {
+  const ensureStringArray = (arr) => Array.isArray(arr) ? arr.map(x => typeof x === 'object' ? Object.values(x).join(' ') : String(x)) : [];
+
   let front = item.word || '';
   if (frontOpt === 'word_pos' && item.pos) front += `  ${item.pos}`;
   if (frontOpt === 'word_pron' && item.pronunciation) front += `  ${item.pronunciation}`;
   const parts = [];
   if (item.meaning) parts.push(`📌 뜻\n${item.pos ? item.pos + ' ' : ''}${item.meaning}`);
   if (backOpt === 'full') {
-    if (item.synonyms?.length) parts.push(`✅ 유의어\n• ${item.synonyms.join('\n• ')}`);
-    if (item.antonyms?.length) parts.push(`❌ 반의어\n• ${item.antonyms.join('\n• ')}`);
-    if (item.related) parts.push(`🔗 관련어\n• ${item.related}`);
+    const syns = ensureStringArray(item.synonyms);
+    const ants = ensureStringArray(item.antonyms);
+    if (syns.length) parts.push(`✅ 유의어\n• ${syns.join('\n• ')}`);
+    if (ants.length) parts.push(`❌ 반의어\n• ${ants.join('\n• ')}`);
+    if (item.related) parts.push(`🔗 관련어\n• ${typeof item.related === 'object' ? Object.values(item.related).join(' ') : item.related}`);
   }
-  if (backOpt !== 'meaning_only' && item.examples?.length) parts.push(`📖 예문\n• ${item.examples.join('\n• ')}`);
+  const exs = ensureStringArray(item.examples);
+  if (backOpt !== 'meaning_only' && exs.length) parts.push(`📖 예문\n• ${exs.join('\n• ')}`);
   return { front: front.trim(), back: parts.join('\n\n').trim() };
 }
 
