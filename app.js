@@ -495,42 +495,29 @@ clearImagesBtn.addEventListener('click', () => { uploadedImages = []; renderImag
 
 async function addImageFiles(files) {
   files.sort((a, b) => a.lastModified - b.lastModified);
-  const results = await Promise.all(files.map(file => new Promise(resolve => {
-    if (file.size > 50*1024*1024) { resolve(null); return; }
+  const results = await Promise.all(files.map(async file => {
+    if (file.size > 50*1024*1024) return null;
+    let targetFile = file;
     const ext = file.name.split('.').pop().toLowerCase();
-    const isHeic = ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif';
-    const isUnknown = !file.type || file.type === 'application/octet-stream';
+    const isHeic = ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif' || !file.type;
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      // If HEIC or unknown type, try to decode via <img> and convert to JPEG via canvas
-      if (isHeic || isUnknown) {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            canvas.getContext('2d').drawImage(img, 0, 0);
-            const jpegUrl = canvas.toDataURL('image/jpeg', 0.92);
-            resolve({ file, dataUrl: jpegUrl, mimeType: 'image/jpeg', name: file.name });
-          } catch(err) {
-            // canvas tainted or other error - fall back to original
-            resolve({ file, dataUrl, mimeType: file.type || 'image/jpeg', name: file.name });
-          }
-        };
-        img.onerror = () => {
-          // Browser can't decode it at all - send as-is and hope for the best
-          resolve({ file, dataUrl, mimeType: file.type || 'image/jpeg', name: file.name });
-        };
-        img.src = dataUrl;
-      } else {
-        resolve({ file, dataUrl, mimeType: file.type, name: file.name });
+    if (isHeic && typeof heic2any !== 'undefined') {
+      try {
+        const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+        targetFile = new File([convertedBlob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" });
+      } catch (err) {
+        console.warn('HEIC conversion failed:', err);
       }
-    };
-    reader.readAsDataURL(file);
-  })));
+    }
+
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve({ file: targetFile, dataUrl: e.target.result, mimeType: targetFile.type || 'image/jpeg', name: targetFile.name });
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(targetFile);
+    });
+  }));
+
   uploadedImages = [...uploadedImages, ...results.filter(Boolean)];
   renderImagePreviews();
   updateGenerateButton();
