@@ -493,18 +493,47 @@ imageFileInput.addEventListener('change', () => {
 });
 clearImagesBtn.addEventListener('click', () => { uploadedImages = []; renderImagePreviews(); updateGenerateButton(); });
 
-function addImageFiles(files) {
+async function addImageFiles(files) {
   files.sort((a, b) => a.lastModified - b.lastModified);
-  Promise.all(files.map(file => new Promise(resolve => {
+  const results = await Promise.all(files.map(file => new Promise(resolve => {
     if (file.size > 50*1024*1024) { resolve(null); return; }
+    const ext = file.name.split('.').pop().toLowerCase();
+    const isHeic = ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif';
+    const isUnknown = !file.type || file.type === 'application/octet-stream';
+
     const reader = new FileReader();
-    reader.onload = e => resolve({ file, dataUrl: e.target.result, mimeType: file.type || 'image/jpeg', name: file.name });
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      // If HEIC or unknown type, try to decode via <img> and convert to JPEG via canvas
+      if (isHeic || isUnknown) {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const jpegUrl = canvas.toDataURL('image/jpeg', 0.92);
+            resolve({ file, dataUrl: jpegUrl, mimeType: 'image/jpeg', name: file.name });
+          } catch(err) {
+            // canvas tainted or other error - fall back to original
+            resolve({ file, dataUrl, mimeType: file.type || 'image/jpeg', name: file.name });
+          }
+        };
+        img.onerror = () => {
+          // Browser can't decode it at all - send as-is and hope for the best
+          resolve({ file, dataUrl, mimeType: file.type || 'image/jpeg', name: file.name });
+        };
+        img.src = dataUrl;
+      } else {
+        resolve({ file, dataUrl, mimeType: file.type, name: file.name });
+      }
+    };
     reader.readAsDataURL(file);
-  }))).then(results => {
-    uploadedImages = [...uploadedImages, ...results.filter(Boolean)];
-    renderImagePreviews();
-    updateGenerateButton();
-  });
+  })));
+  uploadedImages = [...uploadedImages, ...results.filter(Boolean)];
+  renderImagePreviews();
+  updateGenerateButton();
 }
 
 function renderImagePreviews() {
