@@ -503,8 +503,9 @@ CRITICAL ORDERING RULES:
 3. For multiple images or columns, extract from the first image/column to the last, top-to-bottom, left-to-right.
 
 CRITICAL TRANSCRIBING RULES:
-1. For the "meaning" field, you MUST transcribe the text EXACTLY as it appears in the image or source text. 
-2. DO NOT mix, reorder, or arbitrarily group definitions. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", you MUST output exactly "1. 중요한, 의미 있는 2. 상당한, 아주 큰". DO NOT output "1. 중요한, 상당한 2. 의미 있는, 아주 큰".
+1. For the "meaning" field, you MUST perform a STRICT LITERAL TRANSCRIPTION. DO NOT summarize, DO NOT simplify, and DO NOT drop numbers or symbols.
+2. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY "1. 중요한, 의미 있는 2. 상당한, 아주 큰".
+3. NEVER mix or combine definitions. NEVER omit the numbers like "1." or "2.". NEVER drop comma-separated meanings. Do exactly as written in the source.
 
 OUTPUT FORMAT: Return ONLY a valid JSON array. No markdown, no code fences, no extra text.
 Each item: {"word":"","pos":"","pronunciation":"","meaning":"","synonyms":[],"antonyms":[],"examples":[],"related":[]}
