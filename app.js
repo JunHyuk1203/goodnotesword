@@ -409,7 +409,7 @@ async function executeWithFallback(apiKey, body) {
         const err = await res.json().catch(() => ({}));
         const e = new Error(`API (${res.status}): ${err?.error?.message || res.statusText}`);
         e.status = res.status;
-        if (res.status === 429 || res.status === 403) { lastError = e; continue; }
+        if (res.status === 429 || res.status === 403 || res.status >= 500) { lastError = e; continue; }
         throw e;
       }
       const data = await res.json();
@@ -418,8 +418,8 @@ async function executeWithFallback(apiKey, body) {
       return text;
     } catch (e) {
       lastError = e;
-      if (e.status === 429 || e.status === 403) {
-        progressSub.textContent = `${model} 한도 초과, 다음 모델로 시도 중...`;
+      if (e.status === 429 || e.status === 403 || e.status >= 500) {
+        progressSub.textContent = `${model} 오류/한도 초과, 다음 모델로 시도 중...`;
         continue;
       }
       throw e;
