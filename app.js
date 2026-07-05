@@ -508,6 +508,7 @@ CRITICAL TRANSCRIBING RULES:
 3. NEVER mix or combine definitions. NEVER omit the numbers like "1." or "2.". NEVER drop comma-separated meanings. Do exactly as written in the source.
 
 OUTPUT FORMAT: Return ONLY a valid JSON array. No markdown, no code fences, no extra text.
+CRITICAL: You MUST escape all double quotes (") inside your strings using \".
 Each item: {"word":"","pos":"","pronunciation":"","meaning":"","synonyms":[],"antonyms":[],"examples":[],"related":[]}
 - pos: use ⓝ ⓥ ⓐ ad. prep. conj. pron.
 - meaning: in ${langName}, exact literal transcription of the meaning from the source.
