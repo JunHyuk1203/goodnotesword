@@ -551,21 +551,23 @@ async function executeWithFallback(apiKey, body) {
 function parseResponse(text) {
   let c = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const s = c.indexOf('[');
-  let e = c.lastIndexOf(']');
   if (s === -1) throw new Error('JSON 배열 시작 부분을 찾을 수 없습니다.');
   
-  let jsonString = c.slice(s, e !== -1 ? e + 1 : c.length);
-  if (e === -1) jsonString += ']'; // Try to close truncated array
+  c = c.slice(s);
   
   try {
-    return JSON.parse(jsonString);
+    return JSON.parse(c);
   } catch (err) {
-    // Try to remove trailing comma if any
-    try {
-      return JSON.parse(jsonString.replace(/,\s*\]$/, ']'));
-    } catch (err2) {
-      throw new Error(`JSON Parse error: ${err.message}\n(AI가 따옴표 처리를 잘못했거나 응답이 끊겼습니다)`);
+    // 1. 시도: 마지막으로 완성된 닫기 중괄호(})까지만 자르고 배열 닫기 (잘린 마지막 단어 포기)
+    let lastBrace = c.lastIndexOf('}');
+    if (lastBrace !== -1) {
+      let fixed = c.slice(0, lastBrace + 1) + ']';
+      try { return JSON.parse(fixed); } catch (e) {}
     }
+    // 2. 시도: 배열 끝에 그냥 닫기 대괄호 추가해보기
+    try { return JSON.parse(c + ']'); } catch (e) {}
+    
+    throw new Error(`JSON 파싱 오류: ${err.message}\n(AI가 따옴표 처리를 잘못했거나 응답이 끊겼습니다)`);
   }
 }
 
@@ -626,13 +628,13 @@ async function handleGenerate() {
         setProgress(5 + Math.round((b / batches.length) * 80), `배치 ${b+1}/${batches.length} 처리 중...`, '');
         const parts = batches[b].map(img => ({ inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] } }));
         parts.push({ text: prompt });
-        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } });
+        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192, response_mime_type: "application/json" } });
         allParsed = [...allParsed, ...parsed];
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
       setProgress(15, 'AI가 텍스트를 분석 중...', '');
-      const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } };
+      const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192, response_mime_type: "application/json" } };
       const parsed = await executeWithFallback(apiKey, body);
       allParsed = parsed;
     }
