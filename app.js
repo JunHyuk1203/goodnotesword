@@ -605,7 +605,7 @@ ${exampleStr}
 `;
 }
 
-async function executeWithFallback(apiKey, body) {
+async function executeWithFallback(apiKey, body, rawMode = false) {
   let lastError;
   for (const model of FALLBACK_MODELS) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -621,7 +621,7 @@ async function executeWithFallback(apiKey, body) {
       const data = await res.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new Error('AI 응답이 비어있습니다.');
-      return parseResponse(text);
+      return rawMode ? text : parseResponse(text);
     } catch (e) {
       if (e.status === 429) lastError = e;
       else if (!lastError || lastError.status === 404) lastError = e;
@@ -716,17 +716,28 @@ async function handleGenerate() {
       const batches = [];
       for (let i = 0; i < uploadedImages.length; i += BATCH_SIZE) batches.push(uploadedImages.slice(i, i + BATCH_SIZE));
       for (let b = 0; b < batches.length; b++) {
-        setProgress(5 + Math.round((b / batches.length) * 80), `배치 ${b+1}/${batches.length} 처리 중...`, '');
+        setProgress(5 + Math.round((b / batches.length) * 40), `[1단계] 이미지 텍스트 판독 중... (${b+1}/${batches.length})`, '');
         const parts = batches[b].map(img => ({ inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] } }));
-        parts.push({ text: prompt });
-        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: genConfig });
+        
+        // Step 1: Raw OCR
+        parts.push({ text: "Please extract ALL text from these images exactly as written, preserving the layout. Do not skip any words." });
+        const rawOcrText = await executeWithFallback(apiKey, { contents: [{ parts }] }, true);
+
+        // Step 2: Structure JSON from OCR text
+        setProgress(45 + Math.round((b / batches.length) * 40), `[2단계] AI 단어 데이터 정리 중... (${b+1}/${batches.length})`, '');
+        const jsonBody = { 
+          contents: [{ parts: [{ text: prompt + `\n\nOCR TEXT:\n"""\n${rawOcrText}\n"""` }] }], 
+          generationConfig: genConfig 
+        };
+        const parsed = await executeWithFallback(apiKey, jsonBody, false);
+        
         allParsed = [...allParsed, ...parsed];
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
       setProgress(15, 'AI가 텍스트를 분석 중...', '');
       const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: genConfig };
-      const parsed = await executeWithFallback(apiKey, body);
+      const parsed = await executeWithFallback(apiKey, body, false);
       allParsed = parsed;
     }
 
