@@ -509,22 +509,11 @@ CRITICAL ORDERING RULES:
 CRITICAL TRANSCRIBING RULES:
 1. NEVER USE YOUR OWN DICTIONARY KNOWLEDGE. Act purely as an OCR (Optical Character Recognition) engine.
 2. For the "meaning" field, you MUST copy the text EXACTLY as it appears in the image pixel-by-pixel. DO NOT summarize, DO NOT simplify, and DO NOT drop numbers or symbols.
-3. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY "1. 중요한, 의미 있는 2. 상당한, 아주 큰".
-4. NEVER mix or combine definitions. NEVER omit the numbers like "1." or "2.". NEVER drop comma-separated meanings. Do exactly as written in the source.
+3. If the source says "1. 중요한, 의미 있는 2. 상당한, 아주 큰", your output MUST be EXACTLY the same.
 
-OUTPUT FORMAT: Return ONLY a valid JSON array of objects. No markdown, no code fences.
-CRITICAL: You MUST escape all double quotes (") inside your strings using \".
-Example of the required JSON array format (return ALL words as separate objects in the array):
-[
-  {"word":"apple","pos":"ⓝ","pronunciation":"[æpl]","meaning":"사과","synonyms":[],"antonyms":[],"examples":[],"related":[]},
-  {"word":"banana","pos":"ⓝ","pronunciation":"[bənænə]","meaning":"바나나","synonyms":[],"antonyms":[],"examples":[],"related":[]}
-]
-- pos: use ⓝ ⓥ ⓐ ad. prep. conj. pron.
-- meaning: in ${langName}, exact literal transcription of the meaning from the source.
-- synonyms: ${includeSynAnt ? 'array of strings formatted as "word: meaning" (max 5)' : 'empty array []'}
-- antonyms: ${includeSynAnt ? 'array of strings formatted as "word: meaning" (max 4)' : 'empty array []'}
-- examples: ${includeExample ? 'array of sentences with translations (max 2)' : 'empty array []'}
-- related: ${includeSynAnt ? 'array of strings formatted as "word: meaning"' : 'empty array []'}`;
+CRITICAL REQUIREMENT: 
+You MUST output EVERY word found. Do not stop at 3 or 5 words. If there are 30 words in the source, your JSON array MUST contain 30 objects.
+`;
 }
 
 async function executeWithFallback(apiKey, body) {
@@ -629,6 +618,26 @@ async function handleGenerate() {
   const maxWords = parseInt($('max-words-sel').value, 10);
   const prompt = buildPrompt(frontOpt, backOpt, 'ko', maxWords);
 
+  const schema = {
+    type: "ARRAY",
+    description: "A complete list of ALL vocabulary words extracted from the source.",
+    items: {
+      type: "OBJECT",
+      properties: {
+        word: { type: "STRING", description: "The English vocabulary word." },
+        pos: { type: "STRING", description: "Part of speech (e.g., ⓝ, ⓥ, ⓐ, ad, prep)." },
+        pronunciation: { type: "STRING", description: "Pronunciation symbol (e.g., [æpl])." },
+        meaning: { type: "STRING", description: "The exact literal meaning in Korean as written in the source." },
+        synonyms: { type: "ARRAY", items: { type: "STRING" }, description: "Array of synonyms formatted as 'word: meaning' (max 5)." },
+        antonyms: { type: "ARRAY", items: { type: "STRING" }, description: "Array of antonyms formatted as 'word: meaning' (max 4)." },
+        examples: { type: "ARRAY", items: { type: "STRING" }, description: "Array of example sentences with translations (max 2)." },
+        related: { type: "ARRAY", items: { type: "STRING" }, description: "Array of related words formatted as 'word: meaning'." }
+      },
+      required: ["word", "meaning"]
+    }
+  };
+  const genConfig = { temperature: 0.1, maxOutputTokens: 8192, response_mime_type: "application/json", response_schema: schema };
+
   try {
     let allParsed = [];
 
@@ -639,13 +648,13 @@ async function handleGenerate() {
         setProgress(5 + Math.round((b / batches.length) * 80), `배치 ${b+1}/${batches.length} 처리 중...`, '');
         const parts = batches[b].map(img => ({ inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] } }));
         parts.push({ text: prompt });
-        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192, response_mime_type: "application/json" } });
+        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: genConfig });
         allParsed = [...allParsed, ...parsed];
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
       setProgress(15, 'AI가 텍스트를 분석 중...', '');
-      const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192, response_mime_type: "application/json" } };
+      const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: genConfig };
       const parsed = await executeWithFallback(apiKey, body);
       allParsed = parsed;
     }
