@@ -661,6 +661,8 @@ async function handleGenerate() {
 
     if (!allParsed.length) throw new Error('AI 응답에서 단어를 추출하지 못했습니다.');
 
+    console.log('[DEBUG] AI extracted words count:', allParsed.length, allParsed.map(x=>x.word));
+
     // Deduplicate
     const seen = new Set();
     const deduped = allParsed.filter(item => {
@@ -670,7 +672,9 @@ async function handleGenerate() {
       return true;
     });
 
+    console.log('[DEBUG] After dedupe:', deduped.length, '  maxWords:', maxWords);
     generatedData = deduped.slice(0, maxWords).map(item => formatCard(item, frontOpt, backOpt));
+    console.log('[DEBUG] Final card count:', generatedData.length);
 
     // Auto-save to current chapter
     await autoSaveToLibrary(generatedData);
