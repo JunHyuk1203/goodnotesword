@@ -138,8 +138,12 @@ changeKeyBtn.addEventListener('click', () => { apiModalInput.value = ''; showApi
 
 apiModalSave.addEventListener('click', () => {
   const key = apiModalInput.value.trim();
-  if (key.length < 10) { apiModalInput.style.borderColor = 'var(--danger)'; return; }
-  setApiKey(key, apiRememberChk.checked);
+  if (!key.startsWith('AIza') || key.length < 30) { 
+    apiModalInput.style.borderColor = 'var(--danger)'; 
+    alert("올바른 API 키가 아닙니다. Gemini API 키는 반드시 'AIza'로 시작해야 합니다.");
+    return; 
+  }
+  setApiKey(key, apiRememberChk ? apiRememberChk.checked : false);
   apiModalInput.value = '';
   hideApiModal();
   updateKeyStatus();
