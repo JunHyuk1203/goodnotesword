@@ -534,11 +534,11 @@ async function executeWithFallback(apiKey, body) {
       const data = await res.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new Error('AI 응답이 비어있습니다.');
-      return text;
+      return parseResponse(text);
     } catch (e) {
       lastError = e;
-      if (e.status === 429 || e.status === 403 || e.status >= 500) {
-        progressSub.textContent = `${model} 오류/한도 초과, 다음 모델로 시도 중...`;
+      if (e.status === 429 || e.status === 403 || e.status >= 500 || e.message.includes('JSON')) {
+        progressSub.textContent = `${model} 실패 (${e.message.includes('JSON') ? '포맷 오류' : '서버 오류'}), 다음 모델 시도...`;
         continue;
       }
       throw e;
@@ -549,9 +549,23 @@ async function executeWithFallback(apiKey, body) {
 
 function parseResponse(text) {
   let c = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const s = c.indexOf('['), e = c.lastIndexOf(']');
-  if (s === -1 || e === -1) throw new Error('JSON 데이터를 찾을 수 없습니다.');
-  return JSON.parse(c.slice(s, e + 1));
+  const s = c.indexOf('[');
+  let e = c.lastIndexOf(']');
+  if (s === -1) throw new Error('JSON 배열 시작 부분을 찾을 수 없습니다.');
+  
+  let jsonString = c.slice(s, e !== -1 ? e + 1 : c.length);
+  if (e === -1) jsonString += ']'; // Try to close truncated array
+  
+  try {
+    return JSON.parse(jsonString);
+  } catch (err) {
+    // Try to remove trailing comma if any
+    try {
+      return JSON.parse(jsonString.replace(/,\s*\]$/, ']'));
+    } catch (err2) {
+      throw new Error(`JSON Parse error: ${err.message}\n(AI가 따옴표 처리를 잘못했거나 응답이 끊겼습니다)`);
+    }
+  }
 }
 
 function formatCard(item, frontOpt, backOpt) {
@@ -611,15 +625,15 @@ async function handleGenerate() {
         setProgress(5 + Math.round((b / batches.length) * 80), `배치 ${b+1}/${batches.length} 처리 중...`, '');
         const parts = batches[b].map(img => ({ inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] } }));
         parts.push({ text: prompt });
-        const responseText = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } });
-        allParsed = [...allParsed, ...parseResponse(responseText)];
+        const parsed = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } });
+        allParsed = [...allParsed, ...parsed];
         if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
       }
     } else {
       setProgress(15, 'AI가 텍스트를 분석 중...', '');
       const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } };
-      const responseText = await executeWithFallback(apiKey, body);
-      allParsed = parseResponse(responseText);
+      const parsed = await executeWithFallback(apiKey, body);
+      allParsed = parsed;
     }
 
     if (!allParsed.length) throw new Error('AI 응답에서 단어를 추출하지 못했습니다.');
