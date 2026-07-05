@@ -459,6 +459,12 @@ function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const includeExample = backOpt !== 'meaning_only';
   const includeSynAnt = backOpt === 'full';
   return `You are an expert vocabulary extraction assistant. Extract up to ${maxWords} English vocabulary words.
+
+CRITICAL ORDERING RULES:
+1. Maintain the EXACT ORIGINAL ORDER of the words as they appear in the source text/images.
+2. If the words have sequential numbers (e.g., 1, 2, 3...), you MUST extract and list them in that exact numerical order.
+3. For multiple images or columns, extract from the first image/column to the last, top-to-bottom, left-to-right.
+
 OUTPUT FORMAT: Return ONLY a valid JSON array. No markdown, no code fences, no extra text.
 Each item: {"word":"","pos":"","pronunciation":"","meaning":"","synonyms":[],"antonyms":[],"examples":[],"related":""}
 - pos: use ⓝ ⓥ ⓐ ad. prep. conj. pron.
@@ -610,9 +616,10 @@ async function autoSaveToLibrary(data) {
   }
   setProgress(90, '단어장에 저장 중...', '');
   try {
+    let maxOrder = currentLoadedWords.reduce((max, w) => Math.max(max, w.order || 0), -1);
     for (let i = 0; i < data.length; i++) {
       const wordRef = doc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`));
-      await setDoc(wordRef, { front: data[i].front, back: data[i].back, order: i });
+      await setDoc(wordRef, { front: data[i].front, back: data[i].back, order: maxOrder + 1 + i });
     }
     setProgress(100, '저장 완료!', `${data.length}개 단어 저장됨`);
     setTimeout(() => {
