@@ -729,6 +729,22 @@ async function handleGenerate() {
 
     console.log('[DEBUG] AI extracted words count:', allParsed.length, allParsed.map(x=>x.word));
 
+    // UI에 강제 디버그 출력 (사용자 화면용)
+    if (allParsed.length <= 3) {
+      const debugDiv = document.createElement('div');
+      debugDiv.style.padding = '10px';
+      debugDiv.style.marginTop = '20px';
+      debugDiv.style.background = '#2a1a1a';
+      debugDiv.style.border = '2px solid #ff4d4f';
+      debugDiv.style.color = '#ffccc7';
+      debugDiv.style.fontSize = '12px';
+      debugDiv.style.whiteSpace = 'pre-wrap';
+      debugDiv.style.wordBreak = 'break-all';
+      debugDiv.style.fontFamily = 'monospace';
+      debugDiv.innerHTML = `<b>[긴급 디버그 모드] AI가 단어를 ${allParsed.length}개만 반환했습니다. 원본 응답:</b><br/>${JSON.stringify(allParsed, null, 2)}`;
+      document.querySelector('.app-container').appendChild(debugDiv);
+    }
+
     // Deduplicate
     const seen = new Set();
     const deduped = allParsed.filter(item => {
