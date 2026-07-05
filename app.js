@@ -408,6 +408,7 @@ imageFileInput.addEventListener('change', () => {
 clearImagesBtn.addEventListener('click', () => { uploadedImages = []; renderImagePreviews(); updateGenerateButton(); });
 
 function addImageFiles(files) {
+  files.sort((a, b) => a.lastModified - b.lastModified);
   Promise.all(files.map(file => new Promise(resolve => {
     if (file.size > 50*1024*1024) { resolve(null); return; }
     const reader = new FileReader();
