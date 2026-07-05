@@ -485,7 +485,7 @@ function updateGenerateButton() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+const FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-latest'];
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
@@ -537,10 +537,12 @@ async function executeWithFallback(apiKey, body) {
       if (!text) throw new Error('AI 응답이 비어있습니다.');
       return parseResponse(text);
     } catch (e) {
-      lastError = e;
+      if (e.status === 429) lastError = e;
+      else if (!lastError || lastError.status === 404) lastError = e;
+
       const isNetworkError = e instanceof TypeError || e.message.includes('fetch') || e.message.includes('Load failed');
       if (isNetworkError || e.status === 429 || e.status === 403 || e.status === 404 || e.status >= 500 || e.message.includes('JSON')) {
-        progressSub.textContent = `${model} 실패 (${isNetworkError ? '네트워크/CORS 오류' : '서버/포맷 오류'}), 다음 모델 시도...`;
+        progressSub.textContent = `${model} 실패 (${isNetworkError ? '네트워크/CORS 오류' : e.status === 429 ? '한도 초과' : '서버/포맷 오류'}), 다음 모델 시도...`;
         continue;
       }
       throw e;
