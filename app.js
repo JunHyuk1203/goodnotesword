@@ -555,7 +555,7 @@ function updateGenerateButton() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+const FALLBACK_MODELS = ['gemini-2.5-pro', 'gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash'];
 
 function buildPrompt(frontOpt, backOpt, lang, maxWords) {
   const langName = lang === 'ko' ? '한국어' : '영어';
@@ -721,7 +721,8 @@ async function handleGenerate() {
         
         // Step 1: Raw OCR
         parts.push({ text: "Please extract ALL text from these images exactly as written, preserving the layout. Do not skip any words." });
-        const rawOcrText = await executeWithFallback(apiKey, { contents: [{ parts }] }, true);
+        const rawOcrText = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.1, maxOutputTokens: 8192 } }, true);
+        console.log("[DEBUG] RAW OCR TEXT:\n", rawOcrText);
 
         // Step 2: Structure JSON from OCR text
         setProgress(45 + Math.round((b / batches.length) * 40), `[2단계] AI 단어 데이터 정리 중... (${b+1}/${batches.length})`, '');
