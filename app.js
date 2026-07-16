@@ -382,13 +382,14 @@ function renderCardView(docs) {
     const buildRelatedSection = (items, emoji, label, cls) => {
       if (!items || !items.length) return '';
       const lines = items.map(s => {
-        // Each item is a string like "signify: ⓥ 중요하다" or "important: 중요한"
-        // Split at the first colon to highlight the word part
-        const colonIdx = s.indexOf(':');
-        if (colonIdx > 0) {
-          const word = s.slice(0, colonIdx).trim();
-          const rest = s.slice(colonIdx + 1).trim();
-          return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span><span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(rest)}</span></div>`;
+        // Each item is a string like "signify: ⓥ 중요하다" or "important: 중요한" or "important [ⓐ]: 중요한"
+        // Try to split by common separators
+        const match = s.match(/^(.*?)(:|：|-)(.*)$/);
+        if (match) {
+          const word = match[1].trim();
+          const separator = match[2];
+          const rest = match[3].trim();
+          return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span><span class="related-item-colon">${separator}</span><span class="related-item-meaning"> ${escapeHTML(rest)}</span></div>`;
         }
         return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
       }).join('');
@@ -673,14 +674,14 @@ function updatePrompt() {
 
   let formatStr = `- "word": The English vocabulary word (required)\n- "meaning": The Korean meaning exactly as written (required)\n- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)\n- "pronunciation": Pronunciation symbol (optional)`;
   if (includeExample) formatStr += `\n- "examples": Array of example sentences (optional)`;
-  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings, formatted as "English_word: Korean_meaning" (optional)\n- "antonyms": Array of strings, formatted as "English_word: Korean_meaning" (optional)\n- "related": Array of strings, formatted as "English_word: Korean_meaning" (optional)`;
+  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)\n- "antonyms": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)\n- "related": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)`;
 
   let exampleStr = `[
   {
     "word": "significant",
     "meaning": "1 중요한 2 상당한"`;
   if (includeExample) exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
-  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important: 중요한", "crucial: 중대한"]`;
+  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]`;
   exampleStr += `\n  }\n]`;
 
   const prompt = `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
