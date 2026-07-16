@@ -521,21 +521,17 @@ async function autoSaveToLibrary(data) {
     alert('저장할 단원을 찾지 못했습니다. 단원(챕터) 안에서 추출해주세요.');
     return;
   }
-  setProgress(90, '단어장에 저장 중...', '');
   try {
     let maxOrder = currentLoadedWords.reduce((max, w) => Math.max(max, w.order || 0), -1);
     for (let i = 0; i < data.length; i++) {
       const wordRef = doc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`));
       await setDoc(wordRef, { front: data[i].front, back: data[i].back, order: maxOrder + 1 + i });
     }
-    setProgress(100, '저장 완료!', `${data.length}개 단어 저장됨`);
-    setTimeout(() => {
-      vocabInput.value = '';
-      charCount.textContent = '0자';
+    alert(`${data.length}개 단어가 성공적으로 저장되었습니다!`);
+    if (typeof extractSection !== 'undefined' && extractSection) {
       extractSection.classList.add('hidden');
-      progressSection.classList.add('hidden');
-      loadWords(selectedBookId, selectedChapterId, crumbChapterName.textContent);
-    }, 800);
+    }
+    loadWords(selectedBookId, selectedChapterId, crumbChapterName.textContent);
   } catch (e) {
     console.error(e);
     alert('저장 실패: ' + e.message);
