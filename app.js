@@ -30,24 +30,6 @@ let generatedData = [];
 let activeTab = 'text';
 let uploadedImages = [];
 
-// ─── API Key ──────────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'gn_gemini_api_key';
-function getApiKey() { return sessionStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY) || ''; }
-function setApiKey(k, remember) { 
-  if (k === null) {
-    localStorage.removeItem(STORAGE_KEY);
-    sessionStorage.removeItem(STORAGE_KEY);
-    return;
-  }
-  if (remember) {
-    localStorage.setItem(STORAGE_KEY, k);
-    sessionStorage.removeItem(STORAGE_KEY);
-  } else {
-    sessionStorage.setItem(STORAGE_KEY, k);
-    localStorage.removeItem(STORAGE_KEY);
-  }
-}
-
 // ─── Utility ──────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
 function escapeHTML(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -108,13 +90,6 @@ function showConfirm(message, okLabel = '삭제') {
   });
 }
 
-const apiModal = $('api-modal');
-const apiModalInput = $('api-modal-input');
-const apiModalSave = $('api-modal-save');
-const apiRememberChk = $('api-remember-chk');
-const apiDeleteBtn = $('api-delete-btn');
-const apiKeyStatus = $('api-key-status');
-const changeKeyBtn = $('change-key-btn');
 const errorSection = $('error-section');
 const errorTitle = $('error-title');
 const errorMsg = $('error-msg');
@@ -139,83 +114,15 @@ const wordsTbody = $('words-tbody');
 const extractSection = $('extract-section');
 const openExtractBtn = $('open-extract-btn');
 const closeExtractBtn = $('close-extract-btn');
-const vocabInput = $('vocab-input');
-const charCount = $('char-count');
-const generateBtn = $('generate-btn');
-const btnText = $('btn-text');
-const progressSection = $('progress-section');
-const progressBar = $('progress-bar');
-const progressText = $('progress-text');
-const progressSub = $('progress-sub');
-const tabTextBtn = $('tab-text-btn');
-const tabImageBtn = $('tab-image-btn');
-const panelText = $('panel-text');
-const panelImage = $('panel-image');
-const imageDropzone = $('image-dropzone');
-const imageFileInput = $('image-file-input');
-const pickFileBtn = $('pick-file-btn');
-const imagePreviews = $('image-previews');
-const imageGrid = $('image-grid');
-const previewCount = $('preview-count');
-const clearImagesBtn = $('clear-images-btn');
+const promptOutput = $('prompt-output');
+const copyPromptBtn = $('copy-prompt-btn');
+const aiJsonInput = $('ai-json-input');
+const convertBtn = $('convert-btn');
 const exportCsvBtn = $('export-csv-btn');
 const selectAllWords = $('select-all-words');
 const deleteSelectedBtn = $('delete-selected-btn');
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// API KEY MODAL
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function showApiModal() { 
-  apiModal.classList.remove('hidden'); 
-  apiModalInput.focus(); 
-  if(apiRememberChk) apiRememberChk.checked = localStorage.getItem(STORAGE_KEY) !== null;
-}
-function hideApiModal() { apiModal.classList.add('hidden'); }
-
-function updateKeyStatus() {
-  const key = getApiKey();
-  if (key) {
-    apiKeyStatus.textContent = '✓ API 키 저장됨';
-    apiKeyStatus.className = 'key-status ok';
-  } else {
-    apiKeyStatus.textContent = 'API 키 필요';
-    apiKeyStatus.className = 'key-status';
-  }
-}
-
-changeKeyBtn.addEventListener('click', () => { apiModalInput.value = ''; showApiModal(); });
-
-apiModalSave.addEventListener('click', () => {
-  const key = apiModalInput.value.trim();
-  if (!(key.startsWith('AIza') || key.startsWith('AQ.')) || key.length < 30) { 
-    apiModalInput.style.borderColor = 'var(--danger)'; 
-    alert("올바른 API 키가 아닙니다. Gemini API 키는 'AIza' 또는 'AQ.'로 시작해야 합니다.");
-    return; 
-  }
-  setApiKey(key, apiRememberChk ? apiRememberChk.checked : false);
-  apiModalInput.value = '';
-  hideApiModal();
-  updateKeyStatus();
-  updateGenerateButton();
-});
-
-if (apiDeleteBtn) {
-  apiDeleteBtn.addEventListener('click', () => {
-    if (confirm('저장된 API 키를 브라우저에서 완전히 삭제하시겠습니까?')) {
-      setApiKey(null);
-      apiModalInput.value = '';
-      hideApiModal();
-      updateKeyStatus();
-      updateGenerateButton();
-    }
-  });
-}
-
-apiModalInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') apiModalSave.click();
-  apiModalInput.style.borderColor = '';
-});
+const cardFrontSel = $('card-front-sel');
+const cardBackSel = $('card-back-sel');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LIBRARY: Books → Chapters → Words
@@ -450,141 +357,32 @@ openExtractBtn.addEventListener('click', () => extractSection.classList.remove('
 closeExtractBtn.addEventListener('click', () => extractSection.classList.add('hidden'));
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAB SWITCHING (Text / Image)
+// PROMPT GENERATOR
 // ═══════════════════════════════════════════════════════════════════════════════
 
-tabTextBtn.addEventListener('click', () => switchTab('text'));
-tabImageBtn.addEventListener('click', () => switchTab('image'));
+function updatePrompt() {
+  const frontOpt = cardFrontSel.value;
+  const backOpt = cardBackSel.value;
 
-function switchTab(tab) {
-  activeTab = tab;
-  tabTextBtn.classList.toggle('tab-active', tab === 'text');
-  tabImageBtn.classList.toggle('tab-active', tab === 'image');
-  panelText.classList.toggle('hidden', tab !== 'text');
-  panelImage.classList.toggle('hidden', tab !== 'image');
-  updateGenerateButton();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TEXT INPUT
-// ═══════════════════════════════════════════════════════════════════════════════
-
-vocabInput.addEventListener('input', () => {
-  charCount.textContent = `${vocabInput.value.length}자`;
-  updateGenerateButton();
-});
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// IMAGE INPUT
-// ═══════════════════════════════════════════════════════════════════════════════
-
-imageDropzone.addEventListener('dragover', e => { e.preventDefault(); imageDropzone.classList.add('drag-over'); });
-imageDropzone.addEventListener('dragleave', e => { if (!imageDropzone.contains(e.relatedTarget)) imageDropzone.classList.remove('drag-over'); });
-imageDropzone.addEventListener('drop', e => {
-  e.preventDefault(); imageDropzone.classList.remove('drag-over');
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-  if (files.length) addImageFiles(files);
-});
-pickFileBtn.addEventListener('click', e => { e.stopPropagation(); imageFileInput.click(); });
-imageFileInput.addEventListener('change', () => {
-  const files = Array.from(imageFileInput.files);
-  if (files.length) addImageFiles(files);
-  imageFileInput.value = '';
-});
-clearImagesBtn.addEventListener('click', () => { uploadedImages = []; renderImagePreviews(); updateGenerateButton(); });
-
-async function addImageFiles(files) {
-  files.sort((a, b) => a.lastModified - b.lastModified);
-  const results = await Promise.all(files.map(async file => {
-    if (file.size > 50*1024*1024) return null;
-    let targetFile = file;
-    const ext = file.name.split('.').pop().toLowerCase();
-    const isHeic = ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif' || !file.type;
-
-    if (isHeic && typeof heic2any !== 'undefined') {
-      try {
-        const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
-        targetFile = new File([convertedBlob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" });
-      } catch (err) {
-        console.warn('HEIC conversion failed:', err);
-      }
-    }
-
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve({ file: targetFile, dataUrl: e.target.result, mimeType: targetFile.type || 'image/jpeg', name: targetFile.name });
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(targetFile);
-    });
-  }));
-
-  uploadedImages = [...uploadedImages, ...results.filter(Boolean)];
-  renderImagePreviews();
-  updateGenerateButton();
-}
-
-function renderImagePreviews() {
-  imageGrid.innerHTML = '';
-  if (!uploadedImages.length) { imagePreviews.classList.add('hidden'); return; }
-  imagePreviews.classList.remove('hidden');
-  previewCount.textContent = `${uploadedImages.length}장`;
-  uploadedImages.forEach((img, idx) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'img-thumb-wrap';
-    const thumb = document.createElement('img');
-    thumb.className = 'img-thumb'; thumb.src = img.dataUrl;
-    const rm = document.createElement('button');
-    rm.className = 'img-thumb-remove'; rm.textContent = '✕';
-    rm.onclick = e => { e.stopPropagation(); uploadedImages.splice(idx, 1); renderImagePreviews(); updateGenerateButton(); };
-    wrap.appendChild(thumb); wrap.appendChild(rm);
-    imageGrid.appendChild(wrap);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// GENERATE BUTTON STATE
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function updateGenerateButton() {
-  const ready = (activeTab === 'text' && vocabInput.value.trim().length > 10) || (activeTab === 'image' && uploadedImages.length > 0);
-  generateBtn.disabled = !ready;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// GEMINI API
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const BATCH_SIZE = 4;
-const FALLBACK_MODELS = ['gemini-2.5-pro', 'gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash'];
-
-function buildPrompt(frontOpt, backOpt, lang, maxWords) {
-  const langName = lang === 'ko' ? '한국어' : '영어';
   const includeExample = backOpt !== 'meaning_only';
   const includeSynAnt = backOpt === 'full';
 
   let formatStr = `- "word": The English vocabulary word (required)\n- "meaning": The Korean meaning exactly as written (required)\n- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)\n- "pronunciation": Pronunciation symbol (optional)`;
   
-  if (includeExample) {
-    formatStr += `\n- "examples": Array of example sentences (optional)`;
-  }
-  if (includeSynAnt) {
-    formatStr += `\n- "synonyms": Array of strings (optional)\n- "antonyms": Array of strings (optional)\n- "related": Array of related words (optional)`;
-  }
+  if (includeExample) formatStr += `\n- "examples": Array of example sentences (optional)`;
+  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings (optional)\n- "antonyms": Array of strings (optional)\n- "related": Array of related words (optional)`;
 
   let exampleStr = `[
   {
     "word": "significant",
     "meaning": "1 중요한 2 상당한"`;
   
-  if (includeExample) {
-    exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
-  }
-  if (includeSynAnt) {
-    exampleStr += `,\n    "synonyms": ["important: 중요한"]`;
-  }
-  exampleStr += `\n  }\n]`;
+  if (includeExample) exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
+  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important: 중요한"]`;
+  exampleStr += `\n  }
+]`;
 
-  return `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
+  const prompt = `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
 
 CRITICAL EXTRACTION RULES:
 1. DO NOT SKIP ANY MAIN VOCABULARY WORDS. You MUST extract EVERY SINGLE main vocabulary word present in the source.
@@ -603,60 +401,47 @@ ${formatStr}
 Example:
 ${exampleStr}
 `;
+
+  promptOutput.value = prompt;
 }
 
-async function executeWithFallback(apiKey, body, rawMode = false) {
-  let lastError;
-  for (const model of FALLBACK_MODELS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const e = new Error(`API (${res.status}): ${err?.error?.message || res.statusText}`);
-        e.status = res.status;
-        if (res.status === 429 || res.status === 403 || res.status === 404 || res.status >= 500) { lastError = e; continue; }
-        throw e;
-      }
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error('AI 응답이 비어있습니다.');
-      return rawMode ? text : parseResponse(text);
-    } catch (e) {
-      if (e.status === 429) lastError = e;
-      else if (!lastError || lastError.status === 404) lastError = e;
+if (cardFrontSel) cardFrontSel.addEventListener('change', updatePrompt);
+if (cardBackSel) cardBackSel.addEventListener('change', updatePrompt);
+// Init prompt on load
+if (promptOutput) updatePrompt();
 
-      const isNetworkError = e instanceof TypeError || e.message.includes('fetch') || e.message.includes('Load failed');
-      if (isNetworkError || e.status === 429 || e.status === 403 || e.status === 404 || e.status >= 500 || e.message.includes('JSON')) {
-        progressSub.textContent = `${model} 실패 (${isNetworkError ? '네트워크/CORS 오류' : e.status === 429 ? '한도 초과' : '서버/포맷 오류'}), 다음 모델 시도...`;
-        continue;
-      }
-      throw e;
-    }
-  }
-  throw lastError || new Error('모든 모델 실패');
+if (copyPromptBtn) {
+  copyPromptBtn.addEventListener('click', () => {
+    promptOutput.select();
+    document.execCommand('copy');
+    const orgText = copyPromptBtn.textContent;
+    copyPromptBtn.textContent = '✅ 복사 완료!';
+    setTimeout(() => copyPromptBtn.textContent = orgText, 2000);
+  });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONVERT HANDLER
+// ═══════════════════════════════════════════════════════════════════════════════
 
 function parseResponse(text) {
   let c = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const s = c.indexOf('[');
-  if (s === -1) throw new Error('JSON 배열 시작 부분을 찾을 수 없습니다.');
+  if (s === -1) throw new Error('JSON 배열 시작 부분을 찾을 수 없습니다.\nAI가 준 응답에서 [...] 형태의 데이터를 찾지 못했습니다.');
   
   c = c.slice(s);
   
   try {
     return JSON.parse(c);
   } catch (err) {
-    // 1. 시도: 마지막으로 완성된 닫기 중괄호(})까지만 자르고 배열 닫기 (잘린 마지막 단어 포기)
     let lastBrace = c.lastIndexOf('}');
     if (lastBrace !== -1) {
       let fixed = c.slice(0, lastBrace + 1) + ']';
       try { return JSON.parse(fixed); } catch (e) {}
     }
-    // 2. 시도: 배열 끝에 그냥 닫기 대괄호 추가해보기
     try { return JSON.parse(c + ']'); } catch (e) {}
     
-    throw new Error(`JSON 파싱 오류: ${err.message}\n(AI가 따옴표 처리를 잘못했거나 응답이 끊겼습니다)`);
+    throw new Error(`JSON 파싱 오류: ${err.message}\n(AI가 쌍따옴표를 잘못 썼거나 텍스트가 잘렸을 수 있습니다)`);
   }
 }
 
@@ -681,112 +466,50 @@ function formatCard(item, frontOpt, backOpt) {
   return { front: front.trim(), back: parts.join('\n\n').trim() };
 }
 
-function setProgress(pct, text, sub) {
-  progressBar.style.width = `${pct}%`;
-  if (text) progressText.textContent = text;
-  if (sub !== undefined) progressSub.textContent = sub;
-}
+if (convertBtn) {
+  convertBtn.addEventListener('click', async () => {
+    hideError();
+    const rawText = aiJsonInput.value.trim();
+    if (!rawText) {
+      alert("AI가 준 결과를 붙여넣어 주세요.");
+      return;
+    }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// GENERATE HANDLER
-// ═══════════════════════════════════════════════════════════════════════════════
+    const frontOpt = cardFrontSel.value;
+    const backOpt = cardBackSel.value;
 
-generateBtn.addEventListener('click', handleGenerate);
+    convertBtn.disabled = true;
+    const orgText = convertBtn.innerHTML;
+    convertBtn.innerHTML = '<span class="btn-icon">⚡</span> 변환 중...';
 
-async function handleGenerate() {
-  hideError();
-  const apiKey = getApiKey();
-  if (!apiKey) { showApiModal(); return; }
-
-  progressSection.classList.remove('hidden');
-  generateBtn.disabled = true;
-  btnText.textContent = '생성 중...';
-
-  const frontOpt = $('card-front-sel').value;
-  const backOpt = $('card-back-sel').value;
-  const maxWords = parseInt($('max-words-sel').value, 10);
-  const prompt = buildPrompt(frontOpt, backOpt, 'ko', maxWords);
-
-  const genConfig = { temperature: 0.1, maxOutputTokens: 8192, response_mime_type: "application/json" };
-
-  try {
-    let allParsed = [];
-
-    if (activeTab === 'image') {
-      const batches = [];
-      for (let i = 0; i < uploadedImages.length; i += BATCH_SIZE) batches.push(uploadedImages.slice(i, i + BATCH_SIZE));
-      for (let b = 0; b < batches.length; b++) {
-        setProgress(5 + Math.round((b / batches.length) * 40), `[1단계] 이미지 텍스트 판독 중... (${b+1}/${batches.length})`, '');
-        const parts = batches[b].map(img => ({ inline_data: { mime_type: img.mimeType, data: img.dataUrl.split(',')[1] } }));
-        
-        // Step 1: Raw OCR
-        parts.push({ text: "Please extract ALL text from these images exactly as written, preserving the layout. Do not skip any words." });
-        const rawOcrText = await executeWithFallback(apiKey, { contents: [{ parts }], generationConfig: { temperature: 0.1, maxOutputTokens: 8192 } }, true);
-        console.log("[DEBUG] RAW OCR TEXT:\n", rawOcrText);
-
-        // Step 2: Structure JSON from OCR text
-        setProgress(45 + Math.round((b / batches.length) * 40), `[2단계] AI 단어 데이터 정리 중... (${b+1}/${batches.length})`, '');
-        const jsonBody = { 
-          contents: [{ parts: [{ text: prompt + `\n\nOCR TEXT:\n"""\n${rawOcrText}\n"""` }] }], 
-          generationConfig: genConfig 
-        };
-        const parsed = await executeWithFallback(apiKey, jsonBody, false);
-        
-        allParsed = [...allParsed, ...parsed];
-        if (b < batches.length - 1) await new Promise(r => setTimeout(r, 600));
+    try {
+      const allParsed = parseResponse(rawText);
+      if (!Array.isArray(allParsed) || !allParsed.length) {
+        throw new Error("결과에서 단어를 추출하지 못했습니다. (배열이 비어있음)");
       }
-    } else {
-      setProgress(15, 'AI가 텍스트를 분석 중...', '');
-      const body = { contents: [{ parts: [{ text: prompt + `\n\nTEXT:\n"""\n${vocabInput.value.trim()}\n"""` }] }], generationConfig: genConfig };
-      const parsed = await executeWithFallback(apiKey, body, false);
-      allParsed = parsed;
+
+      const seen = new Set();
+      const deduped = allParsed.filter(item => {
+        const key = (item.word || '').toLowerCase().trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      generatedData = deduped.map(item => formatCard(item, frontOpt, backOpt));
+      await autoSaveToLibrary(generatedData);
+      
+      // Clear input after success
+      aiJsonInput.value = '';
+      
+    } catch(err) {
+      console.error(err);
+      showError("변환 오류", err.message);
+    } finally {
+      convertBtn.disabled = false;
+      convertBtn.innerHTML = orgText;
     }
-
-    if (!allParsed.length) throw new Error('AI 응답에서 단어를 추출하지 못했습니다.');
-
-    console.log('[DEBUG] AI extracted words count:', allParsed.length, allParsed.map(x=>x.word));
-
-    // UI에 강제 디버그 출력 (사용자 화면용)
-    if (allParsed.length <= 3) {
-      const debugDiv = document.createElement('div');
-      debugDiv.style.padding = '10px';
-      debugDiv.style.marginTop = '20px';
-      debugDiv.style.background = '#2a1a1a';
-      debugDiv.style.border = '2px solid #ff4d4f';
-      debugDiv.style.color = '#ffccc7';
-      debugDiv.style.fontSize = '12px';
-      debugDiv.style.whiteSpace = 'pre-wrap';
-      debugDiv.style.wordBreak = 'break-all';
-      debugDiv.style.fontFamily = 'monospace';
-      debugDiv.innerHTML = `<b>[긴급 디버그 모드] AI가 단어를 ${allParsed.length}개만 반환했습니다. 원본 응답:</b><br/>${JSON.stringify(allParsed, null, 2)}`;
-      document.querySelector('.app-container').appendChild(debugDiv);
-    }
-
-    // Deduplicate
-    const seen = new Set();
-    const deduped = allParsed.filter(item => {
-      const key = (item.word || '').toLowerCase().trim();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    console.log('[DEBUG] After dedupe:', deduped.length, '  maxWords:', maxWords);
-    generatedData = deduped.slice(0, maxWords).map(item => formatCard(item, frontOpt, backOpt));
-    console.log('[DEBUG] Final card count:', generatedData.length);
-
-    // Auto-save to current chapter
-    await autoSaveToLibrary(generatedData);
-
-  } catch (err) {
-    console.error(err);
-    showError(err.message?.includes('API') ? 'API 오류' : '처리 오류', err.message);
-  } finally {
-    progressSection.classList.add('hidden');
-    generateBtn.disabled = false;
-    btnText.textContent = '생성하고 즉시 저장하기';
-    updateGenerateButton();
-  }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -852,8 +575,5 @@ async function fetchLatestVersion() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-updateKeyStatus();
-if (!getApiKey()) showApiModal();
-updateGenerateButton();
 loadBooks();
 fetchLatestVersion();
