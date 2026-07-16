@@ -372,7 +372,31 @@ function renderCardView(docs) {
     const card = document.createElement('div');
     card.className = 'word-card';
 
-    const synonymsAll = [...(parsed.synonyms || []), ...(parsed.antonyms || []), ...(parsed.related || [])];
+    // Build related sections HTML - each item on its own line
+    const buildRelatedSection = (items, emoji, label, cls) => {
+      if (!items || !items.length) return '';
+      const lines = items.map(s => {
+        // Each item is a string like "signify: ⓥ 중요하다" or "important: 중요한"
+        // Split at the first colon to highlight the word part
+        const colonIdx = s.indexOf(':');
+        if (colonIdx > 0) {
+          const word = s.slice(0, colonIdx).trim();
+          const rest = s.slice(colonIdx + 1).trim();
+          return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span><span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(rest)}</span></div>`;
+        }
+        return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
+      }).join('');
+      return `
+        <div class="word-card-section word-section-related${hideState.related ? '' : ' toggled-hidden'}">
+          <div class="word-card-section-label">${emoji} ${label}</div>
+          <div class="word-card-related-list">${lines}</div>
+        </div>`;
+    };
+
+    const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
+    const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
+    const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
+    const hasRelated = (parsed.synonyms?.length || parsed.antonyms?.length || parsed.related?.length);
 
     card.innerHTML = `
       <div class="word-card-header">
@@ -393,12 +417,7 @@ function renderCardView(docs) {
           <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
         </div>
       ` : ''}
-      ${synonymsAll.length ? `
-        <div class="word-card-section word-section-related${hideState.related ? '' : ' toggled-hidden'}">
-          <div class="word-card-section-label">🔗 유의어/관련어</div>
-          <div class="word-card-related">${synonymsAll.map(s => escapeHTML(s)).join('\n')}</div>
-        </div>
-      ` : ''}
+      ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
       <div class="word-card-actions">
         <button class="word-card-edit-btn">✏️ 수정</button>
         <button class="word-card-delete-btn">🗑 삭제</button>
@@ -773,6 +792,7 @@ const testModal = $('test-modal');
 const testSetup = $('test-setup');
 const testFlash = $('test-flash');
 const testQuiz = $('test-quiz');
+const testShort = $('test-short');
 const testResult = $('test-result');
 
 // Setup options state
@@ -811,6 +831,7 @@ if (startTestBtn) {
 $('test-cancel-btn').addEventListener('click', closeTest);
 $('flash-close-btn').addEventListener('click', closeTest);
 $('quiz-close-btn').addEventListener('click', closeTest);
+$('short-close-btn').addEventListener('click', closeTest);
 $('result-close-btn').addEventListener('click', closeTest);
 $('result-retry-btn').addEventListener('click', () => startTest(testWords));
 $('result-retry-wrong-btn').addEventListener('click', () => {
@@ -828,10 +849,11 @@ $('test-start-confirm-btn').addEventListener('click', () => {
 });
 
 function showScreen(name) {
-  [testSetup, testFlash, testQuiz, testResult].forEach(s => s.classList.add('hidden'));
+  [testSetup, testFlash, testQuiz, testShort, testResult].forEach(s => s.classList.add('hidden'));
   if (name === 'setup') testSetup.classList.remove('hidden');
   else if (name === 'flash') testFlash.classList.remove('hidden');
   else if (name === 'quiz') testQuiz.classList.remove('hidden');
+  else if (name === 'short') testShort.classList.remove('hidden');
   else if (name === 'result') testResult.classList.remove('hidden');
 }
 
@@ -848,9 +870,12 @@ function startTest(words) {
   if (testMode === 'flash') {
     showScreen('flash');
     showFlashCard();
-  } else {
+  } else if (testMode === 'quiz') {
     showScreen('quiz');
     showQuizCard();
+  } else if (testMode === 'short') {
+    showScreen('short');
+    showShortCard();
   }
 }
 
@@ -1016,6 +1041,112 @@ function handleQuizAnswer(clickedBtn, selected, correct, choicesEl) {
     showQuizCard();
   }, 900);
 }
+
+// ─── Short Answer (주관식) ──────────────────────────────────────────────────────
+let shortCorrectAnswer = [];
+let shortCurrentData = null;
+
+function showShortCard() {
+  if (testIndex >= testWords.length) {
+    showTestResult();
+    return;
+  }
+  const data = parseWordData(testWords[testIndex]);
+  shortCurrentData = data;
+  const total = testWords.length;
+  const pct = (testIndex / total) * 100;
+
+  $('short-progress-fill').style.width = pct + '%';
+  $('short-progress-text').textContent = `${testIndex + 1} / ${total}`;
+
+  const questionWord = $('short-question-word');
+  const questionLabel = $('short-question-label');
+  const input = $('short-answer-input');
+  const feedback = $('short-feedback');
+  const nextBtn = $('short-next-btn');
+  const submitBtn = $('short-submit-btn');
+
+  input.value = '';
+  input.disabled = false;
+  input.classList.remove('correct', 'wrong');
+  submitBtn.disabled = false;
+  submitBtn.classList.remove('hidden');
+  nextBtn.classList.add('hidden');
+  feedback.classList.add('hidden');
+  feedback.classList.remove('correct-fb', 'wrong-fb');
+
+  if (testDir === 'word2meaning') {
+    questionLabel.textContent = '다음 단어의 뜻을 입력하세요';
+    questionWord.textContent = data.word;
+    // 뜻 텍스트에서 1, 2, 쉼표 등으로 구분된 여러 정답 추출 (단순화된 형태)
+    const rawMeaning = data.meaning || data.back || '';
+    shortCorrectAnswer = rawMeaning.split(/[,\n]/)
+      .map(s => s.replace(/^[0-9]+/, '').trim()) // 앞의 숫자 제거
+      .filter(Boolean);
+    if (!shortCorrectAnswer.length) shortCorrectAnswer = [rawMeaning];
+  } else {
+    questionLabel.textContent = '다음 뜻의 단어를 입력하세요';
+    questionWord.textContent = data.meaning || data.back;
+    shortCorrectAnswer = [data.word.toLowerCase().trim()];
+  }
+
+  // Auto focus (might not work perfectly on iOS without user interaction, but good for PC)
+  setTimeout(() => input.focus(), 50);
+}
+
+function handleShortSubmit() {
+  const input = $('short-answer-input');
+  const feedback = $('short-feedback');
+  const nextBtn = $('short-next-btn');
+  const submitBtn = $('short-submit-btn');
+  const val = input.value.trim().toLowerCase();
+
+  if (!val) return;
+
+  input.disabled = true;
+  submitBtn.classList.add('hidden');
+  nextBtn.classList.remove('hidden');
+  feedback.classList.remove('hidden');
+
+  // 아주 단순한 정답 체크 로직 (하나라도 포함/일치하면 정답)
+  let isCorrect = false;
+  if (testDir === 'word2meaning') {
+    // 사용자가 입력한 값이 정답들 중 하나에 포함되는지 확인 (또는 정답이 입력값에 포함되거나)
+    isCorrect = shortCorrectAnswer.some(ans => {
+      const cleanAns = ans.toLowerCase().replace(/\s+/g, '');
+      const cleanVal = val.replace(/\s+/g, '');
+      return cleanAns.includes(cleanVal) || cleanVal.includes(cleanAns);
+    });
+  } else {
+    isCorrect = shortCorrectAnswer.includes(val);
+  }
+
+  if (isCorrect) {
+    input.classList.add('correct');
+    feedback.classList.add('correct-fb');
+    feedback.innerHTML = `<span class="correct-label">정답입니다!</span><br>원래 답: ${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}`;
+    testCorrect++;
+  } else {
+    input.classList.add('wrong');
+    feedback.classList.add('wrong-fb');
+    feedback.innerHTML = `<span class="wrong-label">틀렸습니다!</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
+    testWrong.push(shortCurrentData.word);
+  }
+  
+  nextBtn.focus();
+}
+
+$('short-submit-btn').addEventListener('click', handleShortSubmit);
+$('short-answer-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !$('short-submit-btn').classList.contains('hidden')) {
+    handleShortSubmit();
+  }
+});
+
+$('short-next-btn').addEventListener('click', () => {
+  testIndex++;
+  showShortCard();
+});
 
 // ─── Result ───────────────────────────────────────────────────────────────────
 function showTestResult() {

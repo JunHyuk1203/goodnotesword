@@ -212,6 +212,7 @@
             <div style="display:flex; gap:10px; margin-top:8px;">
               <button class="test-mode-btn active" id="mode-flash" data-mode="flash">🃏 플래시카드</button>
               <button class="test-mode-btn" id="mode-quiz" data-mode="quiz">✏️ 4지선다</button>
+              <button class="test-mode-btn" id="mode-short" data-mode="short">✍️ 주관식</button>
             </div>
           </div>
           <div class="option-card">
@@ -267,6 +268,25 @@
         </div>
         <div class="quiz-choices" id="quiz-choices"></div>
         <button id="quiz-close-btn" class="sample-btn" style="margin-top:1rem;">✕ 테스트 종료</button>
+      </div>
+
+      <!-- Short Answer screen -->
+      <div id="test-short" class="test-screen hidden">
+        <div class="test-progress-wrap">
+          <div class="test-progress-bar"><div class="test-progress-fill" id="short-progress-fill"></div></div>
+          <span id="short-progress-text" class="test-progress-label">1 / 20</span>
+        </div>
+        <div class="quiz-question-box">
+          <p class="quiz-question-label" id="short-question-label">다음 단어의 뜻을 입력하세요</p>
+          <p class="quiz-question-word" id="short-question-word"></p>
+        </div>
+        <div class="short-answer-wrap">
+          <input type="text" id="short-answer-input" class="short-answer-input" placeholder="정답을 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <button id="short-submit-btn" class="short-submit-btn">확인 →</button>
+        </div>
+        <div id="short-feedback" class="short-feedback hidden"></div>
+        <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;margin-top:0.5rem;">다음 →</button>
+        <button id="short-close-btn" class="sample-btn" style="margin-top:1rem;">✕ 테스트 종료</button>
       </div>
 
       <!-- Result screen -->
