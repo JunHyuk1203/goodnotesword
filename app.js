@@ -691,13 +691,21 @@ function updatePrompt() {
   const includeExample = backOpt !== 'meaning_only';
   const includeSynAnt = backOpt === 'full';
 
-  let formatStr = `- "word": The English vocabulary word (required)\n- "meaning": The Korean meaning exactly as written (required)\n- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)\n- "pronunciation": Pronunciation symbol (optional)`;
+  let formatStr = `- "word": The English vocabulary word (required)
+- "meaning": The Korean meaning exactly as written (required)
+- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ). You MUST infer and fill this in even if it's not in the image. (required)
+- "pronunciation": Pronunciation symbol (optional)`;
+
   if (includeExample) formatStr += `\n- "examples": Array of example sentences (optional)`;
-  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)\n- "antonyms": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)\n- "related": Array of strings, formatted as "English_word [POS]: Korean_meaning" (optional)`;
+  if (includeSynAnt) formatStr += `
+- "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if it is missing in the image, e.g. [ⓝ], [ⓥ], [ⓐ])
+- "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if missing)
+- "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if missing)`;
 
   let exampleStr = `[
   {
     "word": "significant",
+    "pos": "ⓐ",
     "meaning": "1 중요한 2 상당한"`;
   if (includeExample) exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
   if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]`;
@@ -711,7 +719,7 @@ CRITICAL EXTRACTION RULES:
 3. For multiple images or columns, extract from top-to-bottom, left-to-right.
 
 CRITICAL TRANSCRIBING RULES:
-1. NEVER USE YOUR OWN DICTIONARY KNOWLEDGE. Act purely as an OCR engine.
+1. Act purely as an OCR engine, EXCEPT for the POS (Part of Speech). You MUST use your dictionary knowledge to infer and add the correct POS (e.g., ⓝ, ⓥ, ⓐ) for the main word, synonyms, antonyms, and related words if they are not explicitly present in the text.
 2. For the "meaning" field, you MUST copy the text EXACTLY as it appears. DO NOT summarize.
 
 OUTPUT FORMAT:
