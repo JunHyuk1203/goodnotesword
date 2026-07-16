@@ -314,6 +314,53 @@
     </div>
   </div>
 
+  <!-- Edit Word Modal -->
+  <div id="edit-word-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="test-modal-box" style="max-width:500px; padding:2rem;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">✏️ 단어 편집</h2>
+      <div style="display:flex; flex-direction:column; gap:12px; max-height:65vh; overflow-y:auto; padding-right:10px;">
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">단어 (Word)</label>
+          <input type="text" id="edit-word" class="text-input" />
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
+            <label class="option-label">품사 (POS)</label>
+            <input type="text" id="edit-pos" class="text-input" placeholder="ex) ⓝ" />
+          </div>
+          <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
+            <label class="option-label">발음 (Pronunciation)</label>
+            <input type="text" id="edit-pron" class="text-input" placeholder="ex) [sɪɡˈnɪfɪkənt]" />
+          </div>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">뜻 (Meaning)</label>
+          <textarea id="edit-meaning" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">예문 (Examples - 줄바꿈으로 구분)</label>
+          <textarea id="edit-examples" class="text-input" rows="3" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">유의어 (Synonyms - 줄바꿈으로 구분)</label>
+          <textarea id="edit-synonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">반의어 (Antonyms - 줄바꿈으로 구분)</label>
+          <textarea id="edit-antonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">관련어 (Related - 줄바꿈으로 구분)</label>
+          <textarea id="edit-related" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="edit-word-cancel" class="sample-btn">취소</button>
+        <button id="edit-word-save" class="generate-btn" style="width:auto; padding:0.6rem 1.5rem;">저장</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Custom Prompt Modal -->
   <div id="custom-prompt-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
     <div class="modal-box" style="max-width:420px;">

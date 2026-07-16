@@ -140,6 +140,12 @@ const viewCardBtn = $('view-card-btn');
 const viewTableBtn = $('view-table-btn');
 const startTestBtn = $('start-test-btn');
 
+// Edit Modal
+let currentEditDocRef = null;
+const editWordModal = $('edit-word-modal');
+const editWordSave = $('edit-word-save');
+const editWordCancel = $('edit-word-cancel');
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // LIBRARY: Books → Chapters → Words
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -424,14 +430,7 @@ function renderCardView(docs) {
       </div>
     `;
 
-    card.querySelector('.word-card-edit-btn').onclick = async () => {
-      const newFront = await showPrompt('앞면(단어):', data.front);
-      if (newFront === null) return;
-      const newBack = await showPrompt('뒷면(뜻/정보):', data.back);
-      if (newBack === null) return;
-      try { await updateDoc(data._ref, { front: newFront, back: newBack, word: newFront }); }
-      catch(err) { alert('수정 실패: ' + err.message); }
-    };
+    card.querySelector('.word-card-edit-btn').onclick = () => openEditModal(data);
 
     card.querySelector('.word-card-delete-btn').onclick = async () => {
       if (await showConfirm('이 단어를 삭제하시겠습니까?')) {
@@ -462,14 +461,7 @@ function renderTableView(docs) {
         <button class="word-card-edit-btn" style="font-size:0.78rem;padding:4px 10px;">수정</button>
         <button class="word-card-delete-btn" style="font-size:0.78rem;padding:4px 10px;">삭제</button>
       </div></td>`;
-    tr.querySelector('.word-card-edit-btn').onclick = async () => {
-      const newFront = await showPrompt('앞면(단어):', data.front);
-      if (newFront === null) return;
-      const newBack = await showPrompt('뒷면(뜻/정보):', data.back);
-      if (newBack === null) return;
-      try { await updateDoc(data._ref, { front: newFront, back: newBack }); }
-      catch(err) { alert('수정 실패: ' + err.message); }
-    };
+    tr.querySelector('.word-card-edit-btn').onclick = () => openEditModal(data);
     tr.querySelector('.word-card-delete-btn').onclick = async () => {
       if (await showConfirm('이 단어를 삭제하시겠습니까?')) {
         try { await deleteDoc(data._ref); }
@@ -480,6 +472,71 @@ function renderTableView(docs) {
     wordsTbody.appendChild(tr);
   });
 }
+
+// ─── Edit Word Modal ──────────────────────────────────────────────────────────
+function openEditModal(docData) {
+  const parsed = parseWordData(docData);
+  currentEditDocRef = docData._ref;
+
+  $('edit-word').value = parsed.word || '';
+  $('edit-pos').value = parsed.pos || '';
+  $('edit-pron').value = parsed.pronunciation || '';
+  $('edit-meaning').value = parsed.meaning || '';
+  $('edit-examples').value = (parsed.examples || []).join('\n');
+  $('edit-synonyms').value = (parsed.synonyms || []).join('\n');
+  $('edit-antonyms').value = (parsed.antonyms || []).join('\n');
+  $('edit-related').value = (parsed.related || []).join('\n');
+
+  editWordModal.classList.remove('hidden');
+}
+
+editWordCancel.addEventListener('click', () => {
+  editWordModal.classList.add('hidden');
+});
+
+editWordSave.addEventListener('click', async () => {
+  if (!currentEditDocRef) return;
+  const word = $('edit-word').value.trim();
+  const pos = $('edit-pos').value.trim();
+  const pron = $('edit-pron').value.trim();
+  const meaning = $('edit-meaning').value.trim();
+  
+  const getArray = (id) => $(id).value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const examples = getArray('edit-examples');
+  const synonyms = getArray('edit-synonyms');
+  const antonyms = getArray('edit-antonyms');
+  const related = getArray('edit-related');
+
+  let front = word;
+  if (pos) front += `  ${pos}`;
+  if (pron) front += `  ${pron}`;
+
+  const parts = [];
+  if (meaning) parts.push(`📌 뜻\n${pos ? pos + ' ' : ''}${meaning}`);
+  if (synonyms.length) parts.push(`✅ 유의어\n• ${synonyms.join('\n• ')}`);
+  if (antonyms.length) parts.push(`❌ 반의어\n• ${antonyms.join('\n• ')}`);
+  if (related.length) parts.push(`🔗 관련어\n• ${related.join('\n• ')}`);
+  if (examples.length) parts.push(`📖 예문\n• ${examples.join('\n• ')}`);
+  const back = parts.join('\n\n');
+
+  const updatedData = {
+    word, pos, pronunciation: pron, meaning, examples, synonyms, antonyms, related, front, back
+  };
+
+  try {
+    const org = editWordSave.textContent;
+    editWordSave.textContent = '저장 중...';
+    editWordSave.disabled = true;
+    await updateDoc(currentEditDocRef, updatedData);
+    editWordModal.classList.add('hidden');
+    editWordSave.textContent = org;
+    editWordSave.disabled = false;
+  } catch(e) {
+    alert('수정 실패: ' + e.message);
+    editWordSave.disabled = false;
+    editWordSave.textContent = '저장';
+  }
+});
 
 // ─── View Toggle ──────────────────────────────────────────────────────────────
 viewCardBtn.addEventListener('click', () => {
