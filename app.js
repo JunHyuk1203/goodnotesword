@@ -616,14 +616,14 @@ function updatePrompt() {
 
   let formatStr = `- "word": The English vocabulary word (required)\n- "meaning": The Korean meaning exactly as written (required)\n- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ) (optional)\n- "pronunciation": Pronunciation symbol (optional)`;
   if (includeExample) formatStr += `\n- "examples": Array of example sentences (optional)`;
-  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings (optional)\n- "antonyms": Array of strings (optional)\n- "related": Array of related words (optional)`;
+  if (includeSynAnt) formatStr += `\n- "synonyms": Array of strings, formatted as "English_word: Korean_meaning" (optional)\n- "antonyms": Array of strings, formatted as "English_word: Korean_meaning" (optional)\n- "related": Array of strings, formatted as "English_word: Korean_meaning" (optional)`;
 
   let exampleStr = `[
   {
     "word": "significant",
     "meaning": "1 중요한 2 상당한"`;
   if (includeExample) exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
-  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important: 중요한"]`;
+  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important: 중요한", "crucial: 중대한"]`;
   exampleStr += `\n  }\n]`;
 
   const prompt = `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
