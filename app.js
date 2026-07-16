@@ -6,7 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
-  query, orderBy, serverTimestamp, deleteDoc, updateDoc, onSnapshot
+  query, orderBy, serverTimestamp, deleteDoc, updateDoc, onSnapshot, initializeFirestore, persistentLocalCache
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -19,7 +19,9 @@ const firebaseApp = initializeApp({
   appId: "1:509235514160:web:cd710bfa87fd69971696f5",
   measurementId: "G-87JDYFLD85"
 });
-const db = getFirestore(firebaseApp);
+const db = initializeFirestore(firebaseApp, {
+  localCache: persistentLocalCache()
+});
 
 // ─── Global State ─────────────────────────────────────────────────────────────
 const currentUser = { uid: "default_user" };
