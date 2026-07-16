@@ -594,5 +594,5 @@ async function fetchLatestVersion() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/* auto updated by onSnapshot */
+loadBooks();
 fetchLatestVersion();
