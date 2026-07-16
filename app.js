@@ -6,7 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
-  query, orderBy, serverTimestamp, deleteDoc, updateDoc
+  query, orderBy, serverTimestamp, deleteDoc, updateDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -23,9 +23,9 @@ const db = getFirestore(firebaseApp);
 
 // ─── Global State ─────────────────────────────────────────────────────────────
 const currentUser = { uid: "default_user" };
-let reqBooks = 0;
-let reqChapters = 0;
-let reqWords = 0;
+let unsubBooks = null;
+let unsubChapters = null;
+let unsubWords = null;
 let selectedBookId = null;
 let selectedChapterId = null;
 let currentLoadedWords = [];
@@ -137,8 +137,10 @@ crumbBookName.addEventListener('click', () => {
 });
 
 // ─── Load Books ───────────────────────────────────────────────────────────────
-async function loadBooks() {
-  const currentReq = ++reqBooks;
+function loadBooks() {
+  if (unsubChapters) { unsubChapters(); unsubChapters = null; }
+  if (unsubWords) { unsubWords(); unsubWords = null; }
+
   selectedBookId = null;
   selectedChapterId = null;
 
@@ -150,40 +152,45 @@ async function loadBooks() {
   crumbBook.classList.add('hidden');
   crumbChapter.classList.add('hidden');
 
-  viewBooks.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
-  try {
-    const snap = await getDocs(collection(db, `users/${currentUser.uid}/books`));
-    if (currentReq !== reqBooks) return; // Race condition guard
-    viewBooks.innerHTML = '';
-    if (snap.empty) {
-      viewBooks.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">저장된 단어장이 없습니다. 위의 [+ 새 단어장 만들기] 버튼을 눌러 시작하세요!</p>';
-      return;
-    }
-    snap.forEach(d => {
-      const data = d.data();
-      const div = document.createElement('div');
-      div.className = 'lib-card';
-      div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단어장 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-      div.onclick = () => loadChapters(d.id, data.name);
-      div.querySelector('.lib-delete-btn').onclick = async (e) => {
-        e.stopPropagation();
-        if (await showConfirm('이 단어장을 삭제하시겠습니까? (모든 단원과 함께 삭제됩니다)')) {
-          try { await deleteDoc(doc(db, `users/${currentUser.uid}/books`, d.id)); loadBooks(); }
-          catch(err) { alert('삭제 실패: ' + err.message); }
-        }
-      };
-      viewBooks.appendChild(div);
+  if (!unsubBooks) {
+    viewBooks.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
+    unsubBooks = onSnapshot(collection(db, `users/${currentUser.uid}/books`), (snap) => {
+      viewBooks.innerHTML = '';
+      if (snap.empty) {
+        viewBooks.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">저장된 단어장이 없습니다. 위의 [+ 새 단어장 만들기] 버튼을 눌러 시작하세요!</p>';
+        return;
+      }
+      snap.forEach(d => {
+        const data = d.data();
+        const div = document.createElement('div');
+        div.className = 'lib-card';
+        div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단어장 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
+        div.onclick = () => loadChapters(d.id, data.name);
+        div.querySelector('.lib-delete-btn').onclick = async (e) => {
+          e.stopPropagation();
+          if (await showConfirm('이 단어장을 삭제하시겠습니까? (모든 단원과 함께 삭제됩니다)')) {
+            try { await deleteDoc(doc(db, `users/${currentUser.uid}/books`, d.id)); }
+            catch(err) { alert('삭제 실패: ' + err.message); }
+          }
+        };
+        viewBooks.appendChild(div);
+      });
+    }, (e) => {
+      console.error(e);
+      viewBooks.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
     });
-  } catch (e) {
-    if (currentReq !== reqBooks) return;
-    console.error(e);
-    viewBooks.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
   }
 }
 
 // ─── Load Chapters ────────────────────────────────────────────────────────────
-async function loadChapters(bookId, bookName) {
-  const currentReq = ++reqChapters;
+function loadChapters(bookId, bookName) {
+  if (unsubWords) { unsubWords(); unsubWords = null; }
+  
+  if (unsubChapters && selectedBookId !== bookId) {
+    unsubChapters();
+    unsubChapters = null;
+  }
+
   selectedBookId = bookId;
   selectedChapterId = null;
 
@@ -196,40 +203,43 @@ async function loadChapters(bookId, bookName) {
   crumbBookName.textContent = bookName;
   crumbChapter.classList.add('hidden');
 
-  viewChapters.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
-  try {
-    const snap = await getDocs(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters`));
-    if (currentReq !== reqChapters) return; // Race condition guard
-    viewChapters.innerHTML = '';
-    if (snap.empty) {
-      viewChapters.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">단원이 없습니다. [+ 새 단원 추가] 버튼을 눌러주세요!</p>';
-      return;
-    }
-    snap.forEach(d => {
-      const data = d.data();
-      const div = document.createElement('div');
-      div.className = 'lib-card';
-      div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-      div.onclick = () => loadWords(bookId, d.id, data.name);
-      div.querySelector('.lib-delete-btn').onclick = async (e) => {
-        e.stopPropagation();
-        if (await showConfirm('이 단원을 삭제하시겠습니까? (모든 단어와 함께 삭제됩니다)')) {
-          try { await deleteDoc(doc(db, `users/${currentUser.uid}/books/${bookId}/chapters`, d.id)); loadChapters(bookId, crumbBookName.textContent); }
-          catch(err) { alert('삭제 실패: ' + err.message); }
-        }
-      };
-      viewChapters.appendChild(div);
+  if (!unsubChapters) {
+    viewChapters.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
+    unsubChapters = onSnapshot(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters`), (snap) => {
+      viewChapters.innerHTML = '';
+      if (snap.empty) {
+        viewChapters.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">단원이 없습니다. [+ 새 단원 추가] 버튼을 눌러주세요!</p>';
+        return;
+      }
+      snap.forEach(d => {
+        const data = d.data();
+        const div = document.createElement('div');
+        div.className = 'lib-card';
+        div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
+        div.onclick = () => loadWords(bookId, d.id, data.name);
+        div.querySelector('.lib-delete-btn').onclick = async (e) => {
+          e.stopPropagation();
+          if (await showConfirm('이 단원을 삭제하시겠습니까? (모든 단어와 함께 삭제됩니다)')) {
+            try { await deleteDoc(doc(db, `users/${currentUser.uid}/books/${bookId}/chapters`, d.id)); }
+            catch(err) { alert('삭제 실패: ' + err.message); }
+          }
+        };
+        viewChapters.appendChild(div);
+      });
+    }, (e) => {
+      console.error(e);
+      viewChapters.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
     });
-  } catch (e) {
-    if (currentReq !== reqChapters) return;
-    console.error(e);
-    viewChapters.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
   }
 }
 
 // ─── Load Words ───────────────────────────────────────────────────────────────
-async function loadWords(bookId, chapterId, chapterName) {
-  const currentReq = ++reqWords;
+function loadWords(bookId, chapterId, chapterName) {
+  if (unsubWords && selectedChapterId !== chapterId) {
+    unsubWords();
+    unsubWords = null;
+  }
+
   selectedBookId = bookId;
   selectedChapterId = chapterId;
 
@@ -241,52 +251,53 @@ async function loadWords(bookId, chapterId, chapterName) {
   crumbChapter.classList.remove('hidden');
   crumbChapterName.textContent = chapterName;
 
-  wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
-  currentLoadedWords = [];
-  if (selectAllWords) selectAllWords.checked = false;
-  if (deleteSelectedBtn) deleteSelectedBtn.classList.add('hidden');
-  try {
+  if (!unsubWords) {
+    wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
+    
     const q = query(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters/${chapterId}/words`), orderBy('order'));
-    const snap = await getDocs(q);
-    if (currentReq !== reqWords) return; // Race condition guard
-    wordsTbody.innerHTML = '';
-    wordCountBadge.textContent = `${snap.size} 단어`;
-    let i = 1;
-    snap.forEach(d => {
-      const data = d.data();
-      currentLoadedWords.push(data);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td><input type="checkbox" class="word-chk" data-path="${d.ref.path}" /></td><td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>
-        <td>
-          <div style="display:flex;gap:4px;">
-            <button class="word-edit-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">수정</button>
-            <button class="word-delete-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid #ff4d4f;background:#fff1f0;color:#ff4d4f;">삭제</button>
-          </div>
-        </td>`;
-      tr.querySelector('.word-edit-btn').onclick = async () => {
-        const newFront = await showPrompt('앞면(질문):', data.front);
-        if (newFront === null) return;
-        const newBack = await showPrompt('뒷면(정답):', data.back);
-        if (newBack === null) return;
-        try { await updateDoc(d.ref, { front: newFront, back: newBack }); loadWords(bookId, chapterId, chapterName); }
-        catch(err) { alert('수정 실패: ' + err.message); }
-      };
-      tr.querySelector('.word-delete-btn').onclick = async () => {
-        if (await showConfirm('이 단어를 삭제하시겠습니까?')) {
-          try { await deleteDoc(d.ref); loadWords(bookId, chapterId, chapterName); }
-          catch(err) { alert('삭제 실패: ' + err.message); }
-        }
-      };
-      wordsTbody.appendChild(tr);
-      tr.querySelector('.word-chk').addEventListener('change', updateDeleteBtn);
+    unsubWords = onSnapshot(q, (snap) => {
+      currentLoadedWords = [];
+      if (selectAllWords) selectAllWords.checked = false;
+      if (deleteSelectedBtn) deleteSelectedBtn.classList.add('hidden');
+      
+      wordsTbody.innerHTML = '';
+      wordCountBadge.textContent = `${snap.size} 단어`;
+      let i = 1;
+      snap.forEach(d => {
+        const data = d.data();
+        currentLoadedWords.push(data);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><input type="checkbox" class="word-chk" data-path="${d.ref.path}" /></td><td>${i++}</td><td>${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;">${escapeHTML(data.back)}</td>
+          <td>
+            <div style="display:flex;gap:4px;">
+              <button class="word-edit-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">수정</button>
+              <button class="word-delete-btn" style="padding:4px 8px;font-size:0.8rem;cursor:pointer;border-radius:4px;border:1px solid #ff4d4f;background:#fff1f0;color:#ff4d4f;">삭제</button>
+            </div>
+          </td>`;
+        tr.querySelector('.word-edit-btn').onclick = async () => {
+          const newFront = await showPrompt('앞면(질문):', data.front);
+          if (newFront === null) return;
+          const newBack = await showPrompt('뒷면(정답):', data.back);
+          if (newBack === null) return;
+          try { await updateDoc(d.ref, { front: newFront, back: newBack }); }
+          catch(err) { alert('수정 실패: ' + err.message); }
+        };
+        tr.querySelector('.word-delete-btn').onclick = async () => {
+          if (await showConfirm('이 단어를 삭제하시겠습니까?')) {
+            try { await deleteDoc(d.ref); }
+            catch(err) { alert('삭제 실패: ' + err.message); }
+          }
+        };
+        wordsTbody.appendChild(tr);
+        tr.querySelector('.word-chk').addEventListener('change', updateDeleteBtn);
+      });
+      if (snap.empty) {
+        wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">단어가 없습니다. [✨ 새 단어 추출하기] 버튼으로 추가하세요!</td></tr>';
+      }
+    }, (e) => {
+      console.error(e);
+      wordsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);">오류: ${e.message}</td></tr>`;
     });
-    if (snap.empty) {
-      wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">단어가 없습니다. [✨ 새 단어 추출하기] 버튼으로 추가하세요!</td></tr>';
-    }
-  } catch (e) {
-    if (currentReq !== reqWords) return;
-    console.error(e);
-    wordsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);">오류: ${e.message}</td></tr>`;
   }
 }
 
@@ -298,7 +309,7 @@ addBookBtn.addEventListener('click', async () => {
     await addDoc(collection(db, `users/${currentUser.uid}/books`), {
       name: name.trim(), createdAt: serverTimestamp()
     });
-    loadBooks();
+    /* auto updated by onSnapshot */
   } catch (e) {
     alert('단어장 생성 실패: ' + e.message);
   }
@@ -311,7 +322,7 @@ addChapterBtn.addEventListener('click', async () => {
     await addDoc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters`), {
       name: name.trim(), createdAt: serverTimestamp()
     });
-    loadChapters(selectedBookId, crumbBookName.textContent);
+    /* auto updated by onSnapshot */
   } catch (e) {
     alert('단원 생성 실패: ' + e.message);
   }
@@ -352,7 +363,7 @@ deleteSelectedBtn.addEventListener('click', async () => {
   deleteSelectedBtn.textContent = '삭제 중...';
   try {
     await Promise.all(Array.from(chks).map(chk => deleteDoc(doc(db, chk.dataset.path))));
-    loadWords(selectedBookId, selectedChapterId, crumbChapterName.textContent);
+    /* auto updated by onSnapshot */
   } catch(e) {
     alert('삭제 실패: ' + e.message);
   } finally {
@@ -543,7 +554,7 @@ async function autoSaveToLibrary(data) {
     if (typeof extractSection !== 'undefined' && extractSection) {
       extractSection.classList.add('hidden');
     }
-    loadWords(selectedBookId, selectedChapterId, crumbChapterName.textContent);
+    /* auto updated by onSnapshot */
   } catch (e) {
     console.error(e);
     alert('저장 실패: ' + e.message);
@@ -583,5 +594,5 @@ async function fetchLatestVersion() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-loadBooks();
+/* auto updated by onSnapshot */
 fetchLatestVersion();
