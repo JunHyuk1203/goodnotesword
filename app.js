@@ -23,6 +23,9 @@ const db = getFirestore(firebaseApp);
 
 // ─── Global State ─────────────────────────────────────────────────────────────
 const currentUser = { uid: "default_user" };
+let reqBooks = 0;
+let reqChapters = 0;
+let reqWords = 0;
 let selectedBookId = null;
 let selectedChapterId = null;
 let currentLoadedWords = [];
@@ -135,6 +138,7 @@ crumbBookName.addEventListener('click', () => {
 
 // ─── Load Books ───────────────────────────────────────────────────────────────
 async function loadBooks() {
+  const currentReq = ++reqBooks;
   selectedBookId = null;
   selectedChapterId = null;
 
@@ -149,6 +153,7 @@ async function loadBooks() {
   viewBooks.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
   try {
     const snap = await getDocs(collection(db, `users/${currentUser.uid}/books`));
+    if (currentReq !== reqBooks) return; // Race condition guard
     viewBooks.innerHTML = '';
     if (snap.empty) {
       viewBooks.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">저장된 단어장이 없습니다. 위의 [+ 새 단어장 만들기] 버튼을 눌러 시작하세요!</p>';
@@ -170,6 +175,7 @@ async function loadBooks() {
       viewBooks.appendChild(div);
     });
   } catch (e) {
+    if (currentReq !== reqBooks) return;
     console.error(e);
     viewBooks.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
   }
@@ -177,6 +183,7 @@ async function loadBooks() {
 
 // ─── Load Chapters ────────────────────────────────────────────────────────────
 async function loadChapters(bookId, bookName) {
+  const currentReq = ++reqChapters;
   selectedBookId = bookId;
   selectedChapterId = null;
 
@@ -192,6 +199,7 @@ async function loadChapters(bookId, bookName) {
   viewChapters.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
   try {
     const snap = await getDocs(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters`));
+    if (currentReq !== reqChapters) return; // Race condition guard
     viewChapters.innerHTML = '';
     if (snap.empty) {
       viewChapters.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">단원이 없습니다. [+ 새 단원 추가] 버튼을 눌러주세요!</p>';
@@ -213,6 +221,7 @@ async function loadChapters(bookId, bookName) {
       viewChapters.appendChild(div);
     });
   } catch (e) {
+    if (currentReq !== reqChapters) return;
     console.error(e);
     viewChapters.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--danger);">오류: ${e.message}</p>`;
   }
@@ -220,6 +229,7 @@ async function loadChapters(bookId, bookName) {
 
 // ─── Load Words ───────────────────────────────────────────────────────────────
 async function loadWords(bookId, chapterId, chapterName) {
+  const currentReq = ++reqWords;
   selectedBookId = bookId;
   selectedChapterId = chapterId;
 
@@ -231,13 +241,14 @@ async function loadWords(bookId, chapterId, chapterName) {
   crumbChapter.classList.remove('hidden');
   crumbChapterName.textContent = chapterName;
 
-  wordsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">로딩 중...</td></tr>';
+  wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">로딩 중...</td></tr>';
   currentLoadedWords = [];
   if (selectAllWords) selectAllWords.checked = false;
   if (deleteSelectedBtn) deleteSelectedBtn.classList.add('hidden');
   try {
     const q = query(collection(db, `users/${currentUser.uid}/books/${bookId}/chapters/${chapterId}/words`), orderBy('order'));
     const snap = await getDocs(q);
+    if (currentReq !== reqWords) return; // Race condition guard
     wordsTbody.innerHTML = '';
     wordCountBadge.textContent = `${snap.size} 단어`;
     let i = 1;
@@ -273,8 +284,9 @@ async function loadWords(bookId, chapterId, chapterName) {
       wordsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">단어가 없습니다. [✨ 새 단어 추출하기] 버튼으로 추가하세요!</td></tr>';
     }
   } catch (e) {
+    if (currentReq !== reqWords) return;
     console.error(e);
-    wordsTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">오류: ${e.message}</td></tr>`;
+    wordsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);">오류: ${e.message}</td></tr>`;
   }
 }
 
