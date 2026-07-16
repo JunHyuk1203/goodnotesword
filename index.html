@@ -93,6 +93,7 @@
               </button>
             </div>
             <button id="start-test-btn" class="test-start-btn">🧪 테스트 시작</button>
+            <button id="view-history-btn" class="sample-btn" style="padding:0.5rem 1rem; font-size:0.85rem; background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border);">📊 기록 보기</button>
             <button id="open-extract-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;">✨ 단어 추출하기</button>
             <button id="export-csv-btn" class="download-btn download-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -382,6 +383,19 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button id="custom-confirm-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
         <button id="custom-confirm-ok" style="padding:8px 20px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-weight:600;">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test History Modal -->
+  <div id="history-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="test-modal-box" style="max-width:500px; padding:2rem;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">📊 테스트 기록</h2>
+      <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
+        <!-- Items injected by JS -->
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="history-close-btn" class="sample-btn">닫기</button>
       </div>
     </div>
   </div>

@@ -139,6 +139,10 @@ const cardBackSel = $('card-back-sel');
 const viewCardBtn = $('view-card-btn');
 const viewTableBtn = $('view-table-btn');
 const startTestBtn = $('start-test-btn');
+const viewHistoryBtn = $('view-history-btn');
+const historyModal = $('history-modal');
+const historyCloseBtn = $('history-close-btn');
+const historyList = $('history-list');
 
 // Edit Modal
 let currentEditDocRef = null;
@@ -1232,6 +1236,73 @@ function showTestResult() {
     wrongList.innerHTML = '';
     $('result-retry-wrong-btn').classList.add('hidden');
   }
+
+  // Save to History
+  if (selectedBookId && selectedChapterId) {
+    const historyRef = collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/testHistory`);
+    addDoc(historyRef, {
+      timestamp: serverTimestamp(),
+      mode: testMode, // flash, quiz, short
+      dir: testDir,
+      correct: testCorrect,
+      total: total,
+      wrongWords: testWrong
+    }).catch(e => console.error('History save error:', e));
+  }
+}
+
+// ─── View Test History ────────────────────────────────────────────────────────
+if (viewHistoryBtn) {
+  viewHistoryBtn.addEventListener('click', async () => {
+    if (!selectedBookId || !selectedChapterId) return;
+    
+    historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">기록을 불러오는 중...</p>';
+    historyModal.classList.remove('hidden');
+
+    try {
+      const q = query(
+        collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/testHistory`),
+        orderBy('timestamp', 'desc')
+      );
+      const snap = await getDocs(q);
+      
+      historyList.innerHTML = '';
+      if (snap.empty) {
+        historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">아직 테스트 기록이 없습니다.</p>';
+        return;
+      }
+
+      snap.forEach(doc => {
+        const data = doc.data();
+        const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : '방금 전';
+        const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : '✍️ 주관식';
+        const pct = Math.round((data.correct / data.total) * 100) || 0;
+        
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+          <div class="history-header">
+            <span class="history-title">${modeLabel} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(${data.dir === 'word2meaning' ? '단어→뜻' : '뜻→단어'})</span></span>
+            <span class="history-date">${dateStr}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="history-score">${data.correct} / ${data.total} 정답 <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--primary-light)' : 'var(--danger)'}">(${pct}%)</span></span>
+          </div>
+          ${data.wrongWords && data.wrongWords.length > 0 ? `<div class="history-wrong">틀린 단어: ${escapeHTML(data.wrongWords.join(', '))}</div>` : ''}
+        `;
+        historyList.appendChild(item);
+      });
+    } catch (e) {
+      console.error(e);
+      historyList.innerHTML = `<p style="text-align:center; color:var(--danger); padding:2rem;">오류: ${e.message}</p>`;
+    }
+  });
+}
+
+if (historyCloseBtn) {
+  historyCloseBtn.addEventListener('click', () => {
+    historyModal.classList.add('hidden');
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
