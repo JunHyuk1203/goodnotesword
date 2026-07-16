@@ -386,15 +386,30 @@ function renderCardView(docs) {
     const buildRelatedSection = (items, emoji, label, cls) => {
       if (!items || !items.length) return '';
       const lines = items.map(s => {
-        // Each item is a string like "signify: ⓥ 중요하다" or "important: 중요한" or "important [ⓐ]: 중요한"
-        // Try to split by common separators
-        const match = s.match(/^(.*?)(:|：|-)(.*)$/);
+        let word = '', pos = '', meaning = '';
+        
+        // Match patterns like "word [pos]: meaning" or "word (pos): meaning" or "word: meaning"
+        const match = s.match(/^([^\[\(:：\-]+)(?:\[(.*?)\]|\((.*?)\))?(?:\s*[:：\-]\s*)(.*)$/);
+        
         if (match) {
-          const word = match[1].trim();
-          const separator = match[2];
-          const rest = match[3].trim();
-          return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span><span class="related-item-colon">${separator}</span><span class="related-item-meaning"> ${escapeHTML(rest)}</span></div>`;
+          word = match[1].trim();
+          pos = (match[2] || match[3] || '').trim();
+          meaning = match[4].trim();
+          
+          let posHtml = pos ? `<span class="related-item-pos" style="color:var(--primary);font-size:0.8rem;margin-left:4px;">[${escapeHTML(pos)}]</span>` : '';
+          return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span>${posHtml}<span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(meaning)}</span></div>`;
         }
+        
+        // Fallback for simple "word: meaning" without proper colon but spaces?
+        const spaceMatch = s.match(/^([A-Za-z0-9_]+)\s+(\[[^\]]+\]|\([^)]+\))?\s*(.*)$/);
+        if (spaceMatch && !s.includes(':') && !s.includes('-') && !s.includes('：')) {
+           word = spaceMatch[1].trim();
+           pos = (spaceMatch[2] || '').replace(/[\[\]\(\)]/g, '').trim();
+           meaning = spaceMatch[3].trim();
+           let posHtml = pos ? `<span class="related-item-pos" style="color:var(--primary);font-size:0.8rem;margin-left:4px;">[${escapeHTML(pos)}]</span>` : '';
+           return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span>${posHtml}<span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(meaning)}</span></div>`;
+        }
+
         return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
       }).join('');
       return `
