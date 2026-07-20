@@ -1621,40 +1621,67 @@ if ($('short-appeal-btn')) {
         console.log('Appeals cache hit:', isApproved);
       } else {
         // Cache Miss -> Call Gemini
-        console.log('Appeals cache miss, calling Gemini');
+        const apiKey = geminiApiKey.trim();
         const prompt = `단어 '${targetWord}'의 정답은 원래 '${correctAnswers}' 입니다. 사용자가 주관식 정답으로 '${val}'을(를) 입력했습니다. 이 답변이 의미상 정답으로 인정될 수 있다면 오직 'true', 틀렸다면 'false'라고만 대답하세요.`;
 
-        let model = 'gemini-1.5-flash';
-        let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey.trim()}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
-        });
-        
-        if (response.status === 404) {
-          console.log('gemini-1.5-flash not found, falling back to gemini-pro...');
-          model = 'gemini-pro';
-          response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey.trim()}`, {
+        if (apiKey.startsWith('sk-')) {
+          // Use OpenAI API
+          console.log('Using OpenAI API');
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.1
+            })
+          });
+
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`OpenAI API 호출 실패 (${response.status})\n${errText}`);
+          }
+
+          const json = await response.json();
+          const text = json.choices[0].message.content.toLowerCase().trim();
+          isApproved = text.includes('true');
+
+        } else {
+          // Use Gemini API
+          console.log('Using Gemini API');
+          let model = 'gemini-1.5-flash';
+          let response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }]
             })
           });
-        }
+          
+          if (response.status === 404) {
+            console.log('gemini-1.5-flash not found, falling back to gemini-pro...');
+            model = 'gemini-pro';
+            response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+              })
+            });
+          }
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.error("Gemini API Error:", errText);
-          throw new Error(`API 호출 실패 (${response.status})\n${errText}`);
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Gemini API 호출 실패 (${response.status})\n${errText}`);
+          }
+          
+          const json = await response.json();
+          const text = json.candidates[0].content.parts[0].text.toLowerCase().trim();
+          isApproved = text.includes('true');
         }
-        
-        const json = await response.json();
-        const text = json.candidates[0].content.parts[0].text.toLowerCase().trim();
-        
-        isApproved = text.includes('true');
         
         // Save to Firebase Cache
         await addDoc(appealsCol, {
