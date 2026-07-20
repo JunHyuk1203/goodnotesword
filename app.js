@@ -159,6 +159,18 @@ function playPronunciation(wordText) {
   speechSynthesis.speak(utterance);
 }
 
+// Unlock speech synthesis on first user interaction (required by mobile browsers)
+let speechUnlocked = false;
+function unlockSpeech() {
+  if (speechUnlocked) return;
+  speechUnlocked = true;
+  const unlock = new SpeechSynthesisUtterance('');
+  unlock.volume = 0;
+  speechSynthesis.speak(unlock);
+}
+document.addEventListener('touchstart', unlockSpeech, { passive: true });
+document.addEventListener('click', unlockSpeech, { once: true });
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.pronounce-btn');
   if (btn) {
