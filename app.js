@@ -687,7 +687,9 @@ function renderSwipeView() {
       <button id="auto-play-toggle" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">
         ${autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF'}
       </button>
-      <span>↕ 스와이프 또는 버튼</span>
+      <button id="shuffle-swipe-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">
+        🔀 랜덤 섞기
+      </button>
     </div>
   `;
 
@@ -798,6 +800,22 @@ function setupSwipeGestures() {
     // Init style based on state
     autoPlayBtn.style.background = autoPlayPronunciation ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255,255,255,0.06)';
     autoPlayBtn.style.color = autoPlayPronunciation ? 'var(--primary-light)' : 'var(--text-muted)';
+  }
+
+  const shuffleBtn = document.getElementById('shuffle-swipe-btn');
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      for (let i = swipeWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
+      }
+      swipeIndex = 0;
+      renderSwipeCard(0);
+      
+      shuffleBtn.style.transform = 'scale(0.9)';
+      setTimeout(() => shuffleBtn.style.transform = 'scale(1)', 150);
+    });
   }
 }
 
