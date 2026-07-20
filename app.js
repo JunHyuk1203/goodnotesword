@@ -148,6 +148,24 @@ const historyList = $('history-list');
 
 let swipeIndex = 0;
 let swipeWords = [];
+let autoPlayPronunciation = true; // Enabled by default in Shorts mode
+
+// ─── Pronunciation (Web Speech API) ──────────────────────────────────────────
+function playPronunciation(wordText) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(wordText);
+  utterance.lang = 'en-US'; // English by default
+  speechSynthesis.speak(utterance);
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pronounce-btn');
+  if (btn) {
+    e.stopPropagation();
+    playPronunciation(btn.dataset.word);
+  }
+});
 
 // Edit Modal
 let currentEditDocRef = null;
@@ -436,6 +454,7 @@ function renderCardView(docs) {
     card.innerHTML = `
       <div class="word-card-header">
         <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
+        <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;font-size:1.1rem;margin-left:4px;vertical-align:middle;padding:2px;opacity:0.8;transition:opacity 0.2s;">🔊</button>
         ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
         ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
         <span class="word-card-num">${idx + 1}</span>
@@ -625,8 +644,9 @@ function buildSwipeCardHTML(parsed) {
   const hasRelated = (parsed.synonyms?.length || parsed.antonyms?.length || parsed.related?.length);
 
   return `
-    <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+    <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
       <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}" style="font-size:1.5rem;">${escapeHTML(parsed.word)}</span>
+      <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;font-size:1.3rem;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
       ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
       ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
     </div>
@@ -658,6 +678,9 @@ function renderSwipeView() {
     <button class="swipe-nav-btn swipe-nav-up" id="swipe-prev" title="이전">↑</button>
     <button class="swipe-nav-btn swipe-nav-down" id="swipe-next" title="다음">↓</button>
     <div class="swipe-hint">
+      <button id="auto-play-toggle" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">
+        ${autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF'}
+      </button>
       <span>↕ 스와이프 또는 버튼</span>
     </div>
   `;
@@ -673,6 +696,10 @@ function renderSwipeCard(idx) {
   const parsed = parseWordData(swipeWords[idx]);
   card.innerHTML = buildSwipeCardHTML(parsed);
   counter.textContent = `${idx + 1} / ${swipeWords.length}`;
+
+  if (autoPlayPronunciation) {
+    playPronunciation(parsed.word);
+  }
   // Peek listeners are handled via event delegation on wordsSwipeView
 }
 
@@ -740,6 +767,24 @@ function setupSwipeGestures() {
 
   document.getElementById('swipe-next')?.addEventListener('click', () => navigateSwipe(1));
   document.getElementById('swipe-prev')?.addEventListener('click', () => navigateSwipe(-1));
+  
+  const autoPlayBtn = document.getElementById('auto-play-toggle');
+  if (autoPlayBtn) {
+    autoPlayBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      autoPlayPronunciation = !autoPlayPronunciation;
+      autoPlayBtn.innerHTML = autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF';
+      autoPlayBtn.style.background = autoPlayPronunciation ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255,255,255,0.06)';
+      autoPlayBtn.style.color = autoPlayPronunciation ? 'var(--primary-light)' : 'var(--text-muted)';
+      if (autoPlayPronunciation) {
+         const parsed = parseWordData(swipeWords[swipeIndex]);
+         playPronunciation(parsed.word);
+      }
+    });
+    // Init style based on state
+    autoPlayBtn.style.background = autoPlayPronunciation ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255,255,255,0.06)';
+    autoPlayBtn.style.color = autoPlayPronunciation ? 'var(--primary-light)' : 'var(--text-muted)';
+  }
 }
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
