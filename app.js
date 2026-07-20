@@ -1614,10 +1614,12 @@ if ($('short-appeal-btn')) {
       const querySnapshot = await getDocs(q);
       
       let isApproved = false;
+      let fromCache = false;
       
       if (!querySnapshot.empty) {
         // Cache Hit
         isApproved = querySnapshot.docs[0].data().isApproved;
+        fromCache = true;
         console.log('Appeals cache hit:', isApproved);
       } else {
         // Cache Miss -> Call Gemini
@@ -1709,6 +1711,7 @@ if ($('short-appeal-btn')) {
         });
       }
 
+      const prefix = fromCache ? "⚡ [이전 판단 기반]" : "🤖 [AI 새로운 판단]";
       if (isApproved) {
         // Mark as Correct
         const feedback = $('short-feedback');
@@ -1716,13 +1719,13 @@ if ($('short-appeal-btn')) {
         input.classList.add('correct');
         feedback.classList.remove('wrong-fb');
         feedback.classList.add('correct-fb');
-        feedback.innerHTML = `<span class="correct-label">AI가 정답으로 인정했습니다! 🤖</span><br>원래 답: ${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}`;
+        feedback.innerHTML = `<span class="correct-label">${prefix} 정답으로 인정했습니다!</span><br>원래 답: ${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}`;
         
         testWrong = testWrong.filter(w => w !== shortCurrentData.word);
         testCorrect++;
         appealBtn.classList.add('hidden');
       } else {
-        alert("AI 채점 결과: 정답으로 인정되지 않았습니다. 😢");
+        alert(`${prefix} 정답으로 인정되지 않았습니다. 😢`);
         appealBtn.classList.add('hidden');
       }
     } catch (err) {
