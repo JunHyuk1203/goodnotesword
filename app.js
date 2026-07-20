@@ -649,6 +649,7 @@ function adjustSwipeViewHeight() {
   const rect = swipeView.getBoundingClientRect();
   const available = vph - rect.top;
   swipeView.style.height = Math.max(available, 200) + 'px';
+  fitSwipeCard();
 }
 
 // Re-adjust if window/viewport size changes (mobile address bar show/hide)
@@ -666,7 +667,7 @@ function buildSwipeCardHTML(parsed, originalIdx) {
         const word = match[1].trim();
         const pos = (match[2] || match[3] || '').trim();
         const meaning = match[4].trim();
-        let posHtml = pos ? `<span class="related-item-pos" style="color:var(--primary);font-size:0.8rem;margin-left:4px;">[${escapeHTML(pos)}]</span>` : '';
+        let posHtml = pos ? `<span class="related-item-pos" style="color:var(--primary);margin-left:4px;">[${escapeHTML(pos)}]</span>` : '';
         return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span>${posHtml}<span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(meaning)}</span></div>`;
       }
       return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
@@ -683,8 +684,8 @@ function buildSwipeCardHTML(parsed, originalIdx) {
 
   return `
     <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
-      <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}" style="font-size:1.5rem;">${escapeHTML(parsed.word)}</span>
-      <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;font-size:1.3rem;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
+      <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
+      <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
       ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
       ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
       <span class="word-card-num">${originalIdx + 1}</span>
@@ -762,7 +763,29 @@ function renderSwipeCard(idx) {
   if (autoPlayPronunciation) {
     playPronunciation(parsed.word);
   }
-  // Peek listeners are handled via event delegation on wordsSwipeView
+  
+  // Adjust font size if content overflows
+  fitSwipeCard();
+}
+
+function fitSwipeCard() {
+  const card = document.getElementById('swipe-card');
+  const wrap = document.getElementById('swipe-wrap');
+  if (!card || !wrap) return;
+
+  // Reset base font size
+  let percent = 100;
+  card.style.fontSize = percent + '%';
+  
+  // Force layout calculation
+  void card.offsetHeight;
+  
+  // Shrink font size gradually until it fits (minimum 55%)
+  while (card.scrollHeight > wrap.clientHeight && percent > 55) {
+    percent -= 3;
+    card.style.fontSize = percent + '%';
+    void card.offsetHeight;
+  }
 }
 
 // ─── Peek Mode: Click on hidden element to reveal for 2s ────────────────────────────────────

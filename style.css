@@ -1175,36 +1175,39 @@ body {
   padding-bottom: 0.4rem;
 }
 .word-card-word {
-  font-size: 1.2rem;
+  font-size: 1.5em;
   font-weight: 700;
   color: var(--text);
   font-family: var(--font-mono);
   letter-spacing: -0.01em;
 }
+.pronounce-btn {
+  font-size: 1.3em;
+}
 .word-card-pos {
-  font-size: 0.78rem;
-  color: var(--accent);
+  font-size: 0.8em;
   font-weight: 600;
-  background: rgba(0, 212, 170, 0.1);
-  padding: 1px 7px;
+  color: var(--primary-light);
+  background: rgba(108, 99, 255, 0.15);
+  padding: 2px 8px;
   border-radius: 999px;
 }
 .word-card-pron {
-  font-size: 0.78rem;
+  font-size: 0.78em;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
 .word-card-num {
   margin-left: auto;
-  font-size: 0.72rem;
+  font-size: 0.72em;
   color: var(--text-muted);
 }
 .word-card-section {
-  font-size: 0.88rem;
+  font-size: 0.88em;
   line-height: 1.65;
 }
 .word-card-section-label {
-  font-size: 0.72rem;
+  font-size: 0.72em;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -1950,4 +1953,10 @@ body.shorts-mode-active #view-words {
   line-height: 1;
   opacity: 0.85;
   letter-spacing: -0.05em;
+}
+
+.related-item-pos {
+  color: var(--primary);
+  font-size: 0.8em;
+  margin-left: 4px;
 }
