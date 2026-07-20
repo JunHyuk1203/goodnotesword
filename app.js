@@ -204,6 +204,7 @@ function loadBooks() {
   viewBooks.classList.remove('hidden');
   viewChapters.classList.add('hidden');
   viewWords.classList.add('hidden');
+  document.getElementById('words-action-wrapper')?.classList.add('hidden');
   addBookWrap.classList.remove('hidden');
   addChapterWrap.classList.add('hidden');
   crumbBook.classList.add('hidden');
@@ -253,6 +254,7 @@ function loadChapters(bookId, bookName) {
   viewBooks.classList.add('hidden');
   viewChapters.classList.remove('hidden');
   viewWords.classList.add('hidden');
+  document.getElementById('words-action-wrapper')?.classList.add('hidden');
   addBookWrap.classList.add('hidden');
   addChapterWrap.classList.remove('hidden');
   crumbBook.classList.remove('hidden');
@@ -301,6 +303,7 @@ function loadWords(bookId, chapterId, chapterName) {
   viewBooks.classList.add('hidden');
   viewChapters.classList.add('hidden');
   viewWords.classList.remove('hidden');
+  document.getElementById('words-action-wrapper')?.classList.remove('hidden');
   addBookWrap.classList.add('hidden');
   addChapterWrap.classList.add('hidden');
   crumbChapter.classList.remove('hidden');
