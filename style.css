@@ -1415,6 +1415,7 @@ body {
 .word-card-word.peeking,
 .word-card-section.peeking {
   animation: peekReveal 2s ease-in-out forwards;
+  transition: none !important;
   cursor: pointer;
   user-select: none;
 }

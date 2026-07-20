@@ -673,18 +673,25 @@ function renderSwipeCard(idx) {
   const parsed = parseWordData(swipeWords[idx]);
   card.innerHTML = buildSwipeCardHTML(parsed);
   counter.textContent = `${idx + 1} / ${swipeWords.length}`;
-
-  // Attach peek listeners
-  card.querySelectorAll('.toggled-hidden').forEach(el => {
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      el.classList.remove('peeking');
-      void el.offsetWidth;
-      el.classList.add('peeking');
-      el.addEventListener('animationend', () => el.classList.remove('peeking'), { once: true });
-    });
-  });
+  // Peek listeners are handled via event delegation on wordsSwipeView
 }
+
+// ─── Peek Mode: Click on hidden element to reveal for 2s ────────────────────────────────────
+// Shared peek handler via event delegation
+function handlePeekClick(e) {
+  const hidden = e.target.closest('.toggled-hidden');
+  if (!hidden) return;
+  e.stopPropagation();
+  hidden.classList.remove('peeking');
+  void hidden.offsetWidth;  // force reflow to restart animation
+  hidden.classList.add('peeking');
+  hidden.addEventListener('animationend', () => {
+    hidden.classList.remove('peeking');
+  }, { once: true });
+}
+
+wordsCardView.addEventListener('click', handlePeekClick);
+wordsSwipeView.addEventListener('click', handlePeekClick);
 
 function navigateSwipe(dir) { // dir: 1 = next (swipe up), -1 = prev (swipe down)
   const wrap = document.getElementById('swipe-wrap');
@@ -764,25 +771,7 @@ document.querySelectorAll('.hide-toggle-btn').forEach(btn => {
   });
 });
 
-// ─── Peek Mode: Click on hidden element to reveal for 2s ─────────────────────────────
-// Uses event delegation on the card view container
-wordsCardView.addEventListener('click', (e) => {
-  const target = e.target;
-  const hidden = target.closest('.toggled-hidden');
-  if (!hidden) return;
 
-  e.stopPropagation();
-  // Remove any existing peeking
-  hidden.classList.remove('peeking');
-  // Force reflow
-  void hidden.offsetWidth;
-  // Add peek class
-  hidden.classList.add('peeking');
-  // After animation ends, remove peeking class
-  hidden.addEventListener('animationend', () => {
-    hidden.classList.remove('peeking');
-  }, { once: true });
-});
 
 // ─── Create Book / Chapter ────────────────────────────────────────────────────
 addBookBtn.addEventListener('click', async () => {
