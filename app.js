@@ -822,12 +822,13 @@ function setupSwipeGestures() {
       
       setTimeout(() => {
         // Swap data halfway through animation
-        for (let i = swipeWords.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
+        // Only shuffle from the current card (swipeIndex) onwards, preserving studied cards
+        for (let i = swipeWords.length - 1; i > swipeIndex; i--) {
+          const j = Math.floor(Math.random() * (i - swipeIndex + 1)) + swipeIndex;
           [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
         }
-        swipeIndex = 0;
-        renderSwipeCard(0);
+        // Do not reset swipeIndex to 0. Keep them at their current position!
+        renderSwipeCard(swipeIndex);
       }, 200);
 
       setTimeout(() => {
