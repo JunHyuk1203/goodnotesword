@@ -1100,7 +1100,7 @@ body {
 
 .hide-toggle-bar {
   position: fixed;
-  bottom: 24px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -1324,7 +1324,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 54px 0 140px 0; /* Increased top padding to clear swipe counter */
+  padding: 54px 0 180px 0; /* Increased top padding to clear swipe counter, bottom to clear elevated buttons */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1376,7 +1376,7 @@ body {
 }
 .swipe-hint {
   position: fixed;
-  bottom: 84px;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.85rem;
@@ -1411,8 +1411,8 @@ body {
   z-index: 10;
 }
 .swipe-nav-btn:hover { background: rgba(108,99,255,0.25); color: white; }
-.swipe-nav-up { bottom: 134px; } /* Explicit bottom offsets to prevent overlap */
-.swipe-nav-down { bottom: 84px; }
+.swipe-nav-up { bottom: 160px; } /* Explicit bottom offsets to prevent overlap */
+.swipe-nav-down { bottom: 110px; }
 
 /* Hide footer and remove bottom padding in shorts mode to eliminate empty space */
 body.shorts-mode-active {
