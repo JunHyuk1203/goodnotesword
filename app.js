@@ -690,19 +690,17 @@ function renderSwipeView() {
   swipeIndex = 0;
 
   wordsSwipeView.innerHTML = `
-    <div class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</div>
-    <div class="swipe-card-wrap slide-in-top" id="swipe-wrap">
+    <div id="swipe-wrap" class="swipe-card-wrap slide-in-top">
       <div class="swipe-card" id="swipe-card"></div>
     </div>
-    <button class="swipe-nav-btn swipe-nav-up" id="swipe-prev" title="이전">↑</button>
-    <button class="swipe-nav-btn swipe-nav-down" id="swipe-next" title="다음">↓</button>
-    <div class="swipe-hint">
-      <button id="auto-play-toggle" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:6px 14px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;">
-        ${autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF'}
-      </button>
-      <button id="shuffle-swipe-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:6px 14px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;">
-        🔀 랜덤 섞기
-      </button>
+    <div class="shorts-bottom-bar">
+      <span class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</span>
+      <div class="shorts-bottom-btns">
+        <button id="swipe-prev" class="shorts-nav-btn" title="이전">↑</button>
+        <button id="auto-play-toggle" class="shorts-ctrl-btn">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
+        <button id="shuffle-swipe-btn" class="shorts-ctrl-btn">🔀</button>
+        <button id="swipe-next" class="shorts-nav-btn" title="다음">↓</button>
+      </div>
     </div>
   `;
 
@@ -803,20 +801,18 @@ function setupSwipeGestures() {
   
   const autoPlayBtn = document.getElementById('auto-play-toggle');
   if (autoPlayBtn) {
+    // Set initial active state
+    if (autoPlayPronunciation) autoPlayBtn.classList.add('active');
     autoPlayBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       autoPlayPronunciation = !autoPlayPronunciation;
-      autoPlayBtn.innerHTML = autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF';
-      autoPlayBtn.style.background = autoPlayPronunciation ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255,255,255,0.06)';
-      autoPlayBtn.style.color = autoPlayPronunciation ? 'var(--primary-light)' : 'var(--text-muted)';
+      autoPlayBtn.textContent = autoPlayPronunciation ? '🔊' : '🔇';
+      autoPlayBtn.classList.toggle('active', autoPlayPronunciation);
       if (autoPlayPronunciation) {
          const parsed = parseWordData(swipeWords[swipeIndex]);
          playPronunciation(parsed.word);
       }
     });
-    // Init style based on state
-    autoPlayBtn.style.background = autoPlayPronunciation ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255,255,255,0.06)';
-    autoPlayBtn.style.color = autoPlayPronunciation ? 'var(--primary-light)' : 'var(--text-muted)';
   }
 
   const shuffleBtn = document.getElementById('shuffle-swipe-btn');
