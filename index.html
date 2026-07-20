@@ -20,37 +20,18 @@
 
   <div class="app-container">
     <!-- Header -->
-    <header class="app-header">
-      <div class="logo-wrap">
-        <div class="logo-icon">
-          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="12" fill="url(#logoGrad)"/>
-            <path d="M12 14h16M12 20h10M12 26h13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="30" cy="26" r="5" fill="white" fill-opacity="0.9"/>
-            <path d="M28 26l1.5 1.5L32 24" stroke="#6C63FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#6C63FF"/><stop offset="1" stop-color="#a78bfa"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div>
-          <h1 class="app-title">단어장 스터디 앱 <span class="version-badge" id="version-badge">v2.0</span></h1>
-          <p class="app-subtitle">AI 단어 추출 · 카드형 학습 · 테스트 모드</p>
-        </div>
+    <header class="app-header" style="flex-direction:row; align-items:center; border-bottom: 1px solid var(--border); padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.03); margin-bottom: 8px;">
+      <div style="font-weight: 500; font-size: 0.9rem; color: var(--text); display:flex; align-items:center; gap: 8px; letter-spacing:-0.02em;">
+        <span style="color:var(--primary-light);">✦</span> VocaStudy
       </div>
-      <div class="badge-row">
-        <span class="badge badge-ai">✦ 수동 AI 추출</span>
-        <span class="badge badge-compat">굿노트 호환</span>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">
+        v2.0
       </div>
     </header>
 
     <!-- ========== LIBRARY (단어장) ========== -->
-    <div id="library-content" class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
-        <h2 class="step-title" style="margin:0;">📚 내 단어장</h2>
-      </div>
+    <div id="library-content">
+
 
       <!-- Breadcrumb -->
       <div id="breadcrumb" style="margin-bottom:1.5rem; font-size:0.95rem;">
@@ -61,7 +42,7 @@
 
       <!-- Add Book Button -->
       <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
-        <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단어장 만들기</button>
+        <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
       </div>
 
       <!-- Books Grid -->
