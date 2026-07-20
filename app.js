@@ -1624,7 +1624,7 @@ if ($('short-appeal-btn')) {
         console.log('Appeals cache miss, calling Gemini');
         const prompt = `단어 '${targetWord}'의 정답은 원래 '${correctAnswers}' 입니다. 사용자가 주관식 정답으로 '${val}'을(를) 입력했습니다. 이 답변이 의미상 정답으로 인정될 수 있다면 오직 'true', 틀렸다면 'false'라고만 대답하세요.`;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey.trim()}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1632,7 +1632,12 @@ if ($('short-appeal-btn')) {
           })
         });
         
-        if (!response.ok) throw new Error('API 호출 실패');
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error("Gemini API Error:", errText);
+          throw new Error(`API 호출 실패 (${response.status})\n${errText}`);
+        }
+        
         const json = await response.json();
         const text = json.candidates[0].content.parts[0].text.toLowerCase().trim();
         
