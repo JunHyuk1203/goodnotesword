@@ -601,15 +601,18 @@ function setViewMode(mode) {
     viewCardBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
     hideToggleBar.classList.remove('hidden');
+    document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
     viewTableBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
     hideToggleBar.classList.add('hidden');
     document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
+    document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
     wordsSwipeView.classList.remove('hidden');
     hideToggleBar.classList.remove('hidden');
+    document.body.classList.add('shorts-mode-active');
     renderSwipeView();
   }
 }
