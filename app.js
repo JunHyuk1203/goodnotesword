@@ -1652,34 +1652,45 @@ if ($('short-appeal-btn')) {
         } else {
           // Use Gemini API
           console.log('Using Gemini API');
-          let model = 'gemini-3.5-flash';
-          let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }]
-            })
-          });
+          // Fallback sequence: cheapest/most available -> older generation -> pro (expensive)
+          let modelsToTry = [
+            'gemini-3.1-flash-lite', // Cheapest and most available 2026 tier
+            'gemini-2.5-flash-lite', // Legacy fallback (very cheap)
+            'gemini-3.5-flash',      // Current generation Flash
+            'gemini-2.5-flash',      // Legacy generation Flash
+            'gemini-3.1-pro-preview' // Pro tier (most expensive, last resort)
+          ];
           
-          if (!response.ok && (response.status === 404 || response.status === 503)) {
-            console.log(`gemini-3.5-flash returned ${response.status}, falling back to gemini-3.1-pro...`);
-            model = 'gemini-3.1-pro';
-            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          let response = null;
+          let currentModel = '';
+
+          for (const model of modelsToTry) {
+            currentModel = model;
+            console.log(`Trying Gemini API with model: ${currentModel}`);
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }]
               })
             });
+
+            // If success (200 OK), break the loop and use this response
+            if (response.ok) {
+              break;
+            }
+            
+            // If it's a 404 (Not Found) or 503 (Unavailable), log it and let the loop try the next model
+            console.log(`${currentModel} returned ${response.status}. Trying next model...`);
           }
 
-          if (!response.ok) {
-            const errText = await response.text();
+          if (!response || !response.ok) {
+            const errText = response ? await response.text() : 'No response';
             console.error("Gemini API Error:", errText);
-            if (response.status === 503) {
-              throw new Error("현재 구글 AI 서버에 사용자가 너무 많아 일시적으로 혼잡합니다 (503). 잠시 후 다시 이의제기를 시도해 주세요.");
+            if (response && response.status === 503) {
+              throw new Error("현재 구글 AI 서버 전체에 사용자가 너무 많아 일시적으로 혼잡합니다 (503). 모든 모델 호출에 실패했습니다. 잠시 후 다시 시도해 주세요.");
             } else {
-              throw new Error(`Gemini API 호출 실패 (${response.status})\n${errText}`);
+              throw new Error(`Gemini API 호출 실패 (${response ? response.status : 'Unknown'})\n${errText}`);
             }
           }
           
