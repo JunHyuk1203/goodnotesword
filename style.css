@@ -1105,8 +1105,6 @@ body {
   transform: translateX(-50%);
   z-index: 1000;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
   gap: 6px;
   padding: 10px 14px;
@@ -1130,9 +1128,8 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  width: 100%;
-  text-align: center;
-  margin-bottom: 4px;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 .hide-toggle-btn {
   background: rgba(255,255,255,0.08);
