@@ -1359,7 +1359,7 @@ body {
 }
 .swipe-hint {
   position: absolute;
-  bottom: 14px;
+  bottom: 84px; /* Moved up to clear hide-toggle-bar */
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.72rem;
@@ -1395,7 +1395,7 @@ body {
 }
 .swipe-nav-btn:hover { background: rgba(108,99,255,0.25); color: white; }
 .swipe-nav-up { top: 50px; }
-.swipe-nav-down { bottom: 50px; }
+.swipe-nav-down { bottom: 90px; /* Moved up to clear hide-toggle-bar */ }
 
 /* Hidden state for toggles */
 .toggled-hidden {
