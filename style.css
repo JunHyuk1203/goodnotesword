@@ -1415,24 +1415,55 @@ body {
 }
 .shorts-ctrl-btn:hover { background: rgba(108,99,255,0.2); }
 
+.shorts-divider {
+  color: rgba(255,255,255,0.2);
+  font-size: 0.9rem;
+  padding: 0 2px;
+  user-select: none;
+}
+
+.shorts-hide-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.35);
+  height: 28px;
+  padding: 0 7px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.shorts-hide-btn.active {
+  border-color: rgba(108,99,255,0.5);
+  color: var(--primary-light);
+  background: rgba(108,99,255,0.15);
+}
+.shorts-hide-btn:hover { border-color: rgba(108,99,255,0.4); }
+
 /* Hide toggle bar (가리기) stays at very bottom */
 .hide-toggle-bar {
   flex-shrink: 0;
 }
 
-/* Shorts mode: make body fill screen and layout as column */
+/* Shorts mode: fill screen, hide top bar */
 body.shorts-mode-active {
   overflow: hidden;
 }
 body.shorts-mode-active .app-footer {
   display: none;
 }
+body.shorts-mode-active .words-action-bar {
+  display: none; /* hidden in shorts - controls moved to bottom bar */
+}
 body.shorts-mode-active .app-container {
   padding-bottom: 0;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 60px); /* 60px = approx header/nav height */
+  flex: 1;
   min-height: 0;
+  /* Use svh for mobile browser chrome awareness */
+  height: 100svh;
 }
 body.shorts-mode-active #view-words {
   display: flex;

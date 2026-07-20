@@ -609,26 +609,30 @@ function setViewMode(mode) {
   wordsSwipeView.classList.add('hidden');
   document.querySelector('.words-card-grid')?.classList.remove('edit-mode-active');
 
+  const actionBar = document.querySelector('.words-action-bar');
   if (mode === 'card') {
     viewCardBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
-    document.querySelector('.words-action-bar').appendChild(hideToggleBar);
+    if (actionBar) actionBar.classList.remove('hidden');
+    document.querySelector('.words-action-bar')?.appendChild(hideToggleBar);
     hideToggleBar.classList.remove('hidden');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
     viewTableBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
-    document.querySelector('.words-action-bar').appendChild(hideToggleBar);
+    if (actionBar) actionBar.classList.remove('hidden');
+    document.querySelector('.words-action-bar')?.appendChild(hideToggleBar);
     hideToggleBar.classList.add('hidden');
     document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
     wordsSwipeView.classList.remove('hidden');
+    if (actionBar) actionBar.classList.add('hidden'); // hide top bar in shorts mode
     document.body.classList.add('shorts-mode-active');
     renderSwipeView();
-    wordsSwipeView.appendChild(hideToggleBar);
-    hideToggleBar.classList.remove('hidden');
+    // hide-toggle buttons are now built into the shorts bottom bar
+    hideToggleBar.classList.add('hidden');
   }
 }
 
@@ -697,12 +701,28 @@ function renderSwipeView() {
       <span class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</span>
       <div class="shorts-bottom-btns">
         <button id="swipe-prev" class="shorts-nav-btn" title="이전">↑</button>
-        <button id="auto-play-toggle" class="shorts-ctrl-btn">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
+        <button id="auto-play-toggle" class="shorts-ctrl-btn${autoPlayPronunciation ? ' active' : ''}">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
         <button id="shuffle-swipe-btn" class="shorts-ctrl-btn">🔀</button>
         <button id="swipe-next" class="shorts-nav-btn" title="다음">↓</button>
+        <span class="shorts-divider">|</span>
+        <button class="shorts-hide-btn${hideState.word ? ' active' : ''}" data-target="word">단어</button>
+        <button class="shorts-hide-btn${hideState.meaning ? ' active' : ''}" data-target="meaning">뜻</button>
+        <button class="shorts-hide-btn${hideState.example ? ' active' : ''}" data-target="example">예문</button>
+        <button class="shorts-hide-btn${hideState.related ? ' active' : ''}" data-target="related">유의어</button>
       </div>
     </div>
   `;
+
+  // Wire up inline hide-toggle buttons
+  wordsSwipeView.querySelectorAll('.shorts-hide-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const target = btn.dataset.target;
+      hideState[target] = !hideState[target];
+      btn.classList.toggle('active', hideState[target]);
+      applyHideState();
+    });
+  });
 
   renderSwipeCard(0);
   setupSwipeGestures();
