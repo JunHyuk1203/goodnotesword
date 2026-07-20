@@ -1328,9 +1328,10 @@ body {
 .swipe-card-wrap.slide-from-top  { transform: translateY(-110%); opacity: 0; }
 .swipe-card-wrap.slide-from-bottom { transform: translateY(110%); opacity: 0; }
 .swipe-card {
-  width: calc(100% - 32px); /* Leave 16px margin on left and right */
-  height: 100%; /* Stretch to fill container */
-  max-width: 500px;
+  width: 90%; /* Compact width to reduce horizontal waste */
+  height: auto; /* Hug the content height instead of stretching */
+  max-height: 100%;
+  max-width: 400px;
   padding: 1.5rem; /* Card inner padding */
   display: flex;
   flex-direction: column;
