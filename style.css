@@ -1092,36 +1092,29 @@ body {
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
-/* ─── Hide Toggle Bar (Inline by default, Fixed Floating in Shorts) ─── */
+/* ─── Hide Toggle Bar (Fixed Floating Bottom) ─── */
 .hide-toggle-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px 4px 12px;
-  background: rgba(15, 15, 30, 0.6);
+  padding: 6px 10px 6px 14px;
+  background: rgba(15, 15, 30, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(108, 99, 255, 0.25);
   border-radius: 999px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
   white-space: nowrap;
   transition: opacity 0.3s, transform 0.3s;
-  margin-top: 4px;
 }
 .hide-toggle-bar.hidden {
   opacity: 0;
   pointer-events: none;
-}
-body.shorts-mode-active .hide-toggle-bar {
-  position: fixed;
-  bottom: 30px; /* Right below swipe hint */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  margin-top: 0;
-  background: rgba(15, 15, 30, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
-}
-body.shorts-mode-active .hide-toggle-bar.hidden {
   transform: translateX(-50%) translateY(8px);
 }
 .hide-toggle-label {
@@ -1360,8 +1353,8 @@ body.shorts-mode-active .hide-toggle-bar.hidden {
   z-index: 10;
 }
 .swipe-hint {
-  position: absolute;
-  bottom: 84px; /* Moved up to clear hide-toggle-bar */
+  position: fixed; /* Relative to viewport to stack with hide bar */
+  bottom: 84px; /* Stacked right above hide-toggle-bar */
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.72rem;
@@ -1370,7 +1363,7 @@ body.shorts-mode-active .hide-toggle-bar.hidden {
   align-items: center;
   gap: 16px;
   pointer-events: auto;
-  z-index: 10;
+  z-index: 1000;
 }
 .swipe-hint span {
   display: flex;
@@ -1379,7 +1372,7 @@ body.shorts-mode-active .hide-toggle-bar.hidden {
   gap: 2px;
 }
 .swipe-nav-btn {
-  position: absolute;
+  position: fixed; /* Relative to viewport */
   right: 14px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
