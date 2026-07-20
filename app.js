@@ -724,11 +724,6 @@ function renderSwipeView() {
         <button class="shorts-hide-btn${hideState.meaning ? ' active' : ''}" data-target="meaning">뜻</button>
         <button class="shorts-hide-btn${hideState.example ? ' active' : ''}" data-target="example">예문</button>
         <button class="shorts-hide-btn${hideState.related ? ' active' : ''}" data-target="related">유의어</button>
-        <span class="shorts-divider">|</span>
-        <div class="shorts-nav-group">
-          <button id="swipe-prev" class="shorts-nav-btn" title="이전">↑</button>
-          <button id="swipe-next" class="shorts-nav-btn" title="다음">↓</button>
-        </div>
       </div>
     </div>
   `;
@@ -858,9 +853,7 @@ function setupSwipeGestures() {
     navigateSwipe(e.deltaY > 0 ? 1 : -1);
   }, { passive: true });
 
-  document.getElementById('swipe-next')?.addEventListener('click', () => navigateSwipe(1));
-  document.getElementById('swipe-prev')?.addEventListener('click', () => navigateSwipe(-1));
-  
+
   const autoPlayBtn = document.getElementById('auto-play-toggle');
   if (autoPlayBtn) {
     // Set initial active state
