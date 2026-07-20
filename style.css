@@ -1093,19 +1093,7 @@ body {
 }
 
 /* ─── Hide Toggle Bar (Fixed Floating Bottom) ─── */
-body.shorts-mode-active .hide-toggle-bar {
-  position: static; /* Flow dynamically underneath the swipe-hint */
-  transform: none;
-  margin: 16px auto;
-  background: rgba(15, 15, 30, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(108, 99, 255, 0.25);
-  border-radius: 999px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
-  white-space: nowrap;
-  transition: opacity 0.3s, transform 0.3s;
-}
+
 
 .hide-toggle-bar {
   position: fixed;
@@ -1320,24 +1308,18 @@ body.shorts-mode-active .hide-toggle-bar {
 /* ─── Swipe (Shorts) View ─── */
 #words-swipe-view {
   position: relative;
-  height: calc(100vh - 140px); /* Fill space down to the very bottom */
+  height: calc(100vh - 140px);
   min-height: 350px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   touch-action: pan-y;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Attach everything to the top */
-  padding-bottom: 40px;
 }
 .swipe-card-wrap {
-  position: relative; /* Not absolute so it pushes the buttons below it */
-  width: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: flex-start; /* Card is at the top of the wrap */
+  align-items: flex-start;
   justify-content: center;
-  padding: 40px 0 24px 0; /* Top padding, and 24px gap to the buttons below */
+  padding: 20px 8px 140px 8px; /* 8px side padding so card has almost no space */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1347,10 +1329,9 @@ body.shorts-mode-active .hide-toggle-bar {
 .swipe-card-wrap.slide-from-top  { transform: translateY(-110%); opacity: 0; }
 .swipe-card-wrap.slide-from-bottom { transform: translateY(110%); opacity: 0; }
 .swipe-card {
-  width: 90%; /* Compact width to reduce horizontal waste */
-  height: auto; /* Hug the content height instead of stretching */
-  max-height: 100%;
-  max-width: 400px;
+  width: 100%;
+  height: 100%;
+  max-width: none;
   padding: 1.5rem; /* Card inner padding */
   display: flex;
   flex-direction: column;
@@ -1378,9 +1359,10 @@ body.shorts-mode-active .hide-toggle-bar {
   z-index: 10;
 }
 .swipe-hint {
-  position: static; /* Flow directly under the card */
-  transform: none;
-  margin-bottom: 16px; /* Gap to hide-toggle-bar */
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.72rem;
   color: var(--text-muted);
   display: flex;
