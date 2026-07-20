@@ -1319,7 +1319,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 20px 8px 140px 8px; /* 8px side padding so card has almost no space */
+  padding: 20px 0 140px 0; /* 0 side padding to match exactly the 20px from app-container */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1332,17 +1332,17 @@ body {
   width: 100%;
   height: 100%;
   max-width: none;
-  padding: 1.5rem; /* Card inner padding */
+  padding: 0.8rem 0.8rem 0.6rem; /* Exactly match word-card padding */
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.5rem; /* Match word-card gap */
   overflow-y: auto;
   
-  /* Restore card styling */
-  background: var(--bg-card);
+  /* Match word-card styling exactly */
+  background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  /* Removed heavy shadow to match card mode */
 }
 .swipe-counter {
   position: absolute;
