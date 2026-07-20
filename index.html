@@ -32,7 +32,12 @@
             <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
             <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
           </div>
-          <span id="word-count-badge" class="badge badge-ai hidden" style="margin-left:4px;">0 단어</span>
+          <div style="margin-left:auto; display:flex; gap: 8px; align-items:center;">
+            <span id="word-count-badge" class="badge badge-ai hidden">0 단어</span>
+            <button id="settings-btn" class="circle-action-btn" title="설정" style="width:28px; height:28px; background:transparent; border:none;">
+              <span class="icon" style="font-size:1.2rem;">⚙️</span>
+            </button>
+          </div>
         </div>
 
         <!-- Top action bar (Moved here) -->
@@ -286,7 +291,10 @@
           <button id="short-submit-btn" class="short-submit-btn">확인 →</button>
         </div>
         <div id="short-feedback" class="short-feedback hidden"></div>
-        <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;margin-top:0.5rem;">다음 →</button>
+        <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-top:0.5rem;">
+          <button id="short-appeal-btn" class="sample-btn hidden" style="border-color:var(--primary); color:var(--primary-light);">🤖 AI 이의제기</button>
+          <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;">다음</button>
+        </div>
         <button id="short-close-btn" class="sample-btn" style="margin-top:1rem;">✕ 테스트 종료</button>
       </div>
 
@@ -400,6 +408,23 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay hidden" style="z-index: 9999;">
+    <div class="modal-content" style="max-width:400px;">
+      <h3 style="margin-top:0;">⚙️ 앱 설정</h3>
+      <div style="margin-bottom:1rem;">
+        <label for="gemini-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Gemini API 키</label>
+        <input type="password" id="gemini-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">주관식 이의제기 기능(AI 채점)을 사용하려면 무료 Gemini API 키가 필요합니다. 키는 브라우저에만 안전하게 저장됩니다.</p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button id="settings-close-btn" class="sample-btn">닫기</button>
+        <button id="settings-save-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
   query, orderBy, serverTimestamp, deleteDoc, updateDoc,
-  onSnapshot, initializeFirestore, persistentLocalCache
+  onSnapshot, initializeFirestore, persistentLocalCache, where
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -139,6 +139,28 @@ const cardBackSel = $('card-back-sel');
 const viewCardBtn = $('view-card-btn');
 const viewTableBtn = $('view-table-btn');
 const viewSwipeBtn = $('view-swipe-btn');
+
+// Settings
+const settingsBtn = $('settings-btn');
+const settingsModal = $('settings-modal');
+const settingsCloseBtn = $('settings-close-btn');
+const settingsSaveBtn = $('settings-save-btn');
+const geminiApiKeyInput = $('gemini-api-key');
+let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+
+if (settingsBtn) {
+  settingsBtn.addEventListener('click', () => {
+    geminiApiKeyInput.value = geminiApiKey;
+    settingsModal.classList.remove('hidden');
+  });
+  settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+  settingsSaveBtn.addEventListener('click', () => {
+    geminiApiKey = geminiApiKeyInput.value.trim();
+    localStorage.setItem('gemini_api_key', geminiApiKey);
+    settingsModal.classList.add('hidden');
+    alert('설정이 저장되었습니다.');
+  });
+}
 const wordsSwipeView = $('words-swipe-view');
 const startTestBtn = $('start-test-btn');
 const viewHistoryBtn = $('view-history-btn');
@@ -1481,6 +1503,7 @@ function showShortCard() {
   const feedback = $('short-feedback');
   const nextBtn = $('short-next-btn');
   const submitBtn = $('short-submit-btn');
+  const appealBtn = $('short-appeal-btn');
 
   input.value = '';
   input.disabled = false;
@@ -1488,6 +1511,7 @@ function showShortCard() {
   submitBtn.disabled = false;
   submitBtn.classList.remove('hidden');
   nextBtn.classList.add('hidden');
+  appealBtn.classList.add('hidden');
   feedback.classList.add('hidden');
   feedback.classList.remove('correct-fb', 'wrong-fb');
 
