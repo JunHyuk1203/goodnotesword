@@ -1684,9 +1684,9 @@ async function fetchLatestVersion() {
     if (!res.ok) return;
     const data = await res.json();
     const date = new Date(data.commit.author.date);
-    const badge = $('version-badge');
+    const badge = $('build-time');
     if (badge) {
-      badge.textContent = `업데이트 ${date.getMonth()+1}.${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      badge.textContent = `마지막 업데이트: ${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
       badge.title = data.commit.message;
     }
   } catch (e) { console.error('Version fetch failed:', e); }
