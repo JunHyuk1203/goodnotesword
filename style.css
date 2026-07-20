@@ -41,7 +41,10 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-html { scroll-behavior: smooth; }
+html { 
+  scroll-behavior: smooth;
+  font-size: 18px; /* Increase overall app scale (default is 16px) */
+}
 
 body {
   font-family: var(--font-sans);
