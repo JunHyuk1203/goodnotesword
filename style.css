@@ -1450,6 +1450,8 @@ body {
 /* Shorts mode: fill screen, hide top bar */
 body.shorts-mode-active {
   overflow: hidden;
+  min-height: 0;
+  height: 100svh;
 }
 body.shorts-mode-active .app-footer {
   display: none;
