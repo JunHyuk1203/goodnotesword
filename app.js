@@ -1571,6 +1571,11 @@ function handleShortSubmit() {
     feedback.classList.add('wrong-fb');
     feedback.innerHTML = `<span class="wrong-label">틀렸습니다!</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
     testWrong.push(shortCurrentData.word);
+    
+    // Show AI Appeal Button
+    if ($('short-appeal-btn')) {
+      $('short-appeal-btn').classList.remove('hidden');
+    }
   }
   
   nextBtn.focus();
@@ -1582,6 +1587,92 @@ $('short-answer-input').addEventListener('keydown', (e) => {
     handleShortSubmit();
   }
 });
+
+// ─── AI Appeal (주관식 이의제기) ──────────────────────────────────────────────────
+if ($('short-appeal-btn')) {
+  $('short-appeal-btn').addEventListener('click', async () => {
+    if (!geminiApiKey) {
+      alert("설정(⚙️) 메뉴에서 Gemini API 키를 먼저 등록해주세요.");
+      return;
+    }
+    const appealBtn = $('short-appeal-btn');
+    const input = $('short-answer-input');
+    const val = input.value.trim().toLowerCase();
+    if (!val) return;
+
+    const correctAnswers = shortCorrectAnswer.join(', ');
+    const targetWord = testDir === 'word2meaning' ? shortCurrentData.word : shortCurrentData.meaning;
+    
+    const originalText = appealBtn.innerHTML;
+    appealBtn.innerHTML = '🤖 채점 중...';
+    appealBtn.disabled = true;
+
+    try {
+      // 1. Check Firebase Cache
+      const appealsCol = collection(db, 'appeals');
+      const q = query(appealsCol, where("userAnswer", "==", val), where("targetWord", "==", targetWord));
+      const querySnapshot = await getDocs(q);
+      
+      let isApproved = false;
+      
+      if (!querySnapshot.empty) {
+        // Cache Hit
+        isApproved = querySnapshot.docs[0].data().isApproved;
+        console.log('Appeals cache hit:', isApproved);
+      } else {
+        // Cache Miss -> Call Gemini
+        console.log('Appeals cache miss, calling Gemini');
+        const prompt = `단어 '${targetWord}'의 정답은 원래 '${correctAnswers}' 입니다. 사용자가 주관식 정답으로 '${val}'을(를) 입력했습니다. 이 답변이 의미상 정답으로 인정될 수 있다면 오직 'true', 틀렸다면 'false'라고만 대답하세요.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+        
+        if (!response.ok) throw new Error('API 호출 실패');
+        const json = await response.json();
+        const text = json.candidates[0].content.parts[0].text.toLowerCase().trim();
+        
+        isApproved = text.includes('true');
+        
+        // Save to Firebase Cache
+        await addDoc(appealsCol, {
+          targetWord,
+          correctAnswers,
+          userAnswer: val,
+          isApproved,
+          createdAt: serverTimestamp()
+        });
+      }
+
+      if (isApproved) {
+        // Mark as Correct
+        const feedback = $('short-feedback');
+        input.classList.remove('wrong');
+        input.classList.add('correct');
+        feedback.classList.remove('wrong-fb');
+        feedback.classList.add('correct-fb');
+        feedback.innerHTML = `<span class="correct-label">AI가 정답으로 인정했습니다! 🤖</span><br>원래 답: ${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}`;
+        
+        testWrong = testWrong.filter(w => w !== shortCurrentData.word);
+        testCorrect++;
+        appealBtn.classList.add('hidden');
+      } else {
+        alert("AI 채점 결과: 정답으로 인정되지 않았습니다. 😢");
+        appealBtn.classList.add('hidden');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('이의제기 처리 중 오류가 발생했습니다: ' + err.message);
+    } finally {
+      appealBtn.innerHTML = originalText;
+      appealBtn.disabled = false;
+    }
+  });
+}
 
 $('short-next-btn').addEventListener('click', () => {
   testIndex++;
