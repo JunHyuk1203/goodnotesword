@@ -1400,6 +1400,9 @@ body {
 .swipe-nav-down { bottom: 84px; }
 
 /* Hide footer and remove bottom padding in shorts mode to eliminate empty space */
+body.shorts-mode-active {
+  overflow: hidden; /* Lock page scroll completely in shorts mode */
+}
 body.shorts-mode-active .app-footer {
   display: none;
 }
