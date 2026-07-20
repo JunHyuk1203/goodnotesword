@@ -1863,3 +1863,19 @@ body.shorts-mode-active .app-container {
   border: 1px solid var(--border-light);
   z-index: 1;
 }
+
+/* ─── Mobile UI Scaling Tweak ─── */
+@media (max-width: 600px) {
+  .hide-toggle-bar {
+    padding: 8px 10px;
+    gap: 4px;
+    max-width: 98vw;
+  }
+  .hide-toggle-label {
+    font-size: 0.75rem;
+  }
+  .hide-toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
