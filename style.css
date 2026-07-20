@@ -1330,7 +1330,8 @@ body {
 .swipe-card-wrap.slide-from-bottom { transform: translateY(110%); opacity: 0; }
 .swipe-card {
   width: 100%;
-  height: 100%;
+  height: auto; /* Shrink to wrap content */
+  max-height: 100%; /* Don't exceed container */
   max-width: none;
   padding: 0.8rem 0.8rem 0.6rem; /* Exactly match word-card padding */
   display: flex;
