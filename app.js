@@ -735,9 +735,17 @@ function navigateSwipe(dir) { // dir: 1 = next (swipe up), -1 = prev (swipe down
   setTimeout(() => {
     swipeIndex = newIdx;
     renderSwipeCard(swipeIndex);
+    
+    // Disable transition to jump instantly to the starting position
+    wrap.style.transition = 'none';
     wrap.classList.remove(outClass);
     wrap.classList.add(inClass);
+    
+    // Force reflow
     void wrap.offsetWidth;
+    
+    // Restore transition and animate in
+    wrap.style.transition = '';
     wrap.classList.remove(inClass);
     wrap.classList.add('slide-in-top');
   }, 280);
