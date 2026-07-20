@@ -1652,7 +1652,7 @@ if ($('short-appeal-btn')) {
         } else {
           // Use Gemini API
           console.log('Using Gemini API');
-          let model = 'gemini-1.5-flash';
+          let model = 'gemini-3.5-flash';
           let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1662,8 +1662,8 @@ if ($('short-appeal-btn')) {
           });
           
           if (response.status === 404) {
-            console.log('gemini-1.5-flash not found, falling back to gemini-1.5-pro...');
-            model = 'gemini-1.5-pro';
+            console.log('gemini-3.5-flash not found, falling back to gemini-3.1-pro...');
+            model = 'gemini-3.1-pro';
             response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
