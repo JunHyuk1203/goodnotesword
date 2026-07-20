@@ -436,8 +436,8 @@ function renderCardView(docs) {
     card.innerHTML = `
       <div class="word-card-header">
         <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
-        ${parsed.pos ? `<span class="word-card-pos">${escapeHTML(parsed.pos)}</span>` : ''}
-        ${parsed.pronunciation ? `<span class="word-card-pron">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+        ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
+        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
         <span class="word-card-num">${idx + 1}</span>
       </div>
       ${parsed.meaning ? `
@@ -614,7 +614,7 @@ function buildSwipeCardHTML(parsed) {
       }
       return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
     }).join('');
-    return `<div class="word-card-section${!hideState.related ? ' toggled-hidden' : ''}">
+    return `<div class="word-card-section word-section-related${hideState.related ? '' : ' toggled-hidden'}">
       <div class="word-card-section-label">${emoji} ${label}</div>
       <div class="word-card-related-list">${lines}</div>
     </div>`;
@@ -627,8 +627,8 @@ function buildSwipeCardHTML(parsed) {
   return `
     <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
       <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}" style="font-size:1.5rem;">${escapeHTML(parsed.word)}</span>
-      ${parsed.pos ? `<span class="word-card-pos">${escapeHTML(parsed.pos)}</span>` : ''}
-      ${parsed.pronunciation ? `<span class="word-card-pron">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+      ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
+      ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
     </div>
     ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
       <div class="word-card-section-label">📌 뜻</div>
