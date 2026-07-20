@@ -34,10 +34,13 @@
 
 
       <!-- Breadcrumb -->
-      <div id="breadcrumb" style="margin-bottom:1.5rem; font-size:0.95rem;">
-        <span id="crumb-home" style="cursor:pointer; color:var(--primary); font-weight:600;">🏠 단어장 목록</span>
-        <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
-        <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
+      <div id="breadcrumb" style="margin-bottom:0.8rem; font-size:0.95rem; display:flex; align-items:center; flex-wrap:wrap; gap: 8px;">
+        <div>
+          <span id="crumb-home" style="cursor:pointer; color:var(--primary); font-weight:600;">🏠 단어장 목록</span>
+          <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
+          <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
+        </div>
+        <span id="word-count-badge" class="badge badge-ai hidden" style="margin-left:4px;">0 단어</span>
       </div>
 
       <!-- Add Book Button -->
@@ -61,11 +64,8 @@
 
         <!-- Top action bar -->
         <div class="words-action-bar">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span id="word-count-badge" class="badge badge-ai">0 단어</span>
-            <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:0.8rem;">🗑 삭제</button>
-          </div>
-          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; width: 100%;">
+            <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:0.8rem; margin-right:auto;">🗑 삭제</button>
             <!-- View mode: card vs edit -->
             <div class="view-toggle-group">
               <button id="view-card-btn" class="view-toggle-btn active" title="카드 모드">
