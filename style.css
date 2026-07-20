@@ -1306,7 +1306,7 @@ body {
 /* ─── Swipe (Shorts) View ─── */
 #words-swipe-view {
   position: relative;
-  height: calc(100vh - 280px); /* Exactly calculates remaining height to prevent scroll */
+  height: calc(100vh - 140px); /* Fill space down to the very bottom */
   min-height: 350px;
   overflow: hidden;
   touch-action: pan-y;
@@ -1318,7 +1318,7 @@ body {
   display: flex;
   align-items: flex-start; /* Move card to top rather than isolating it in the center */
   justify-content: center;
-  padding: 40px 0 70px 0; /* Add top padding to prevent swipe-counter overlap */
+  padding: 40px 0 140px 0; /* Add top padding and 140px bottom padding to clear the fixed buttons */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1391,6 +1391,14 @@ body {
 .swipe-nav-btn:hover { background: rgba(108,99,255,0.25); color: white; }
 .swipe-nav-up { bottom: 134px; } /* Explicit bottom offsets to prevent overlap */
 .swipe-nav-down { bottom: 84px; }
+
+/* Hide footer and remove bottom padding in shorts mode to eliminate empty space */
+body.shorts-mode-active .app-footer {
+  display: none;
+}
+body.shorts-mode-active .app-container {
+  padding-bottom: 0;
+}
 
 /* Hidden state for toggles */
 .toggled-hidden {
