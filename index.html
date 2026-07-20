@@ -95,6 +95,10 @@
                 <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M4 6h12M4 10h8M4 14h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 <span style="font-size:0.78rem;margin-left:3px;">수정</span>
               </button>
+              <button id="view-swipe-btn" class="view-toggle-btn" title="쇼츠 모드">
+                <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 9l4-3v6l-4-3z" fill="currentColor"/></svg>
+                <span style="font-size:0.78rem;margin-left:3px;">쇼츠</span>
+              </button>
             </div>
             <button id="start-test-btn" class="test-start-btn">🧪 테스트</button>
             <button id="view-history-btn" class="sample-btn" style="padding:0.4rem 0.8rem; font-size:0.78rem; background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid var(--border);">📊</button>
@@ -104,15 +108,6 @@
               CSV
             </button>
           </div>
-        </div>
-
-        <!-- Sticky Hide Toggle Bar -->
-        <div class="hide-toggle-bar" id="hide-toggle-bar">
-          <span class="hide-toggle-label">가리기:</span>
-          <button class="hide-toggle-btn active" id="toggle-word" data-target="word">🔤 단어</button>
-          <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">📌 뜻</button>
-          <button class="hide-toggle-btn active" id="toggle-example" data-target="example">📖 예문</button>
-          <button class="hide-toggle-btn active" id="toggle-related" data-target="related">🔗 유의어</button>
         </div>
 
         <!-- EXTRACT SECTION (hidden, toggled by button) -->
@@ -181,6 +176,9 @@
         <!-- Card View -->
         <div id="words-card-view"></div>
 
+        <!-- Swipe View -->
+        <div id="words-swipe-view" class="hidden"></div>
+
         <!-- Table View (hidden by default) -->
         <div id="words-table-view" class="hidden">
           <table class="preview-table">
@@ -204,6 +202,15 @@
     <footer class="app-footer">
       <p>단어장 스터디 앱 ✦ GoodNotes 호환 CSV 내보내기</p>
     </footer>
+  </div>
+
+  <!-- Floating Hide Toggle Bar (fixed bottom) -->
+  <div class="hide-toggle-bar hidden" id="hide-toggle-bar">
+    <span class="hide-toggle-label">가리기</span>
+    <button class="hide-toggle-btn active" id="toggle-word" data-target="word">단어</button>
+    <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">뜻</button>
+    <button class="hide-toggle-btn active" id="toggle-example" data-target="example">예문</button>
+    <button class="hide-toggle-btn active" id="toggle-related" data-target="related">유의어</button>
   </div>
 
   <!-- ========== TEST MODE MODAL ========== -->

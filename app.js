@@ -138,11 +138,16 @@ const cardFrontSel = $('card-front-sel');
 const cardBackSel = $('card-back-sel');
 const viewCardBtn = $('view-card-btn');
 const viewTableBtn = $('view-table-btn');
+const viewSwipeBtn = $('view-swipe-btn');
+const wordsSwipeView = $('words-swipe-view');
 const startTestBtn = $('start-test-btn');
 const viewHistoryBtn = $('view-history-btn');
 const historyModal = $('history-modal');
 const historyCloseBtn = $('history-close-btn');
 const historyList = $('history-list');
+
+let swipeIndex = 0;
+let swipeWords = [];
 
 // Edit Modal
 let currentEditDocRef = null;
@@ -173,6 +178,7 @@ function loadBooks() {
   addChapterWrap.classList.add('hidden');
   crumbBook.classList.add('hidden');
   crumbChapter.classList.add('hidden');
+  hideToggleBar.classList.add('hidden');
 
   if (!unsubBooks) {
     viewBooks.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
@@ -269,6 +275,9 @@ function loadWords(bookId, chapterId, chapterName) {
   addChapterWrap.classList.add('hidden');
   crumbChapter.classList.remove('hidden');
   crumbChapterName.textContent = chapterName;
+  // Show hide bar and reset to card mode
+  hideToggleBar.classList.remove('hidden');
+  if (currentViewMode !== 'card') setViewMode('card');
 
   if (!unsubWords) {
     wordsCardView.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:2rem;">로딩 중...</p>';
@@ -558,28 +567,173 @@ editWordSave.addEventListener('click', async () => {
   }
 });
 
-// ─── View Toggle (Card Mode / Edit Mode) ─────────────────────────────────────
-viewCardBtn.addEventListener('click', () => {
-  currentViewMode = 'card';
-  viewCardBtn.classList.add('active');
-  viewTableBtn.classList.remove('active');
-  wordsCardView.classList.remove('hidden');
+// ─── View Toggle (Card / Edit / Swipe) ───────────────────────────────────────
+function setViewMode(mode) {
+  currentViewMode = mode;
+  // Reset all buttons
+  [viewCardBtn, viewTableBtn, viewSwipeBtn].forEach(b => b?.classList.remove('active'));
+  // Hide all views
+  wordsCardView.classList.add('hidden');
   wordsTableView.classList.add('hidden');
-  hideToggleBar.classList.remove('hidden');
-  // Remove edit mode class → hide action buttons
+  wordsSwipeView.classList.add('hidden');
   document.querySelector('.words-card-grid')?.classList.remove('edit-mode-active');
-});
-viewTableBtn.addEventListener('click', () => {
-  currentViewMode = 'edit';
-  viewTableBtn.classList.add('active');
-  viewCardBtn.classList.remove('active');
-  // Stay on card view, but activate edit mode
-  wordsCardView.classList.remove('hidden');
-  wordsTableView.classList.add('hidden');
-  hideToggleBar.classList.remove('hidden');
-  // Add edit mode → show edit/delete buttons on each card
-  document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
-});
+
+  if (mode === 'card') {
+    viewCardBtn.classList.add('active');
+    wordsCardView.classList.remove('hidden');
+    hideToggleBar.classList.remove('hidden');
+  } else if (mode === 'edit') {
+    viewTableBtn.classList.add('active');
+    wordsCardView.classList.remove('hidden');
+    hideToggleBar.classList.add('hidden');
+    document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
+  } else if (mode === 'swipe') {
+    viewSwipeBtn.classList.add('active');
+    wordsSwipeView.classList.remove('hidden');
+    hideToggleBar.classList.remove('hidden');
+    renderSwipeView();
+  }
+}
+
+viewCardBtn.addEventListener('click', () => setViewMode('card'));
+viewTableBtn.addEventListener('click', () => setViewMode('edit'));
+viewSwipeBtn.addEventListener('click', () => setViewMode('swipe'));
+
+// ─── Swipe (Shorts) View ──────────────────────────────────────────────────────
+function buildSwipeCardHTML(parsed) {
+  const buildRelatedSection = (items, emoji, label) => {
+    if (!items || !items.length) return '';
+    const lines = items.map(s => {
+      const match = s.match(/^([^\[\(:：\-]+)(?:\[(.*?)\]|\((.*?)\))?(?:\s*[:：\-]\s*)(.*)$/);
+      if (match) {
+        const word = match[1].trim();
+        const pos = (match[2] || match[3] || '').trim();
+        const meaning = match[4].trim();
+        let posHtml = pos ? `<span class="related-item-pos" style="color:var(--primary);font-size:0.8rem;margin-left:4px;">[${escapeHTML(pos)}]</span>` : '';
+        return `<div class="related-item"><span class="related-item-word">${escapeHTML(word)}</span>${posHtml}<span class="related-item-colon">:</span><span class="related-item-meaning"> ${escapeHTML(meaning)}</span></div>`;
+      }
+      return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
+    }).join('');
+    return `<div class="word-card-section${!hideState.related ? ' toggled-hidden' : ''}">
+      <div class="word-card-section-label">${emoji} ${label}</div>
+      <div class="word-card-related-list">${lines}</div>
+    </div>`;
+  };
+  const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
+  const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
+  const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
+  const hasRelated = (parsed.synonyms?.length || parsed.antonyms?.length || parsed.related?.length);
+
+  return `
+    <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+      <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}" style="font-size:1.5rem;">${escapeHTML(parsed.word)}</span>
+      ${parsed.pos ? `<span class="word-card-pos">${escapeHTML(parsed.pos)}</span>` : ''}
+      ${parsed.pronunciation ? `<span class="word-card-pron">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+    </div>
+    ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
+      <div class="word-card-section-label">📌 뜻</div>
+      <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
+    </div>` : ''}
+    ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
+      <div class="word-card-section-label">📖 예문</div>
+      <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
+    </div>` : ''}
+    ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
+  `;
+}
+
+function renderSwipeView() {
+  swipeWords = [...currentLoadedWords];
+  if (!swipeWords.length) {
+    wordsSwipeView.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:3rem;">단어가 없습니다.</p>';
+    return;
+  }
+  swipeIndex = 0;
+
+  wordsSwipeView.innerHTML = `
+    <div class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</div>
+    <div class="swipe-card-wrap slide-in-top" id="swipe-wrap">
+      <div class="swipe-card" id="swipe-card"></div>
+    </div>
+    <button class="swipe-nav-btn swipe-nav-up" id="swipe-prev" title="이전">↑</button>
+    <button class="swipe-nav-btn swipe-nav-down" id="swipe-next" title="다음">↓</button>
+    <div class="swipe-hint">
+      <span>↕ 스와이프 또는 버튼</span>
+    </div>
+  `;
+
+  renderSwipeCard(0);
+  setupSwipeGestures();
+}
+
+function renderSwipeCard(idx) {
+  const card = document.getElementById('swipe-card');
+  const counter = document.getElementById('swipe-counter');
+  if (!card) return;
+  const parsed = parseWordData(swipeWords[idx]);
+  card.innerHTML = buildSwipeCardHTML(parsed);
+  counter.textContent = `${idx + 1} / ${swipeWords.length}`;
+
+  // Attach peek listeners
+  card.querySelectorAll('.toggled-hidden').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      el.classList.remove('peeking');
+      void el.offsetWidth;
+      el.classList.add('peeking');
+      el.addEventListener('animationend', () => el.classList.remove('peeking'), { once: true });
+    });
+  });
+}
+
+function navigateSwipe(dir) { // dir: 1 = next (swipe up), -1 = prev (swipe down)
+  const wrap = document.getElementById('swipe-wrap');
+  if (!wrap) return;
+  const newIdx = swipeIndex + dir;
+  if (newIdx < 0 || newIdx >= swipeWords.length) return;
+
+  const outClass = dir === 1 ? 'slide-out-top' : 'slide-out-bottom';
+  const inClass = dir === 1 ? 'slide-from-bottom' : 'slide-from-top';
+
+  wrap.classList.remove('slide-in-top', 'slide-in-bottom');
+  wrap.classList.add(outClass);
+
+  setTimeout(() => {
+    swipeIndex = newIdx;
+    renderSwipeCard(swipeIndex);
+    wrap.classList.remove(outClass);
+    wrap.classList.add(inClass);
+    void wrap.offsetWidth;
+    wrap.classList.remove(inClass);
+    wrap.classList.add('slide-in-top');
+  }, 280);
+}
+
+function setupSwipeGestures() {
+  const el = wordsSwipeView;
+  let startY = 0, isDragging = false;
+
+  el.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  el.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dy) < 40) return;
+    navigateSwipe(dy < 0 ? 1 : -1);
+  }, { passive: true });
+
+  el.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaY) < 30) return;
+    navigateSwipe(e.deltaY > 0 ? 1 : -1);
+  }, { passive: true });
+
+  document.getElementById('swipe-next')?.addEventListener('click', () => navigateSwipe(1));
+  document.getElementById('swipe-prev')?.addEventListener('click', () => navigateSwipe(-1));
+}
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
 function applyHideState() {
