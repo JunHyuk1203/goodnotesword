@@ -1309,10 +1309,10 @@ body {
 
 /* ─── Swipe (Shorts) View ─── */
 #words-swipe-view {
+  /* height is set dynamically via JS (adjustSwipeViewHeight) */
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  min-height: 200px;
   overflow: hidden;
 }
 
@@ -1453,23 +1453,11 @@ body.shorts-mode-active {
 body.shorts-mode-active .app-footer {
   display: none;
 }
-body.shorts-mode-active .words-action-bar {
-  display: none; /* hidden in shorts - controls moved to bottom bar */
-}
 body.shorts-mode-active .app-container {
   padding-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  /* Use svh for mobile browser chrome awareness */
-  height: 100svh;
 }
 body.shorts-mode-active #view-words {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  /* flex layout not needed; swipe view height set by JS */
 }
 
 /* Hidden state for toggles */

@@ -628,17 +628,33 @@ function setViewMode(mode) {
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
     wordsSwipeView.classList.remove('hidden');
-    if (actionBar) actionBar.classList.add('hidden'); // hide top bar in shorts mode
+    // Do NOT hide words-action-bar — it has the mode switch buttons
     document.body.classList.add('shorts-mode-active');
     renderSwipeView();
-    // hide-toggle buttons are now built into the shorts bottom bar
     hideToggleBar.classList.add('hidden');
+    // Calculate exact remaining height for swipe view
+    requestAnimationFrame(adjustSwipeViewHeight);
   }
 }
 
 viewCardBtn.addEventListener('click', () => setViewMode('card'));
 viewTableBtn.addEventListener('click', () => setViewMode('edit'));
 viewSwipeBtn.addEventListener('click', () => setViewMode('swipe'));
+
+// Compute exact remaining height for swipe view using actual DOM measurements
+function adjustSwipeViewHeight() {
+  const swipeView = document.getElementById('words-swipe-view');
+  if (!swipeView) return;
+  const vph = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const rect = swipeView.getBoundingClientRect();
+  const available = vph - rect.top;
+  swipeView.style.height = Math.max(available, 200) + 'px';
+}
+
+// Re-adjust if window/viewport size changes (mobile address bar show/hide)
+window.visualViewport?.addEventListener('resize', () => {
+  if (document.body.classList.contains('shorts-mode-active')) adjustSwipeViewHeight();
+});
 
 // ─── Swipe (Shorts) View ──────────────────────────────────────────────────────
 function buildSwipeCardHTML(parsed, originalIdx) {
