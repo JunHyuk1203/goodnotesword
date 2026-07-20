@@ -1318,7 +1318,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 16px 80px;
+  padding: 10px 4px 80px; /* Reduced left/right/top padding */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1330,10 +1330,10 @@ body {
 .swipe-card {
   width: 100%;
   max-width: 480px;
-  padding: 1.2rem 1rem;
+  padding: 0.5rem 0.5rem; /* Reduced inner padding */
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
   max-height: 100%;
   overflow-y: auto;
   /* Removed background, border, and shadow */
@@ -1389,8 +1389,8 @@ body {
   z-index: 10;
 }
 .swipe-nav-btn:hover { background: rgba(108,99,255,0.25); color: white; }
-.swipe-nav-up { top: 40%; transform: translateY(-50%); }
-.swipe-nav-down { top: 55%; transform: translateY(-50%); }
+.swipe-nav-up { bottom: 134px; } /* Explicit bottom offsets to prevent overlap */
+.swipe-nav-down { bottom: 84px; }
 
 /* Hidden state for toggles */
 .toggled-hidden {
