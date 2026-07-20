@@ -600,20 +600,23 @@ function setViewMode(mode) {
   if (mode === 'card') {
     viewCardBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
+    document.querySelector('.words-action-bar').appendChild(hideToggleBar);
     hideToggleBar.classList.remove('hidden');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
     viewTableBtn.classList.add('active');
     wordsCardView.classList.remove('hidden');
+    document.querySelector('.words-action-bar').appendChild(hideToggleBar);
     hideToggleBar.classList.add('hidden');
     document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
     wordsSwipeView.classList.remove('hidden');
-    hideToggleBar.classList.remove('hidden');
     document.body.classList.add('shorts-mode-active');
     renderSwipeView();
+    wordsSwipeView.appendChild(hideToggleBar);
+    hideToggleBar.classList.remove('hidden');
   }
 }
 

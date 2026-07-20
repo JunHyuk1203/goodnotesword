@@ -1093,6 +1093,20 @@ body {
 }
 
 /* ─── Hide Toggle Bar (Fixed Floating Bottom) ─── */
+body.shorts-mode-active .hide-toggle-bar {
+  position: static; /* Flow dynamically underneath the swipe-hint */
+  transform: none;
+  margin: 16px auto;
+  background: rgba(15, 15, 30, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: 999px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  white-space: nowrap;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
 .hide-toggle-bar {
   position: fixed;
   bottom: 24px;
@@ -1308,17 +1322,22 @@ body {
   position: relative;
   height: calc(100vh - 140px); /* Fill space down to the very bottom */
   min-height: 350px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   touch-action: pan-y;
-  /* Removed border and background for a flatter layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Attach everything to the top */
+  padding-bottom: 40px;
 }
 .swipe-card-wrap {
-  position: absolute;
-  inset: 0;
+  position: relative; /* Not absolute so it pushes the buttons below it */
+  width: 100%;
   display: flex;
-  align-items: flex-end; /* Anchor card to the bottom to hug the buttons */
+  align-items: flex-start; /* Card is at the top of the wrap */
   justify-content: center;
-  padding: 40px 0 140px 0; /* 140px bottom padding keeps it exactly above the fixed buttons */
+  padding: 40px 0 24px 0; /* Top padding, and 24px gap to the buttons below */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1359,10 +1378,9 @@ body {
   z-index: 10;
 }
 .swipe-hint {
-  position: fixed; /* Relative to viewport to stack with hide bar */
-  bottom: 84px; /* Stacked right above hide-toggle-bar */
-  left: 50%;
-  transform: translateX(-50%);
+  position: static; /* Flow directly under the card */
+  transform: none;
+  margin-bottom: 16px; /* Gap to hide-toggle-bar */
   font-size: 0.72rem;
   color: var(--text-muted);
   display: flex;
