@@ -1318,7 +1318,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 4px 80px; /* Reduced left/right/top padding */
+  padding: 0 0 70px 0; /* Zero top/left/right padding */
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1329,11 +1329,11 @@ body {
 .swipe-card-wrap.slide-from-bottom { transform: translateY(110%); opacity: 0; }
 .swipe-card {
   width: 100%;
-  max-width: 480px;
-  padding: 0.5rem 0.5rem; /* Reduced inner padding */
+  max-width: 500px;
+  padding: 0.2rem; /* Near zero inner padding */
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.8rem; /* Tighter gap */
   max-height: 100%;
   overflow-y: auto;
   /* Removed background, border, and shadow */
@@ -1741,8 +1741,8 @@ body {
 
 /* ─── Responsive ─── */
 @media (max-width: 600px) {
-  .app-container { padding: 10px 8px 60px; gap: 8px; }
-  .app-header { flex-direction: column; gap: 6px; padding: 4px 0 8px; }
+  .app-container { padding: 4px 4px 60px; gap: 4px; }
+  .app-header { flex-direction: column; gap: 4px; padding: 2px 4px 6px; }
   .app-title { font-size: 1.2rem; }
   .app-subtitle { font-size: 0.75rem; }
   .card { padding: 16px; border-radius: 14px; }
