@@ -1398,8 +1398,7 @@ body {
 .swipe-nav-down { bottom: 50px; }
 
 /* Hidden state for toggles */
-.word-card-word.toggled-hidden,
-.word-card-section.toggled-hidden {
+.toggled-hidden {
   filter: blur(6px);
   user-select: none;
   cursor: pointer;
@@ -1412,8 +1411,7 @@ body {
   90%  { filter: blur(0px); }
   100% { filter: blur(6px); }
 }
-.word-card-word.peeking,
-.word-card-section.peeking {
+.peeking {
   animation: peekReveal 2s ease-in-out forwards;
   transition: none !important;
   cursor: pointer;
