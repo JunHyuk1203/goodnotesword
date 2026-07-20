@@ -1310,8 +1310,8 @@ body {
 /* ─── Swipe (Shorts) View ─── */
 #words-swipe-view {
   position: relative;
-  height: calc(100vh - 140px);
-  min-height: 350px;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   touch-action: pan-y;
 }
@@ -1414,12 +1414,25 @@ body {
 /* Hide footer and remove bottom padding in shorts mode to eliminate empty space */
 body.shorts-mode-active {
   overflow: hidden; /* Lock page scroll completely in shorts mode */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 body.shorts-mode-active .app-footer {
   display: none;
 }
 body.shorts-mode-active .app-container {
   padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+body.shorts-mode-active #view-words {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Hidden state for toggles */
