@@ -1661,8 +1661,8 @@ if ($('short-appeal-btn')) {
             })
           });
           
-          if (response.status === 404) {
-            console.log('gemini-3.5-flash not found, falling back to gemini-3.1-pro...');
+          if (!response.ok && (response.status === 404 || response.status === 503)) {
+            console.log(`gemini-3.5-flash returned ${response.status}, falling back to gemini-3.1-pro...`);
             model = 'gemini-3.1-pro';
             response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
               method: 'POST',
@@ -1675,7 +1675,12 @@ if ($('short-appeal-btn')) {
 
           if (!response.ok) {
             const errText = await response.text();
-            throw new Error(`Gemini API 호출 실패 (${response.status})\n${errText}`);
+            console.error("Gemini API Error:", errText);
+            if (response.status === 503) {
+              throw new Error("현재 구글 AI 서버에 사용자가 너무 많아 일시적으로 혼잡합니다 (503). 잠시 후 다시 이의제기를 시도해 주세요.");
+            } else {
+              throw new Error(`Gemini API 호출 실패 (${response.status})\n${errText}`);
+            }
           }
           
           const json = await response.json();
