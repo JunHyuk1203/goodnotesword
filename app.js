@@ -558,7 +558,7 @@ editWordSave.addEventListener('click', async () => {
   }
 });
 
-// ─── View Toggle ──────────────────────────────────────────────────────────────
+// ─── View Toggle (Card Mode / Edit Mode) ─────────────────────────────────────
 viewCardBtn.addEventListener('click', () => {
   currentViewMode = 'card';
   viewCardBtn.classList.add('active');
@@ -566,14 +566,19 @@ viewCardBtn.addEventListener('click', () => {
   wordsCardView.classList.remove('hidden');
   wordsTableView.classList.add('hidden');
   hideToggleBar.classList.remove('hidden');
+  // Remove edit mode class → hide action buttons
+  document.querySelector('.words-card-grid')?.classList.remove('edit-mode-active');
 });
 viewTableBtn.addEventListener('click', () => {
-  currentViewMode = 'table';
+  currentViewMode = 'edit';
   viewTableBtn.classList.add('active');
   viewCardBtn.classList.remove('active');
-  wordsTableView.classList.remove('hidden');
-  wordsCardView.classList.add('hidden');
-  hideToggleBar.classList.add('hidden');
+  // Stay on card view, but activate edit mode
+  wordsCardView.classList.remove('hidden');
+  wordsTableView.classList.add('hidden');
+  hideToggleBar.classList.remove('hidden');
+  // Add edit mode → show edit/delete buttons on each card
+  document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
 });
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
@@ -603,6 +608,26 @@ document.querySelectorAll('.hide-toggle-btn').forEach(btn => {
     btn.classList.toggle('active', hideState[target]);
     applyHideState();
   });
+});
+
+// ─── Peek Mode: Click on hidden element to reveal for 2s ─────────────────────────────
+// Uses event delegation on the card view container
+wordsCardView.addEventListener('click', (e) => {
+  const target = e.target;
+  const hidden = target.closest('.toggled-hidden');
+  if (!hidden) return;
+
+  e.stopPropagation();
+  // Remove any existing peeking
+  hidden.classList.remove('peeking');
+  // Force reflow
+  void hidden.offsetWidth;
+  // Add peek class
+  hidden.classList.add('peeking');
+  // After animation ends, remove peeking class
+  hidden.addEventListener('animationend', () => {
+    hidden.classList.remove('peeking');
+  }, { once: true });
 });
 
 // ─── Create Book / Chapter ────────────────────────────────────────────────────

@@ -1092,23 +1092,31 @@ body {
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
-/* ─── Hide Toggle Bar ─── */
+/* ─── Hide Toggle Bar (Sticky) ─── */
 .hide-toggle-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.25);
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 8px 12px;
+  background: rgba(13, 14, 26, 0.92);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+  scrollbar-width: none;
 }
+.hide-toggle-bar::-webkit-scrollbar { display: none; }
 .hide-toggle-label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 500;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .hide-toggle-btn {
   background: rgba(108, 99, 255, 0.15);
@@ -1116,11 +1124,13 @@ body {
   border-radius: 999px;
   color: var(--primary-light);
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  padding: 5px 12px;
+  padding: 4px 10px;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .hide-toggle-btn.active {
   background: var(--primary);
@@ -1138,55 +1148,55 @@ body {
 /* ─── Word Cards (Card View) ─── */
 .words-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
 }
 .word-card {
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.4rem;
+  border-radius: 14px;
+  padding: 1rem 1rem 0.8rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.65rem;
   position: relative;
 }
 .word-card:hover {
   border-color: rgba(108, 99, 255, 0.3);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.3);
 }
 .word-card-header {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.8rem;
+  padding-bottom: 0.65rem;
 }
 .word-card-word {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text);
   font-family: var(--font-mono);
   letter-spacing: -0.01em;
 }
 .word-card-pos {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--accent);
   font-weight: 600;
   background: rgba(0, 212, 170, 0.1);
-  padding: 2px 8px;
+  padding: 1px 7px;
   border-radius: 999px;
 }
 .word-card-pron {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
 .word-card-num {
   margin-left: auto;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 .word-card-section {
@@ -1286,8 +1296,39 @@ body {
 }
 
 /* Hidden state for toggles */
-.word-card-word.toggled-hidden { filter: blur(6px); user-select: none; }
-.word-card-section.toggled-hidden { filter: blur(5px); user-select: none; }
+.word-card-word.toggled-hidden,
+.word-card-section.toggled-hidden {
+  filter: blur(6px);
+  user-select: none;
+  cursor: pointer;
+  transition: filter 0.3s;
+}
+/* Peek animation: temporarily reveal hidden content */
+@keyframes peekReveal {
+  0%   { filter: blur(6px); }
+  10%  { filter: blur(0px); }
+  90%  { filter: blur(0px); }
+  100% { filter: blur(6px); }
+}
+.word-card-word.peeking,
+.word-card-section.peeking {
+  animation: peekReveal 2s ease-in-out forwards;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Edit mode: show actions panel, Card mode: hide it */
+.word-card-actions { display: none; }
+.edit-mode-active .word-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+}
+/* Edit mode shows checkboxes */
+.words-card-grid .word-chk { display: none; }
+.edit-mode-active .words-card-grid .word-chk { display: inline; }
 
 /* ─── Test Modal ─── */
 .test-modal-box {
@@ -1604,15 +1645,22 @@ body {
 
 /* ─── Responsive ─── */
 @media (max-width: 600px) {
-  .app-header { flex-direction: column; }
+  .app-container { padding: 16px 10px 60px; gap: 12px; }
+  .app-header { flex-direction: column; gap: 8px; padding: 6px 0 12px; }
+  .app-title { font-size: 1.2rem; }
+  .app-subtitle { font-size: 0.75rem; }
+  .card { padding: 16px; border-radius: 14px; }
   .options-grid { grid-template-columns: 1fr 1fr; }
-  .generate-btn { padding: 14px 32px; }
+  .generate-btn { padding: 12px 24px; }
   .download-section { flex-direction: column; }
-  .words-card-grid { grid-template-columns: 1fr; }
-  .test-modal-box { padding: 1.5rem; }
+  .words-card-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+  .word-card { padding: 0.8rem 0.85rem 0.7rem; border-radius: 12px; }
+  .word-card-word { font-size: 1.1rem; }
+  .test-modal-box { padding: 1.2rem; }
   .flashcard-front, .flashcard-back { font-size: 1.2rem; min-height: 160px; }
   .quiz-question-word { font-size: 1.5rem; }
-  .words-action-bar { flex-direction: column; align-items: flex-start; }
+  .words-action-bar { gap: 6px; }
+  .hide-toggle-bar { border-radius: 12px; padding: 7px 10px; }
 }
 
 

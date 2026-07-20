@@ -80,35 +80,39 @@
 
         <!-- Top action bar -->
         <div class="words-action-bar">
-          <span id="word-count-badge" class="badge badge-ai">0 단어</span>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-            <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.5rem 1rem; font-size:0.85rem;">🗑 선택 삭제</button>
-            <!-- View mode toggle -->
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="word-count-badge" class="badge badge-ai">0 단어</span>
+            <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:0.8rem;">🗑 삭제</button>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <!-- View mode: card vs edit -->
             <div class="view-toggle-group">
-              <button id="view-card-btn" class="view-toggle-btn active" title="카드 뷰">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+              <button id="view-card-btn" class="view-toggle-btn active" title="카드 모드">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+                <span style="font-size:0.78rem;margin-left:3px;">카드</span>
               </button>
-              <button id="view-table-btn" class="view-toggle-btn" title="테이블 뷰">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><rect x="2" y="3" width="16" height="2.5" rx="1"/><rect x="2" y="8.5" width="16" height="2.5" rx="1"/><rect x="2" y="14" width="16" height="2.5" rx="1"/></svg>
+              <button id="view-table-btn" class="view-toggle-btn" title="수정 모드">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M4 6h12M4 10h8M4 14h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:0.78rem;margin-left:3px;">수정</span>
               </button>
             </div>
-            <button id="start-test-btn" class="test-start-btn">🧪 테스트 시작</button>
-            <button id="view-history-btn" class="sample-btn" style="padding:0.5rem 1rem; font-size:0.85rem; background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border);">📊 기록 보기</button>
-            <button id="open-extract-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;">✨ 단어 추출하기</button>
-            <button id="export-csv-btn" class="download-btn download-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <button id="start-test-btn" class="test-start-btn">🧪 테스트</button>
+            <button id="view-history-btn" class="sample-btn" style="padding:0.4rem 0.8rem; font-size:0.78rem; background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid var(--border);">📊</button>
+            <button id="open-extract-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.78rem;">✨ 추출</button>
+            <button id="export-csv-btn" class="download-btn download-primary" style="padding:0.4rem 0.8rem; font-size:0.78rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;margin-right:3px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               CSV
             </button>
           </div>
         </div>
 
-        <!-- Hide Toggle Bar -->
+        <!-- Sticky Hide Toggle Bar -->
         <div class="hide-toggle-bar" id="hide-toggle-bar">
           <span class="hide-toggle-label">가리기:</span>
           <button class="hide-toggle-btn active" id="toggle-word" data-target="word">🔤 단어</button>
           <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">📌 뜻</button>
           <button class="hide-toggle-btn active" id="toggle-example" data-target="example">📖 예문</button>
-          <button class="hide-toggle-btn active" id="toggle-related" data-target="related">🔗 유의어/관련어</button>
+          <button class="hide-toggle-btn active" id="toggle-related" data-target="related">🔗 유의어</button>
         </div>
 
         <!-- EXTRACT SECTION (hidden, toggled by button) -->
