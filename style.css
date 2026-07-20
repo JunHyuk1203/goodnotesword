@@ -1958,6 +1958,7 @@ body.shorts-mode-active #view-words {
   filter: brightness(1.2);
 }
 .circle-action-btn .icon {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;
   font-size: 1.1rem;
   line-height: 1;
 }
