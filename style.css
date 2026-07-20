@@ -1102,16 +1102,18 @@ body {
   transform: translateX(-50%);
   z-index: 1000;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 4px;
-  padding: 6px 10px 6px 14px;
+  gap: 6px;
+  padding: 10px 14px;
   background: rgba(15, 15, 30, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(108, 99, 255, 0.25);
-  border-radius: 999px;
+  border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
-  white-space: nowrap;
+  max-width: 95vw;
   transition: opacity 0.3s, transform 0.3s;
 }
 .hide-toggle-bar.hidden {
@@ -1120,13 +1122,14 @@ body {
   transform: translateX(-50%) translateY(8px);
 }
 .hide-toggle-label {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-right: 4px;
-  flex-shrink: 0;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 4px;
 }
 .hide-toggle-btn {
   background: rgba(255,255,255,0.08);
@@ -1134,13 +1137,12 @@ body {
   border-radius: 999px;
   color: var(--text-secondary);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 5px 11px;
+  padding: 7px 14px;
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 .hide-toggle-btn.active {
   background: var(--primary);
@@ -1360,10 +1362,10 @@ body {
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   background: rgba(0,0,0,0.4);
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 999px;
   backdrop-filter: blur(8px);
   pointer-events: none;
@@ -1374,7 +1376,7 @@ body {
   bottom: 84px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;

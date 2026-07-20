@@ -685,10 +685,10 @@ function renderSwipeView() {
     <button class="swipe-nav-btn swipe-nav-up" id="swipe-prev" title="이전">↑</button>
     <button class="swipe-nav-btn swipe-nav-down" id="swipe-next" title="다음">↓</button>
     <div class="swipe-hint">
-      <button id="auto-play-toggle" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">
+      <button id="auto-play-toggle" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:6px 14px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;">
         ${autoPlayPronunciation ? '🔊 자동재생 ON' : '🔇 자동재생 OFF'}
       </button>
-      <button id="shuffle-swipe-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">
+      <button id="shuffle-swipe-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:12px;padding:6px 14px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;">
         🔀 랜덤 섞기
       </button>
     </div>
