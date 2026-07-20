@@ -625,7 +625,7 @@ viewTableBtn.addEventListener('click', () => setViewMode('edit'));
 viewSwipeBtn.addEventListener('click', () => setViewMode('swipe'));
 
 // ─── Swipe (Shorts) View ──────────────────────────────────────────────────────
-function buildSwipeCardHTML(parsed) {
+function buildSwipeCardHTML(parsed, originalIdx) {
   const buildRelatedSection = (items, emoji, label) => {
     if (!items || !items.length) return '';
     const lines = items.map(s => {
@@ -655,6 +655,7 @@ function buildSwipeCardHTML(parsed) {
       <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;font-size:1.3rem;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
       ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
       ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+      <span class="word-card-num">${originalIdx + 1}</span>
     </div>
     ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
       <div class="word-card-section-label">📌 뜻</div>
@@ -701,8 +702,12 @@ function renderSwipeCard(idx) {
   const card = document.getElementById('swipe-card');
   const counter = document.getElementById('swipe-counter');
   if (!card) return;
-  const parsed = parseWordData(swipeWords[idx]);
-  card.innerHTML = buildSwipeCardHTML(parsed);
+  
+  const rawWord = swipeWords[idx];
+  const parsed = parseWordData(rawWord);
+  const originalIdx = currentLoadedWords.indexOf(rawWord);
+  
+  card.innerHTML = buildSwipeCardHTML(parsed, originalIdx);
   counter.textContent = `${idx + 1} / ${swipeWords.length}`;
 
   if (autoPlayPronunciation) {
@@ -806,15 +811,29 @@ function setupSwipeGestures() {
   if (shuffleBtn) {
     shuffleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      for (let i = swipeWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
-      }
-      swipeIndex = 0;
-      renderSwipeCard(0);
-      
+      const wrap = document.getElementById('swipe-wrap');
+      if (!wrap) return;
+
       shuffleBtn.style.transform = 'scale(0.9)';
       setTimeout(() => shuffleBtn.style.transform = 'scale(1)', 150);
+
+      wrap.style.transition = 'none';
+      wrap.classList.add('shuffle-anim');
+      
+      setTimeout(() => {
+        // Swap data halfway through animation
+        for (let i = swipeWords.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
+        }
+        swipeIndex = 0;
+        renderSwipeCard(0);
+      }, 200);
+
+      setTimeout(() => {
+        wrap.classList.remove('shuffle-anim');
+        wrap.style.transition = '';
+      }, 400);
     });
   }
 }

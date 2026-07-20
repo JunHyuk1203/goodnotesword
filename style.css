@@ -1328,6 +1328,16 @@ body {
 .swipe-card-wrap.slide-in-bottom { transform: translateY(0); opacity: 1; }
 .swipe-card-wrap.slide-from-top  { transform: translateY(-110%); opacity: 0; }
 .swipe-card-wrap.slide-from-bottom { transform: translateY(110%); opacity: 0; }
+
+@keyframes flipShuffle {
+  0% { transform: perspective(1000px) rotateY(0deg); opacity: 1; }
+  50% { transform: perspective(1000px) rotateY(90deg) scale(0.9); opacity: 0; }
+  100% { transform: perspective(1000px) rotateY(0deg); opacity: 1; }
+}
+.shuffle-anim {
+  animation: flipShuffle 0.4s ease-in-out forwards;
+}
+
 .swipe-card {
   width: 100%;
   height: auto; /* Shrink to wrap content */
