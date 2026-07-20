@@ -1095,35 +1095,30 @@ body {
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
-/* ─── Hide Toggle Bar (Fixed Floating Bottom) ─── */
-
-
+/* ─── Hide Toggle Bar (bottom bar — unified with shorts style) ─── */
 .hide-toggle-bar {
   position: fixed;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 14px;
-  background: rgba(15, 15, 30, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(108, 99, 255, 0.25);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
-  max-width: 95vw;
+  padding: 8px 16px;
+  background: rgba(10, 10, 20, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.08);
   transition: opacity 0.3s, transform 0.3s;
 }
 .hide-toggle-bar.hidden {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-50%) translateY(8px);
+  transform: translateY(20px);
 }
 .hide-toggle-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1132,30 +1127,23 @@ body {
   flex-shrink: 0;
 }
 .hide-toggle-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 999px;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.35);
+  height: 28px;
+  padding: 0 7px;
+  font-size: 0.72rem;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all 0.15s;
   white-space: nowrap;
 }
 .hide-toggle-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-  box-shadow: 0 2px 8px var(--primary-glow);
+  border-color: rgba(108,99,255,0.5);
+  color: var(--primary-light);
+  background: rgba(108,99,255,0.15);
 }
-.hide-toggle-btn:not(.active) {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.06);
-  color: var(--text-muted);
-  text-decoration: line-through;
-}
+.hide-toggle-btn:hover { border-color: rgba(108,99,255,0.4); }
 
 /* ─── Word Cards (Card View) ─── */
 .words-card-grid {
@@ -1393,6 +1381,19 @@ body {
   transition: all 0.18s;
 }
 .shorts-nav-btn:hover { background: rgba(108,99,255,0.25); color: white; }
+
+/* Arrow buttons: remove gap/radius between them to look like a group */
+.shorts-nav-group {
+  display: flex;
+  gap: 0;
+}
+.shorts-nav-group .shorts-nav-btn:first-child {
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+.shorts-nav-group .shorts-nav-btn:last-child {
+  border-radius: 0 8px 8px 0;
+}
 
 .shorts-ctrl-btn {
   background: rgba(255,255,255,0.07);

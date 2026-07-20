@@ -716,15 +716,18 @@ function renderSwipeView() {
     <div class="shorts-bottom-bar">
       <span class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</span>
       <div class="shorts-bottom-btns">
-        <button id="swipe-prev" class="shorts-nav-btn" title="이전">↑</button>
         <button id="auto-play-toggle" class="shorts-ctrl-btn${autoPlayPronunciation ? ' active' : ''}">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
         <button id="shuffle-swipe-btn" class="shorts-ctrl-btn">🔀</button>
-        <button id="swipe-next" class="shorts-nav-btn" title="다음">↓</button>
         <span class="shorts-divider">|</span>
         <button class="shorts-hide-btn${hideState.word ? ' active' : ''}" data-target="word">단어</button>
         <button class="shorts-hide-btn${hideState.meaning ? ' active' : ''}" data-target="meaning">뜻</button>
         <button class="shorts-hide-btn${hideState.example ? ' active' : ''}" data-target="example">예문</button>
         <button class="shorts-hide-btn${hideState.related ? ' active' : ''}" data-target="related">유의어</button>
+        <span class="shorts-divider">|</span>
+        <div class="shorts-nav-group">
+          <button id="swipe-prev" class="shorts-nav-btn" title="이전">↑</button>
+          <button id="swipe-next" class="shorts-nav-btn" title="다음">↓</button>
+        </div>
       </div>
     </div>
   `;
