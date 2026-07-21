@@ -45,6 +45,7 @@
 html { 
   scroll-behavior: smooth;
   font-size: 18px; /* Increase overall app scale (default is 16px) */
+  overscroll-behavior: none; /* Prevent elastic scroll and stretch */
 }
 
 body {
@@ -53,6 +54,9 @@ body {
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
+  margin: 0;
+  overscroll-behavior: none; /* Prevent Android stretch effect */
+  overflow-x: hidden; /* Prevent horizontal jitter */
 }
 body.modal-open {
   overflow: hidden !important;
