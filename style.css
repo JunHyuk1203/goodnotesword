@@ -504,9 +504,14 @@ body {
   transition: max-height 0.35s ease;
 }
 .preview-container.collapsed { max-height: 0; }
-.preview-container::-webkit-scrollbar { width: 6px; }
-.preview-container::-webkit-scrollbar-track { background: transparent; }
-.preview-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
+/* Hide scrollbar globally for a native app feel */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
 
 .preview-table {
   width: 100%;
