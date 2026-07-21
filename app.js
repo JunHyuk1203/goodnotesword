@@ -1368,6 +1368,12 @@ function showFlashCard() {
       flashBack.appendChild(p);
     }
   }
+
+  // 입장 애니메이션
+  const flashContainer = $('flashcard-container');
+  flashContainer.classList.remove('card-slide-in');
+  void flashContainer.offsetWidth;
+  flashContainer.classList.add('card-slide-in');
 }
 
 // Global flip function (called from onclick in HTML)
@@ -1383,15 +1389,25 @@ window.flipCard = function() {
 
 $('flash-correct-btn').addEventListener('click', () => {
   testCorrect++;
-  testIndex++;
-  showFlashCard();
+  const flashContainer = $('flashcard-container');
+  flashContainer.classList.add('card-slide-out');
+  setTimeout(() => {
+    flashContainer.classList.remove('card-slide-out');
+    testIndex++;
+    showFlashCard();
+  }, 180);
 });
 
 $('flash-wrong-btn').addEventListener('click', () => {
   const data = parseWordData(testWords[testIndex]);
   testWrong.push(data.word);
-  testIndex++;
-  showFlashCard();
+  const flashContainer = $('flashcard-container');
+  flashContainer.classList.add('card-slide-out');
+  setTimeout(() => {
+    flashContainer.classList.remove('card-slide-out');
+    testIndex++;
+    showFlashCard();
+  }, 180);
 });
 
 // ─── Quiz (4지선다) ───────────────────────────────────────────────────────────
@@ -1504,6 +1520,7 @@ function showShortCard() {
   const nextBtn = $('short-next-btn');
   const submitBtn = $('short-submit-btn');
   const appealBtn = $('short-appeal-btn');
+  const dontKnowBtn = $('short-dontknow-btn');
 
   input.value = '';
   input.disabled = false;
@@ -1514,14 +1531,14 @@ function showShortCard() {
   appealBtn.classList.add('hidden');
   feedback.classList.add('hidden');
   feedback.classList.remove('correct-fb', 'wrong-fb');
+  if (dontKnowBtn) dontKnowBtn.classList.remove('hidden');
 
   if (testDir === 'word2meaning') {
     questionLabel.textContent = '다음 단어의 뜻을 입력하세요';
     questionWord.textContent = data.word;
-    // 뜻 텍스트에서 1, 2, 쉼표 등으로 구분된 여러 정답 추출 (단순화된 형태)
     const rawMeaning = data.meaning || data.back || '';
     shortCorrectAnswer = rawMeaning.split(/[,\n]/)
-      .map(s => s.replace(/^[0-9]+/, '').trim()) // 앞의 숫자 제거
+      .map(s => s.replace(/^[0-9]+/, '').trim())
       .filter(Boolean);
     if (!shortCorrectAnswer.length) shortCorrectAnswer = [rawMeaning];
   } else {
@@ -1530,7 +1547,12 @@ function showShortCard() {
     shortCorrectAnswer = [data.word.toLowerCase().trim()];
   }
 
-  // Auto focus (might not work perfectly on iOS without user interaction, but good for PC)
+  // 입장 애니메이션
+  const shortScreen = $('test-short');
+  shortScreen.classList.remove('card-slide-in');
+  void shortScreen.offsetWidth;
+  shortScreen.classList.add('card-slide-in');
+
   setTimeout(() => input.focus(), 50);
 }
 
@@ -1539,19 +1561,19 @@ function handleShortSubmit() {
   const feedback = $('short-feedback');
   const nextBtn = $('short-next-btn');
   const submitBtn = $('short-submit-btn');
+  const dontKnowBtn = $('short-dontknow-btn');
   const val = input.value.trim().toLowerCase();
 
   if (!val) return;
 
   input.disabled = true;
   submitBtn.classList.add('hidden');
+  if (dontKnowBtn) dontKnowBtn.classList.add('hidden');
   nextBtn.classList.remove('hidden');
   feedback.classList.remove('hidden');
 
-  // 아주 단순한 정답 체크 로직 (하나라도 포함/일치하면 정답)
   let isCorrect = false;
   if (testDir === 'word2meaning') {
-    // 사용자가 입력한 값이 정답들 중 하나에 포함되는지 확인 (또는 정답이 입력값에 포함되거나)
     isCorrect = shortCorrectAnswer.some(ans => {
       const cleanAns = ans.toLowerCase().replace(/\s+/g, '');
       const cleanVal = val.replace(/\s+/g, '');
@@ -1571,8 +1593,6 @@ function handleShortSubmit() {
     feedback.classList.add('wrong-fb');
     feedback.innerHTML = `<span class="wrong-label">틀렸습니다!</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
     testWrong.push(shortCurrentData.word);
-    
-    // Show AI Appeal Button
     if ($('short-appeal-btn')) {
       $('short-appeal-btn').classList.remove('hidden');
     }
@@ -1582,11 +1602,37 @@ function handleShortSubmit() {
 }
 
 $('short-submit-btn').addEventListener('click', handleShortSubmit);
+// 엔터키: 아직 submit 단계일 때만 처리, 다음(next) 단계에서는 무시
 $('short-answer-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !$('short-submit-btn').classList.contains('hidden')) {
-    handleShortSubmit();
+  if (e.key === 'Enter') {
+    if (!$('short-submit-btn').classList.contains('hidden')) {
+      e.preventDefault();
+      handleShortSubmit();
+    }
+    // submit이 hidden이면(다음 버튼 상태) 아무것도 하지 않음
   }
 });
+
+// 모름 버튼
+if ($('short-dontknow-btn')) {
+  $('short-dontknow-btn').addEventListener('click', () => {
+    const input = $('short-answer-input');
+    const feedback = $('short-feedback');
+    const nextBtn = $('short-next-btn');
+    const submitBtn = $('short-submit-btn');
+    const dontKnowBtn = $('short-dontknow-btn');
+
+    input.disabled = true;
+    submitBtn.classList.add('hidden');
+    dontKnowBtn.classList.add('hidden');
+    nextBtn.classList.remove('hidden');
+    feedback.classList.remove('hidden');
+    feedback.classList.add('wrong-fb');
+    feedback.innerHTML = `<span class="wrong-label">모름 처리</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
+    testWrong.push(shortCurrentData.word);
+    nextBtn.focus();
+  });
+}
 
 // ─── AI Appeal (주관식 이의제기) ──────────────────────────────────────────────────
 if ($('short-appeal-btn')) {
@@ -1739,8 +1785,13 @@ if ($('short-appeal-btn')) {
 }
 
 $('short-next-btn').addEventListener('click', () => {
-  testIndex++;
-  showShortCard();
+  const shortScreen = $('test-short');
+  shortScreen.classList.add('card-slide-out');
+  setTimeout(() => {
+    shortScreen.classList.remove('card-slide-out');
+    testIndex++;
+    showShortCard();
+  }, 200);
 });
 
 // ─── Result ───────────────────────────────────────────────────────────────────

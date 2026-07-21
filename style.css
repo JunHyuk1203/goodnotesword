@@ -1727,6 +1727,48 @@ body.shorts-mode-active #view-words {
   color: var(--danger);
 }
 
+.quiz-dontknow-btn {
+  grid-column: 1 / -1;
+  border-color: var(--warning) !important;
+  color: var(--warning) !important;
+  opacity: 0.75;
+}
+.quiz-dontknow-btn:hover:not(:disabled) {
+  background: rgba(251, 191, 36, 0.12) !important;
+  opacity: 1;
+}
+
+/* ─── Card slide transition animations ─── */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+}
+
+.card-slide-in {
+  animation: slideInFromRight 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.card-slide-out {
+  animation: slideOutToLeft 0.18s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
 /* ─── Result screen ─── */
 .result-circle-wrap {
   position: relative;
