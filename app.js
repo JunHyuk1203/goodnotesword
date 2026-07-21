@@ -1775,9 +1775,10 @@ if ($('short-appeal-btn')) {
       }
 
       const prefix = fromCache ? "⚡ [이전 판단 기반]" : "🤖 [AI 새로운 판단]";
+      const feedback = $('short-feedback');
+      
       if (isApproved) {
         // Mark as Correct
-        const feedback = $('short-feedback');
         input.classList.remove('wrong');
         input.classList.add('correct');
         feedback.classList.remove('wrong-fb');
@@ -1788,12 +1789,13 @@ if ($('short-appeal-btn')) {
         testCorrect++;
         appealBtn.classList.add('hidden');
       } else {
-        alert(`${prefix} 정답으로 인정되지 않았습니다. 😢`);
+        feedback.innerHTML += `<br><span style="color:var(--danger); font-size:0.95em; font-weight:600; display:inline-block; margin-top:8px;">${prefix} 오답 처리 유지 😢</span>`;
         appealBtn.classList.add('hidden');
       }
     } catch (err) {
       console.error(err);
-      alert('이의제기 처리 중 오류가 발생했습니다: ' + err.message);
+      const feedback = $('short-feedback');
+      feedback.innerHTML += `<br><span style="color:var(--warning); font-size:0.9em; display:inline-block; margin-top:8px;">⚠️ 오류: ${err.message}</span>`;
     } finally {
       appealBtn.innerHTML = originalText;
       appealBtn.disabled = false;
