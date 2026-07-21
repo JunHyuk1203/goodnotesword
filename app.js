@@ -683,17 +683,14 @@ function setViewMode(mode) {
   
   if (mode === 'card') {
     viewCardBtn.classList.add('active');
-    hideToggleBar.classList.remove('hidden');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
     viewTableBtn.classList.add('active');
-    hideToggleBar.classList.add('hidden');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
     document.body.classList.add('shorts-mode-active');
     renderSwipeView();
-    hideToggleBar.classList.add('hidden');
     requestAnimationFrame(adjustSwipeViewHeight);
   }
 
@@ -735,6 +732,16 @@ function setViewMode(mode) {
       v.classList.add('active-view');
     }
   });
+
+  // Apply CSS transition classes for hideToggleBar (synchronized with card mode, index 0)
+  hideToggleBar.classList.remove('active-view', 'idle-left', 'idle-right');
+  if (0 < newIndex) {
+    hideToggleBar.classList.add('idle-left');
+  } else if (0 > newIndex) {
+    hideToggleBar.classList.add('idle-right');
+  } else {
+    hideToggleBar.classList.add('active-view');
+  }
 }
 
 viewCardBtn.addEventListener('click', () => setViewMode('card'));

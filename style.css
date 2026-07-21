@@ -1159,12 +1159,13 @@ body.modal-open {
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
-/* ─── Hide Toggle Bar (bottom bar — unified with shorts style) ─── */
+/* ─── Hide Toggle Bar (bottom bar) ─── */
 .hide-toggle-bar {
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
+  width: 100%;
+  box-sizing: border-box;
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -1174,13 +1175,21 @@ body.modal-open {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255,255,255,0.08);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.35, 1);
+  pointer-events: none;
 }
 .hide-toggle-bar.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
-  display: flex !important; /* Override global .hidden so CSS transitions can run */
+  display: none !important;
+}
+.hide-toggle-bar.active-view {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.hide-toggle-bar.idle-left {
+  transform: translateX(-100%);
+}
+.hide-toggle-bar.idle-right {
+  transform: translateX(100%);
 }
 .hide-toggle-label {
   font-size: 0.75rem;
@@ -2188,7 +2197,6 @@ button:active:not(:disabled) {
   .hide-toggle-bar {
     padding: 8px 10px;
     gap: 4px;
-    max-width: 98vw;
   }
   .hide-toggle-label {
     font-size: 0.75rem;
