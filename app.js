@@ -269,8 +269,8 @@ let backSwipeStartX = null;
 let backSwipeStartY = null;
 
 document.addEventListener('touchstart', (e) => {
-  // Only trigger from left edge
-  if (e.touches.length === 1 && e.touches[0].clientX <= 40) {
+  // Only trigger from left half (up to 45% of screen width)
+  if (e.touches.length === 1 && e.touches[0].clientX <= window.innerWidth * 0.45) {
     backSwipeStartX = e.touches[0].clientX;
     backSwipeStartY = e.touches[0].clientY;
   }
