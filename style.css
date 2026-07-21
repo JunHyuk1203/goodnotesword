@@ -1598,7 +1598,8 @@ body.shorts-mode-active #view-words {
 }
 /* Short answer specific stretch layout */
 #test-short.test-screen {
-  height: 100%;
+  min-height: 100%;
+  height: auto;
   padding-bottom: 0; /* Keyboard goes flush */
 }
 #test-short .quiz-question-box {
@@ -2005,6 +2006,7 @@ button:active:not(:disabled) {
   border-radius: 12px;
   font-size: 0.92rem;
   line-height: 1.6;
+  flex-shrink: 0;
   transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .short-feedback.show-feedback {
