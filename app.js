@@ -54,6 +54,18 @@ function escapeCSV(s) {
   return (v.includes(',') || v.includes('\n') || v.includes('"')) ? `"${v}"` : v;
 }
 
+function openModal(modalEl) {
+  modalEl.classList.remove('hidden');
+  void modalEl.offsetWidth;
+  modalEl.classList.add('show');
+}
+function closeModal(modalEl) {
+  modalEl.classList.remove('show');
+  setTimeout(() => {
+    modalEl.classList.add('hidden');
+  }, 350);
+}
+
 // ─── Custom Modals ────────────────────────────────────────────────────────────
 function showPrompt(message, defaultVal = '') {
   return new Promise(resolve => {
