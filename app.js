@@ -56,9 +56,14 @@ function escapeCSV(s) {
 
 function openModal(modalEl) {
   document.body.classList.add('modal-open');
+  // Use visibility instead of display:none removal to avoid layout flash
   modalEl.classList.remove('hidden');
-  void modalEl.offsetWidth;
-  modalEl.classList.add('show');
+  // Double rAF ensures browser has painted 1 frame before starting transition
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      modalEl.classList.add('show');
+    });
+  });
 }
 function closeModal(modalEl) {
   modalEl.classList.remove('show');
@@ -67,7 +72,7 @@ function closeModal(modalEl) {
     if (!document.querySelector('.modal-screen.show')) {
       document.body.classList.remove('modal-open');
     }
-  }, 350);
+  }, 400);
 }
 
 // ─── Custom Modals ────────────────────────────────────────────────────────────
@@ -349,13 +354,37 @@ let swipeIndex = 0;
 let swipeWords = [];
 let autoPlayPronunciation = true; // Enabled by default in Shorts mode
 
-// ─── Pronunciation (Web Speech API) ──────────────────────────────────────────
+// ─── Pronunciation ────────────────────────────────────────────────────────────
+let _ttsAudio = null;
 function playPronunciation(wordText) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(wordText);
-  utterance.lang = 'en-US'; // English by default
-  speechSynthesis.speak(utterance);
+  if (!wordText) return;
+  try {
+    // Try Web Speech API first (works on desktop/some Android Chrome)
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(wordText);
+      utterance.lang = 'en-US';
+      utterance.onerror = () => _ttsAudioFallback(wordText);
+      // If speech doesn't start in 500ms, use audio fallback
+      const timer = setTimeout(() => _ttsAudioFallback(wordText), 800);
+      utterance.onstart = () => clearTimeout(timer);
+      speechSynthesis.speak(utterance);
+    } else {
+      _ttsAudioFallback(wordText);
+    }
+  } catch (e) {
+    _ttsAudioFallback(wordText);
+  }
+}
+function _ttsAudioFallback(wordText) {
+  // Use Google Translate TTS as fallback - works in WebView
+  try {
+    if (_ttsAudio) { _ttsAudio.pause(); _ttsAudio = null; }
+    const encoded = encodeURIComponent(wordText);
+    _ttsAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=en&client=gtx`);
+    _ttsAudio.volume = 1.0;
+    _ttsAudio.play().catch(() => {});
+  } catch (e) {}
 }
 
 // Unlock speech synthesis on first user interaction (required by mobile browsers)
@@ -363,9 +392,11 @@ let speechUnlocked = false;
 function unlockSpeech() {
   if (speechUnlocked) return;
   speechUnlocked = true;
-  const unlock = new SpeechSynthesisUtterance('');
-  unlock.volume = 0;
-  speechSynthesis.speak(unlock);
+  try {
+    const unlock = new SpeechSynthesisUtterance('');
+    unlock.volume = 0;
+    speechSynthesis.speak(unlock);
+  } catch (e) {}
 }
 document.addEventListener('touchstart', unlockSpeech, { passive: true });
 document.addEventListener('click', unlockSpeech, { once: true });
