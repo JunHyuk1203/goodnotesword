@@ -1741,23 +1741,19 @@ body.shorts-mode-active #view-words {
 /* ─── Card slide transition animations ─── */
 @keyframes slideInFromRight {
   from {
-    opacity: 0;
-    transform: translateX(32px);
+    transform: translateX(100px);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }
 
 @keyframes slideOutToLeft {
   from {
-    opacity: 1;
     transform: translateX(0);
   }
   to {
-    opacity: 0;
-    transform: translateX(-32px);
+    transform: translateX(-100px);
   }
 }
 
@@ -1771,11 +1767,9 @@ body.shorts-mode-active #view-words {
 
 @keyframes slideInFromLeft {
   from {
-    opacity: 0;
-    transform: translateX(-32px);
+    transform: translateX(-100px);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }
