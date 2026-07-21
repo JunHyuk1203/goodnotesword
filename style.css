@@ -1390,7 +1390,7 @@ body.modal-open {
 
 .swipe-card {
   position: absolute;
-  inset: 8px 0 0;
+  inset: 0;
   padding: 1rem;
   display: flex;
   flex-direction: column;
