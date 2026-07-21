@@ -1598,6 +1598,126 @@ function handleQuizAnswer(clickedBtn, selected, correct, choicesEl) {
   }, 1200);
 }
 
+// ─── Virtual Keyboard ───
+let vkUseNative = false;
+let vkIsShift = false;
+let vkLayout = 'en';
+
+const vkLayouts = {
+  en: {
+    normal: [
+      ['q','w','e','r','t','y','u','i','o','p'],
+      ['a','s','d','f','g','h','j','k','l'],
+      ['Shift','z','x','c','v','b','n','m','⌫'],
+      ['EN/KR','Space','Enter']
+    ],
+    shift: [
+      ['Q','W','E','R','T','Y','U','I','O','P'],
+      ['A','S','D','F','G','H','J','K','L'],
+      ['Shift','Z','X','C','V','B','N','M','⌫'],
+      ['EN/KR','Space','Enter']
+    ]
+  },
+  ko: {
+    normal: [
+      ['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],
+      ['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],
+      ['Shift','ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ','⌫'],
+      ['EN/KR','Space','Enter']
+    ],
+    shift: [
+      ['ㅃ','ㅉ','ㄸ','ㄲ','ㅆ','ㅛ','ㅕ','ㅑ','ㅒ','ㅖ'],
+      ['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],
+      ['Shift','ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ','⌫'],
+      ['EN/KR','Space','Enter']
+    ]
+  }
+};
+
+function renderVirtualKeyboard() {
+  const container = $('virtual-keyboard-container');
+  if (vkUseNative) {
+    container.classList.add('hidden');
+    $('short-answer-input').removeAttribute('inputmode');
+    return;
+  }
+  container.classList.remove('hidden');
+  $('short-answer-input').setAttribute('inputmode', 'none');
+  
+  const layout = vkLayouts[vkLayout][vkIsShift ? 'shift' : 'normal'];
+  container.innerHTML = '';
+  
+  layout.forEach(rowKeys => {
+    const row = document.createElement('div');
+    row.className = 'vk-row';
+    rowKeys.forEach(key => {
+      const btn = document.createElement('div');
+      btn.className = 'vk-key';
+      btn.textContent = key;
+      if (key === 'Shift' || key === '⌫' || key === 'EN/KR') btn.classList.add('vk-wide');
+      if (key === 'Space') btn.classList.add('vk-space');
+      if (key === 'Enter') btn.classList.add('vk-enter');
+      
+      // Prevent default mousedown to avoid input losing focus natively
+      btn.addEventListener('mousedown', e => e.preventDefault());
+      
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleVkPress(key);
+      });
+      row.appendChild(btn);
+    });
+    container.appendChild(row);
+  });
+}
+
+function handleVkPress(key) {
+  const input = $('short-answer-input');
+  if (key === 'Shift') {
+    vkIsShift = !vkIsShift;
+    renderVirtualKeyboard();
+    return;
+  }
+  if (key === 'EN/KR') {
+    vkLayout = vkLayout === 'en' ? 'ko' : 'en';
+    vkIsShift = false;
+    renderVirtualKeyboard();
+    return;
+  }
+  
+  let chars = typeof Hangul !== 'undefined' ? Hangul.disassemble(input.value) : input.value.split('');
+  
+  if (key === '⌫') {
+    chars.pop();
+  } else if (key === 'Space') {
+    chars.push(' ');
+  } else if (key === 'Enter') {
+    if (!$('short-submit-btn').classList.contains('hidden')) {
+      handleShortSubmit();
+    }
+    return;
+  } else {
+    chars.push(key);
+    if (vkIsShift) {
+      vkIsShift = false;
+      renderVirtualKeyboard();
+    }
+  }
+  
+  input.value = typeof Hangul !== 'undefined' ? Hangul.assemble(chars) : chars.join('');
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  
+  if (!vkUseNative) input.focus();
+}
+
+if ($('native-kbd-switch')) {
+  $('native-kbd-switch').addEventListener('change', (e) => {
+    vkUseNative = e.target.checked;
+    renderVirtualKeyboard();
+    if (vkUseNative) $('short-answer-input').focus();
+  });
+}
+
 // ─── Short Answer (주관식) ──────────────────────────────────────────────────────
 let shortCorrectAnswer = [];
 let shortCurrentData = null;
@@ -1665,7 +1785,13 @@ function showShortCard() {
   void shortScreen.offsetWidth;
   shortScreen.classList.add('card-slide-in');
 
-  setTimeout(() => input.focus(), 50);
+  vkLayout = testDir === 'word2meaning' ? 'ko' : 'en';
+  vkIsShift = false;
+  renderVirtualKeyboard();
+
+  setTimeout(() => {
+    if (!vkUseNative) input.focus();
+  }, 50);
 }
 
 function handleShortSubmit() {

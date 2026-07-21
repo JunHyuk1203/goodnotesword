@@ -1959,6 +1959,77 @@ button:active:not(:disabled) {
 .short-feedback .correct-label { color: var(--success); font-weight: 700; }
 .short-feedback .wrong-label { color: var(--danger); font-weight: 700; }
 
+/* ─── Virtual Keyboard ─── */
+.vk-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 1.5rem;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+.vk-container.hidden {
+  display: none !important;
+}
+.vk-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.vk-key {
+  flex: 1;
+  max-width: 40px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s, transform 0.1s;
+}
+.vk-key:active {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0.95);
+}
+.vk-key.vk-wide {
+  flex: 1.5;
+  max-width: 60px;
+  font-size: 0.9rem;
+}
+.vk-key.vk-space {
+  flex: 4;
+  max-width: 200px;
+}
+.vk-key.vk-enter {
+  background: rgba(108, 99, 255, 0.2);
+  border-color: rgba(108, 99, 255, 0.4);
+  color: var(--primary-light);
+}
+
+.vk-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.vk-toggle-label input {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 600px) {
   .app-container { padding: 4px 4px 60px; gap: 4px; }
