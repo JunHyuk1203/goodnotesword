@@ -1871,10 +1871,10 @@ button:active:not(:disabled) {
   display: flex;
   gap: 10px;
   align-items: stretch;
-  flex-wrap: nowrap;
 }
 .short-answer-input {
   flex: 1;
+  min-width: 0;
   background: rgba(255,255,255,0.06);
   border: 2px solid var(--border);
   border-radius: 12px;

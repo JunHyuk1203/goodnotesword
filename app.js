@@ -1467,6 +1467,15 @@ function showQuizCard() {
   const questionWord = $('quiz-question-word');
   const choices = $('quiz-choices');
   const questionLabel = document.querySelector('.quiz-question-label');
+  const qBox = document.querySelector('#test-quiz .quiz-question-box');
+
+  [qBox, choices].forEach(el => {
+    if (el) {
+      el.classList.remove('card-slide-in');
+      void el.offsetWidth;
+      el.classList.add('card-slide-in');
+    }
+  });
 
   // Build choices: 1 correct + 3 random from other words
   const allParsed = currentLoadedWords.map(parseWordData);
@@ -1589,8 +1598,19 @@ function showShortCard() {
   $('short-progress-fill').style.width = pct + '%';
   $('short-progress-text').textContent = `${testIndex + 1} / ${total}`;
 
-  const questionWord = $('short-question-word');
   const questionLabel = $('short-question-label');
+  const questionWord = $('short-question-word');
+
+  const qBox = document.querySelector('#test-short .quiz-question-box');
+  const ansWrap = document.querySelector('.short-answer-wrap');
+  [qBox, ansWrap].forEach(el => {
+    if (el) {
+      el.classList.remove('card-slide-in');
+      void el.offsetWidth;
+      el.classList.add('card-slide-in');
+    }
+  });
+
   const input = $('short-answer-input');
   const feedback = $('short-feedback');
   const nextBtn = $('short-next-btn');
@@ -1676,7 +1696,7 @@ function handleShortSubmit() {
     }
   }
   
-  nextBtn.focus();
+  input.blur();
 }
 
 $('short-submit-btn').addEventListener('click', handleShortSubmit);
@@ -1709,7 +1729,7 @@ if ($('short-dontknow-btn')) {
     feedback.classList.add('fade-slide-up', 'wrong-fb');
     feedback.innerHTML = `<span class="wrong-label">모름 처리</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
     testWrong.push(shortCurrentData.word);
-    nextBtn.focus();
+    input.blur();
   });
 }
 
