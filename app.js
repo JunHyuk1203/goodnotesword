@@ -256,6 +256,7 @@ function loadBooks(dir = 'backward') {
         viewBooks.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">저장된 단어장이 없습니다. 위의 [+ 새 단어장 만들기] 버튼을 눌러 시작하세요!</p>';
         return;
       }
+      let idx = 0;
       snap.forEach(d => {
         const data = d.data();
         const div = document.createElement('div');
@@ -271,6 +272,7 @@ function loadBooks(dir = 'backward') {
           }
         };
         viewBooks.appendChild(div);
+        idx++;
       });
     }, (e) => {
       console.error(e);
