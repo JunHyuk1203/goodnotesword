@@ -1392,7 +1392,11 @@ window.flipCard = function() {
   if (!testIsFlipped) {
     card.classList.add('flipped');
     testIsFlipped = true;
-    $('flash-actions').style.display = 'flex';
+    const actions = $('flash-actions');
+    actions.style.display = 'flex';
+    actions.classList.remove('fade-slide-up');
+    void actions.offsetWidth;
+    actions.classList.add('fade-slide-up');
     $('flip-hint').style.display = 'none';
   }
 };
@@ -1580,7 +1584,9 @@ function handleShortSubmit() {
   submitBtn.classList.add('hidden');
   if (dontKnowBtn) dontKnowBtn.classList.add('hidden');
   nextBtn.classList.remove('hidden');
-  feedback.classList.remove('hidden');
+  feedback.classList.remove('hidden', 'fade-slide-up');
+  void feedback.offsetWidth;
+  feedback.classList.add('fade-slide-up');
 
   let isCorrect = false;
   if (testDir === 'word2meaning') {
@@ -1636,8 +1642,9 @@ if ($('short-dontknow-btn')) {
     submitBtn.classList.add('hidden');
     dontKnowBtn.classList.add('hidden');
     nextBtn.classList.remove('hidden');
-    feedback.classList.remove('hidden');
-    feedback.classList.add('wrong-fb');
+    feedback.classList.remove('hidden', 'fade-slide-up');
+    void feedback.offsetWidth;
+    feedback.classList.add('fade-slide-up', 'wrong-fb');
     feedback.innerHTML = `<span class="wrong-label">모름 처리</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
     testWrong.push(shortCurrentData.word);
     nextBtn.focus();
