@@ -304,9 +304,16 @@ ${chapterWords.map(w => `${w.word} (${w.meaning})`).join(', ')}`;
         const data = await response.json();
         responseText = data.choices[0].message.content;
       } else {
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+        const modelsToTry = [
+          'gemini-3.1-flash-lite',
+          'gemini-2.5-flash-lite',
+          'gemini-3.5-flash',
+          'gemini-2.5-flash',
+          'gemini-3.1-pro-preview'
+        ];
         let success = false;
         for (const model of modelsToTry) {
+          console.log(`Trying Gemini API with model: ${model} for Report`);
           const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

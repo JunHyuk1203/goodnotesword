@@ -2009,7 +2009,7 @@ button:active:not(:disabled) {
 }
 .short-feedback.show-feedback {
   padding: 14px 18px;
-  max-height: 200px;
+  max-height: 2000px;
   opacity: 1;
   margin-top: 1rem;
 }
@@ -2253,24 +2253,28 @@ button:active:not(:disabled) {
   top: 0;
   left: 0;
   width: 100%;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.35, 1);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.35, 1), opacity 0.35s ease;
   pointer-events: none;
+  opacity: 0;
 }
 
 .view-layer.active-view, .lib-layer.active-lib {
   position: relative;
   transform: translateX(0);
+  opacity: 1;
   pointer-events: auto;
   z-index: 2;
 }
 
 .view-layer.idle-left, .lib-layer.idle-left {
-  transform: translateX(-100%);
+  transform: translateX(-30%);
+  opacity: 0;
   z-index: 1;
 }
 
 .view-layer.idle-right, .lib-layer.idle-right {
-  transform: translateX(100%);
+  transform: translateX(30%);
+  opacity: 0;
   z-index: 1;
 }
 
