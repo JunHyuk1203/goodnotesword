@@ -2217,17 +2217,22 @@ if (viewHistoryBtn) {
         const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : '✍️ 주관식';
         const pct = Math.round((data.correct / data.total) * 100) || 0;
         
-        const item = document.createElement('div');
-        item.className = 'history-item';
+        const item = document.createElement('details');
+        item.className = 'history-item history-details';
         item.innerHTML = `
-          <div class="history-header">
-            <span class="history-title">${modeLabel} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(${data.dir === 'word2meaning' ? '단어→뜻' : '뜻→단어'})</span></span>
-            <span class="history-date">${dateStr}</span>
+          <summary class="history-summary">
+            <div class="history-header">
+              <span class="history-title">${modeLabel} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(${data.dir === 'word2meaning' ? '단어→뜻' : '뜻→단어'})</span></span>
+              <span class="history-date">${dateStr}</span>
+            </div>
+            <div style="font-size:1.2rem; color:var(--text-muted); opacity:0.7;">▼</div>
+          </summary>
+          <div class="history-content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="history-score">${data.correct} / ${data.total} 정답 <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--primary-light)' : 'var(--danger)'}">(${pct}%)</span></span>
+            </div>
+            ${data.wrongWords && data.wrongWords.length > 0 ? `<div class="history-wrong"><strong>틀린 단어:</strong><br/>${escapeHTML(data.wrongWords.join(', '))}</div>` : ''}
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="history-score">${data.correct} / ${data.total} 정답 <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--primary-light)' : 'var(--danger)'}">(${pct}%)</span></span>
-          </div>
-          ${data.wrongWords && data.wrongWords.length > 0 ? `<div class="history-wrong">틀린 단어: ${escapeHTML(data.wrongWords.join(', '))}</div>` : ''}
         `;
         historyList.appendChild(item);
       });
