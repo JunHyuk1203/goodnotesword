@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=6.5" />
+  <link rel="stylesheet" href="style.css?v=6.6" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
 </head>
 <body>
@@ -78,11 +78,11 @@
         </div>
       </div>
 
-      <!-- Library Views Container for Sliding Animation -->
-      <div id="lib-views-container" style="position:relative; overflow:hidden; width:100%; min-height: 60vh;">
+      <!-- Library Views Container -->
+      <div id="lib-views-container" style="display: grid; align-items: start; width:100%; min-height: 60vh;">
         
         <!-- LEVEL 0: Books -->
-        <div id="layer-books" class="lib-layer active-lib">
+        <div id="layer-books" class="lib-layer active-lib" style="grid-area: 1 / 1;">
           <!-- Add Book Button -->
           <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
             <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
@@ -92,7 +92,7 @@
         </div>
 
         <!-- LEVEL 1: Chapters -->
-        <div id="layer-chapters" class="lib-layer hidden">
+        <div id="layer-chapters" class="lib-layer idle-right">
           <!-- Add Chapter Button (hidden until inside a book) -->
           <div id="add-chapter-wrap" style="margin-bottom:1rem; text-align:right;">
             <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
@@ -102,11 +102,11 @@
         </div>
 
         <!-- LEVEL 2: Words -->
-        <div id="layer-words" class="lib-layer hidden">
+        <div id="layer-words" class="lib-layer idle-right">
       <div id="view-words">
 
         <!-- Views Container for Sliding Animation -->
-        <div id="views-container" style="position:relative; overflow:hidden; width:100%;">
+        <div id="views-container" style="display: grid; align-items: start; width:100%;">
           <!-- Card View -->
           <div id="words-card-view" class="view-layer active-view"></div>
           
@@ -497,6 +497,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=6.5"></script>
+  <script type="module" src="app.js?v=6.6"></script>
 </body>
 </html>
