@@ -1308,6 +1308,10 @@ async function autoSaveToLibrary(data) {
     for (let i = 0; i < data.length; i++) {
       const wordRef = doc(collection(db, `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`));
       await setDoc(wordRef, { ...data[i], order: maxOrder + 1 + i });
+      if (convertBtn) {
+        const percent = Math.floor(((i + 1) / data.length) * 100);
+        convertBtn.innerHTML = `<span class="btn-icon">⚡</span> 저장 중... ${percent}%`;
+      }
     }
     alert(`${data.length}개 단어가 성공적으로 저장되었습니다!`);
     if (extractModal) closeModal(extractModal);

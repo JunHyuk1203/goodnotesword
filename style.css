@@ -1180,6 +1180,7 @@ body.modal-open {
   opacity: 0;
   pointer-events: none;
   transform: translateY(20px);
+  display: flex !important; /* Override global .hidden so CSS transitions can run */
 }
 .hide-toggle-label {
   font-size: 0.75rem;
