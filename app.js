@@ -1486,6 +1486,41 @@ function showQuizCard() {
       choices.appendChild(btn);
     });
   }
+
+  // 모름 버튼 추가
+  const dontKnowBtn = document.createElement('button');
+  dontKnowBtn.className = 'quiz-choice-btn quiz-dontknow-btn';
+  dontKnowBtn.textContent = '🤔 모름';
+  dontKnowBtn.addEventListener('click', () => {
+    // 모든 선택지 비활성화
+    choices.querySelectorAll('.quiz-choice-btn').forEach(b => b.disabled = true);
+    // 정답 표시
+    const correctAnswer = (testDir === 'word2meaning')
+      ? (parseWordData(testWords[testIndex]).meaning || parseWordData(testWords[testIndex]).back || '')
+      : parseWordData(testWords[testIndex]).word;
+    choices.querySelectorAll('.quiz-choice-btn').forEach(b => {
+      if (b.textContent === correctAnswer) b.classList.add('correct');
+    });
+    dontKnowBtn.classList.add('wrong');
+    testWrong.push(parseWordData(testWords[testIndex]).word);
+    setTimeout(() => { testIndex++; animateAndShowQuizCard(); }, 900);
+  });
+  choices.appendChild(dontKnowBtn);
+
+  // 입장 애니메이션
+  const quizScreen = $('test-quiz');
+  quizScreen.classList.remove('card-slide-in');
+  void quizScreen.offsetWidth; // reflow
+  quizScreen.classList.add('card-slide-in');
+}
+
+function animateAndShowQuizCard() {
+  const quizScreen = $('test-quiz');
+  quizScreen.classList.add('card-slide-out');
+  setTimeout(() => {
+    quizScreen.classList.remove('card-slide-out');
+    showQuizCard();
+  }, 200);
 }
 
 function handleQuizAnswer(clickedBtn, selected, correct, choicesEl) {
@@ -1506,7 +1541,7 @@ function handleQuizAnswer(clickedBtn, selected, correct, choicesEl) {
 
   setTimeout(() => {
     testIndex++;
-    showQuizCard();
+    animateAndShowQuizCard();
   }, 900);
 }
 
