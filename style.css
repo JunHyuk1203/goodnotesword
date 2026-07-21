@@ -2244,25 +2244,23 @@ button:active:not(:disabled) {
   top: 0;
   left: 0;
   width: 100%;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
-  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.35, 1);
   pointer-events: none;
-  visibility: hidden;
 }
 
 .view-layer.active-view {
   position: relative;
-  opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
-  visibility: visible;
   z-index: 2;
 }
 
 .view-layer.idle-left {
-  transform: translateX(-30%);
+  transform: translateX(-100%);
+  z-index: 1;
 }
 
 .view-layer.idle-right {
-  transform: translateX(30%);
+  transform: translateX(100%);
+  z-index: 1;
 }
