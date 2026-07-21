@@ -1373,7 +1373,7 @@ function showFlashCard() {
 
   const flashFront = $('flashcard-front');
   const flashBack = $('flashcard-back');
-  $('flash-actions').style.display = 'none';
+  $('flash-actions').classList.remove('show');
   $('flip-hint').style.display = '';
 
   if (testDir === 'word2meaning') {
@@ -1420,10 +1420,7 @@ window.flipCard = function() {
     card.classList.add('flipped');
     testIsFlipped = true;
     const actions = $('flash-actions');
-    actions.style.display = 'flex';
-    actions.classList.remove('fade-slide-up');
-    void actions.offsetWidth;
-    actions.classList.add('fade-slide-up');
+    actions.classList.add('show');
     $('flip-hint').style.display = 'none';
   }
 };
@@ -1468,6 +1465,8 @@ function showQuizCard() {
   const choices = $('quiz-choices');
   const questionLabel = document.querySelector('.quiz-question-label');
   const qBox = document.querySelector('#test-quiz .quiz-question-box');
+  const fb = $('quiz-feedback');
+  if (fb) fb.classList.remove('show-feedback', 'correct-fb', 'wrong-fb');
 
   [qBox, choices].forEach(el => {
     if (el) {
@@ -1539,7 +1538,17 @@ function showQuizCard() {
     });
     dontKnowBtn.classList.add('wrong');
     testWrong.push(parseWordData(testWords[testIndex]).word);
-    setTimeout(() => { testIndex++; animateAndShowQuizCard(); }, 900);
+    
+    const fb = $('quiz-feedback');
+    fb.innerHTML = `<span class="wrong-label">모름 처리됨</span><br>정답: <strong>${escapeHTML(correctAnswer)}</strong>`;
+    fb.classList.remove('correct-fb');
+    fb.classList.add('wrong-fb', 'show-feedback');
+    
+    setTimeout(() => { 
+      fb.classList.remove('show-feedback');
+      testIndex++; 
+      animateAndShowQuizCard(); 
+    }, 1200);
   });
   choices.appendChild(dontKnowBtn);
 
@@ -1566,19 +1575,27 @@ function handleQuizAnswer(clickedBtn, selected, correct, choicesEl) {
     if (b.textContent === correct) b.classList.add('correct');
   });
 
+  const fb = $('quiz-feedback');
   if (selected === correct) {
     clickedBtn.classList.add('correct');
     testCorrect++;
+    fb.innerHTML = `<span class="correct-label">정답입니다!</span>`;
+    fb.classList.remove('wrong-fb');
+    fb.classList.add('correct-fb', 'show-feedback');
   } else {
     clickedBtn.classList.add('wrong');
     const data = parseWordData(testWords[testIndex]);
     testWrong.push(data.word);
+    fb.innerHTML = `<span class="wrong-label">틀렸습니다!</span><br>정답: <strong>${escapeHTML(correct)}</strong>`;
+    fb.classList.remove('correct-fb');
+    fb.classList.add('wrong-fb', 'show-feedback');
   }
 
   setTimeout(() => {
+    fb.classList.remove('show-feedback');
     testIndex++;
     animateAndShowQuizCard();
-  }, 900);
+  }, 1200);
 }
 
 // ─── Short Answer (주관식) ──────────────────────────────────────────────────────
@@ -1625,8 +1642,7 @@ function showShortCard() {
   submitBtn.classList.remove('hidden');
   nextBtn.classList.add('hidden');
   appealBtn.classList.add('hidden');
-  feedback.classList.add('hidden');
-  feedback.classList.remove('correct-fb', 'wrong-fb');
+  feedback.classList.remove('show-feedback', 'correct-fb', 'wrong-fb');
   if (dontKnowBtn) dontKnowBtn.classList.remove('hidden');
 
   if (testDir === 'word2meaning') {
@@ -1666,9 +1682,7 @@ function handleShortSubmit() {
   submitBtn.classList.add('hidden');
   if (dontKnowBtn) dontKnowBtn.classList.add('hidden');
   nextBtn.classList.remove('hidden');
-  feedback.classList.remove('hidden', 'fade-slide-up');
-  void feedback.offsetWidth;
-  feedback.classList.add('fade-slide-up');
+  feedback.classList.add('show-feedback');
 
   let isCorrect = false;
   if (testDir === 'word2meaning') {
@@ -1724,9 +1738,7 @@ if ($('short-dontknow-btn')) {
     submitBtn.classList.add('hidden');
     dontKnowBtn.classList.add('hidden');
     nextBtn.classList.remove('hidden');
-    feedback.classList.remove('hidden', 'fade-slide-up');
-    void feedback.offsetWidth;
-    feedback.classList.add('fade-slide-up', 'wrong-fb');
+    feedback.classList.add('wrong-fb', 'show-feedback');
     feedback.innerHTML = `<span class="wrong-label">모름 처리</span><br>정답: <strong>${escapeHTML(testDir === 'word2meaning' ? shortCurrentData.meaning : shortCurrentData.word)}</strong>`;
     testWrong.push(shortCurrentData.word);
     input.blur();

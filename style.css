@@ -1647,6 +1647,16 @@ body.shorts-mode-active #view-words {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.flash-actions.show {
+  max-height: 100px;
+  opacity: 1;
+  margin-top: 1.5rem;
 }
 .flash-wrong-btn, .flash-correct-btn {
   border: none;
@@ -1915,11 +1925,21 @@ button:active:not(:disabled) {
 .short-submit-btn:hover { transform: translateY(-2px); }
 .short-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .short-feedback {
-  padding: 14px 18px;
+  padding: 0 18px;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
   border-radius: 12px;
   font-size: 0.92rem;
   line-height: 1.6;
-  animation: fadeIn 0.2s ease;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.short-feedback.show-feedback {
+  padding: 14px 18px;
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 1rem;
 }
 .short-feedback.correct-fb {
   background: rgba(74, 222, 128, 0.1);
