@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5.9" />
+  <link rel="stylesheet" href="style.css?v=6.0" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
 </head>
 <body>
@@ -78,23 +78,31 @@
         </div>
       </div>
 
-      <!-- Add Book Button -->
-      <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
-        <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
-      </div>
+      <!-- Library Views Container for Sliding Animation -->
+      <div id="lib-views-container" style="position:relative; overflow-x:hidden; width:100%;">
+        
+        <!-- LEVEL 0: Books -->
+        <div id="layer-books" class="lib-layer active-lib">
+          <!-- Add Book Button -->
+          <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
+            <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
+          </div>
+          <!-- Books Grid -->
+          <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
+        </div>
 
-      <!-- Books Grid -->
-      <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
+        <!-- LEVEL 1: Chapters -->
+        <div id="layer-chapters" class="lib-layer hidden">
+          <!-- Add Chapter Button (hidden until inside a book) -->
+          <div id="add-chapter-wrap" class="hidden" style="margin-bottom:1rem; text-align:right;">
+            <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
+          </div>
+          <!-- Chapters Grid -->
+          <div id="view-chapters" class="hidden" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
+        </div>
 
-      <!-- Add Chapter Button (hidden until inside a book) -->
-      <div id="add-chapter-wrap" class="hidden" style="margin-bottom:1rem; text-align:right;">
-        <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
-      </div>
-
-      <!-- Chapters Grid -->
-      <div id="view-chapters" class="hidden" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
-
-      <!-- Words View -->
+        <!-- LEVEL 2: Words -->
+        <div id="layer-words" class="lib-layer hidden">
       <div id="view-words" class="hidden">
 
         <!-- Views Container for Sliding Animation -->
@@ -115,10 +123,11 @@
               <tbody id="words-tbody"></tbody>
             </table>
           </div>
+          </div>
+  
         </div>
-
-      </div>
-    </div>
+        </div> <!-- End layer-words -->
+      </div> <!-- End lib-views-container -->
 
     <!-- Error -->
     <div id="error-section" class="error-section hidden" role="alert">
@@ -462,6 +471,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=5.9"></script>
+  <script type="module" src="app.js?v=6.0"></script>
 </body>
 </html>

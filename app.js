@@ -126,6 +126,27 @@ const errorMsg = $('error-msg');
 const viewBooks = $('view-books');
 const viewChapters = $('view-chapters');
 const viewWords = $('view-words');
+const layerBooks = $('layer-books');
+const layerChapters = $('layer-chapters');
+const layerWords = $('layer-words');
+
+let currentLibraryLevel = 0; // 0: Books, 1: Chapters, 2: Words
+
+function setLibraryLevel(newIndex) {
+  currentLibraryLevel = newIndex;
+  const views = [layerBooks, layerChapters, layerWords];
+  views.forEach((v, i) => {
+    if (!v) return;
+    v.classList.remove('active-lib', 'idle-left', 'idle-right', 'hidden');
+    if (i < newIndex) {
+      v.classList.add('idle-left');
+    } else if (i > newIndex) {
+      v.classList.add('idle-right');
+    } else {
+      v.classList.add('active-lib');
+    }
+  });
+}
 const crumbHome = $('crumb-home');
 const crumbBook = $('crumb-book');
 const crumbBookName = $('crumb-book-name');
@@ -238,27 +259,56 @@ const editWordCancel = $('edit-word-cancel');
 // LIBRARY: Books → Chapters → Words
 // ═══════════════════════════════════════════════════════════════════════════════
 
-crumbHome.addEventListener('click', () => loadBooks('backward'));
+crumbHome.addEventListener('click', () => loadBooks());
 crumbBookName.addEventListener('click', () => {
-  if (selectedBookId) loadChapters(selectedBookId, crumbBookName.textContent, 'backward');
+  if (selectedBookId) loadChapters(selectedBookId, crumbBookName.textContent);
+});
+
+// --- Swipe to Go Back (iOS style edge swipe) ---
+let backSwipeStartX = null;
+let backSwipeStartY = null;
+
+document.addEventListener('touchstart', (e) => {
+  // Only trigger from left edge
+  if (e.touches.length === 1 && e.touches[0].clientX <= 40) {
+    backSwipeStartX = e.touches[0].clientX;
+    backSwipeStartY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  if (backSwipeStartX === null) return;
+  const deltaX = e.touches[0].clientX - backSwipeStartX;
+  const deltaY = Math.abs(e.touches[0].clientY - backSwipeStartY);
+  // Cancel if vertical scroll is dominant
+  if (deltaY > 50 && deltaX < 50) {
+    backSwipeStartX = null;
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (backSwipeStartX === null) return;
+  const deltaX = e.changedTouches[0].clientX - backSwipeStartX;
+  if (deltaX > 80) {
+    if (currentLibraryLevel === 2 && selectedBookId) {
+      loadChapters(selectedBookId, crumbBookName.textContent);
+    } else if (currentLibraryLevel === 1) {
+      loadBooks();
+    }
+  }
+  backSwipeStartX = null;
 });
 
 // ─── Load Books ───────────────────────────────────────────────────────────────
-function loadBooks(dir = 'backward') {
+function loadBooks() {
   if (unsubChapters) { unsubChapters(); unsubChapters = null; }
   if (unsubWords) { unsubWords(); unsubWords = null; }
   selectedBookId = null;
   selectedChapterId = null;
 
-  viewBooks.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
-  void viewBooks.offsetWidth;
-  viewBooks.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+  setLibraryLevel(0);
 
-  viewChapters.classList.add('hidden');
-  viewWords.classList.add('hidden');
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
-  addBookWrap.classList.remove('hidden');
-  addChapterWrap.classList.add('hidden');
   crumbBook.classList.add('hidden');
   crumbChapter.classList.add('hidden');
   hideToggleBar.classList.add('hidden');
@@ -278,7 +328,7 @@ function loadBooks(dir = 'backward') {
         div.className = 'lib-card list-item-enter';
         div.style.animationDelay = `${idx * 0.04}s`;
         div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단어장 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-        div.onclick = () => loadChapters(d.id, data.name, 'forward');
+        div.onclick = () => loadChapters(d.id, data.name);
         div.querySelector('.lib-delete-btn').onclick = async (e) => {
           e.stopPropagation();
           if (await showConfirm('이 단어장을 삭제하시겠습니까? (모든 단원과 함께 삭제됩니다)')) {
@@ -297,7 +347,7 @@ function loadBooks(dir = 'backward') {
 }
 
 // ─── Load Chapters ────────────────────────────────────────────────────────────
-function loadChapters(bookId, bookName, dir = 'forward') {
+function loadChapters(bookId, bookName) {
   if (unsubWords) { unsubWords(); unsubWords = null; }
   if (unsubChapters && selectedBookId !== bookId) {
     unsubChapters();
@@ -306,16 +356,9 @@ function loadChapters(bookId, bookName, dir = 'forward') {
   selectedBookId = bookId;
   selectedChapterId = null;
 
-  viewBooks.classList.add('hidden');
-  
-  viewChapters.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
-  void viewChapters.offsetWidth;
-  viewChapters.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+  setLibraryLevel(1);
 
-  viewWords.classList.add('hidden');
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
-  addBookWrap.classList.add('hidden');
-  addChapterWrap.classList.remove('hidden');
   crumbBook.classList.remove('hidden');
   crumbBookName.textContent = bookName;
   crumbChapter.classList.add('hidden');
@@ -335,7 +378,7 @@ function loadChapters(bookId, bookName, dir = 'forward') {
         div.className = 'lib-card list-item-enter';
         div.style.animationDelay = `${idx * 0.04}s`;
         div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-        div.onclick = () => loadWords(bookId, d.id, data.name, 'forward');
+        div.onclick = () => loadWords(bookId, d.id, data.name);
         div.querySelector('.lib-delete-btn').onclick = async (e) => {
           e.stopPropagation();
           if (await showConfirm('이 단원을 삭제하시겠습니까? (모든 단어와 함께 삭제됩니다)')) {
@@ -354,7 +397,7 @@ function loadChapters(bookId, bookName, dir = 'forward') {
 }
 
 // ─── Load Words ───────────────────────────────────────────────────────────────
-function loadWords(bookId, chapterId, chapterName, dir = 'forward') {
+function loadWords(bookId, chapterId, chapterName) {
   if (unsubWords && selectedChapterId !== chapterId) {
     unsubWords();
     unsubWords = null;
@@ -362,16 +405,9 @@ function loadWords(bookId, chapterId, chapterName, dir = 'forward') {
   selectedBookId = bookId;
   selectedChapterId = chapterId;
 
-  viewBooks.classList.add('hidden');
-  viewChapters.classList.add('hidden');
-  
-  viewWords.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
-  void viewWords.offsetWidth;
-  viewWords.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+  setLibraryLevel(2);
 
   document.getElementById('words-action-wrapper')?.classList.remove('hidden');
-  addBookWrap.classList.add('hidden');
-  addChapterWrap.classList.add('hidden');
   crumbChapter.classList.remove('hidden');
   crumbChapterName.textContent = chapterName;
   // Show hide bar and reset to card mode

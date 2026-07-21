@@ -2248,7 +2248,7 @@ button:active:not(:disabled) {
 /* =============================================
    View Sliding Animations
    ============================================= */
-.view-layer {
+.view-layer, .lib-layer {
   position: absolute;
   top: 0;
   left: 0;
@@ -2257,19 +2257,23 @@ button:active:not(:disabled) {
   pointer-events: none;
 }
 
-.view-layer.active-view {
+.view-layer.active-view, .lib-layer.active-lib {
   position: relative;
   transform: translateX(0);
   pointer-events: auto;
   z-index: 2;
 }
 
-.view-layer.idle-left {
+.view-layer.idle-left, .lib-layer.idle-left {
   transform: translateX(-100%);
   z-index: 1;
 }
 
-.view-layer.idle-right {
+.view-layer.idle-right, .lib-layer.idle-right {
   transform: translateX(100%);
   z-index: 1;
+}
+
+.lib-layer.hidden {
+  display: none !important;
 }
