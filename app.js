@@ -223,19 +223,22 @@ const editWordCancel = $('edit-word-cancel');
 // LIBRARY: Books → Chapters → Words
 // ═══════════════════════════════════════════════════════════════════════════════
 
-crumbHome.addEventListener('click', () => loadBooks());
+crumbHome.addEventListener('click', () => loadBooks('backward'));
 crumbBookName.addEventListener('click', () => {
-  if (selectedBookId) loadChapters(selectedBookId, crumbBookName.textContent);
+  if (selectedBookId) loadChapters(selectedBookId, crumbBookName.textContent, 'backward');
 });
 
 // ─── Load Books ───────────────────────────────────────────────────────────────
-function loadBooks() {
+function loadBooks(dir = 'backward') {
   if (unsubChapters) { unsubChapters(); unsubChapters = null; }
   if (unsubWords) { unsubWords(); unsubWords = null; }
   selectedBookId = null;
   selectedChapterId = null;
 
-  viewBooks.classList.remove('hidden');
+  viewBooks.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
+  void viewBooks.offsetWidth;
+  viewBooks.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+
   viewChapters.classList.add('hidden');
   viewWords.classList.add('hidden');
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
@@ -256,9 +259,10 @@ function loadBooks() {
       snap.forEach(d => {
         const data = d.data();
         const div = document.createElement('div');
-        div.className = 'lib-card';
+        div.className = 'lib-card list-item-enter';
+        div.style.animationDelay = `${idx * 0.04}s`;
         div.innerHTML = `<div class="lib-icon">📘</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단어장 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-        div.onclick = () => loadChapters(d.id, data.name);
+        div.onclick = () => loadChapters(d.id, data.name, 'forward');
         div.querySelector('.lib-delete-btn').onclick = async (e) => {
           e.stopPropagation();
           if (await showConfirm('이 단어장을 삭제하시겠습니까? (모든 단원과 함께 삭제됩니다)')) {
@@ -276,7 +280,7 @@ function loadBooks() {
 }
 
 // ─── Load Chapters ────────────────────────────────────────────────────────────
-function loadChapters(bookId, bookName) {
+function loadChapters(bookId, bookName, dir = 'forward') {
   if (unsubWords) { unsubWords(); unsubWords = null; }
   if (unsubChapters && selectedBookId !== bookId) {
     unsubChapters();
@@ -286,7 +290,11 @@ function loadChapters(bookId, bookName) {
   selectedChapterId = null;
 
   viewBooks.classList.add('hidden');
-  viewChapters.classList.remove('hidden');
+  
+  viewChapters.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
+  void viewChapters.offsetWidth;
+  viewChapters.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+
   viewWords.classList.add('hidden');
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
   addBookWrap.classList.add('hidden');
@@ -310,7 +318,7 @@ function loadChapters(bookId, bookName) {
         div.className = 'lib-card list-item-enter';
         div.style.animationDelay = `${idx * 0.04}s`;
         div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
-        div.onclick = () => loadWords(bookId, d.id, data.name);
+        div.onclick = () => loadWords(bookId, d.id, data.name, 'forward');
         div.querySelector('.lib-delete-btn').onclick = async (e) => {
           e.stopPropagation();
           if (await showConfirm('이 단원을 삭제하시겠습니까? (모든 단어와 함께 삭제됩니다)')) {
@@ -329,7 +337,7 @@ function loadChapters(bookId, bookName) {
 }
 
 // ─── Load Words ───────────────────────────────────────────────────────────────
-function loadWords(bookId, chapterId, chapterName) {
+function loadWords(bookId, chapterId, chapterName, dir = 'forward') {
   if (unsubWords && selectedChapterId !== chapterId) {
     unsubWords();
     unsubWords = null;
@@ -339,7 +347,11 @@ function loadWords(bookId, chapterId, chapterName) {
 
   viewBooks.classList.add('hidden');
   viewChapters.classList.add('hidden');
-  viewWords.classList.remove('hidden');
+  
+  viewWords.classList.remove('hidden', 'nav-slide-forward', 'nav-slide-backward');
+  void viewWords.offsetWidth;
+  viewWords.classList.add(dir === 'forward' ? 'nav-slide-forward' : 'nav-slide-backward');
+
   document.getElementById('words-action-wrapper')?.classList.remove('hidden');
   addBookWrap.classList.add('hidden');
   addChapterWrap.classList.add('hidden');

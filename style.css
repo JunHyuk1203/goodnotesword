@@ -1769,6 +1769,25 @@ body.shorts-mode-active #view-words {
   animation: slideOutToLeft 0.18s cubic-bezier(0.55, 0, 1, 0.45) both;
 }
 
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nav-slide-forward {
+  animation: slideInFromRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.nav-slide-backward {
+  animation: slideInFromLeft 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
