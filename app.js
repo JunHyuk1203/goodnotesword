@@ -216,6 +216,17 @@ const historyModal = $('history-modal');
 const historyCloseBtn = $('history-close-btn');
 const historyList = $('history-list');
 
+const historyDetailModal = $('history-detail-modal');
+const historyDetailCloseBtn = $('history-detail-close-btn');
+const historyDetailTitle = $('history-detail-title');
+const historyDetailDate = $('history-detail-date');
+const historyDetailScore = $('history-detail-score');
+const historyDetailWrong = $('history-detail-wrong');
+
+if (historyDetailCloseBtn) {
+  historyDetailCloseBtn.addEventListener('click', () => closeModal(historyDetailModal));
+}
+
 let swipeIndex = 0;
 let swipeWords = [];
 let autoPlayPronunciation = true; // Enabled by default in Shorts mode
@@ -2217,23 +2228,30 @@ if (viewHistoryBtn) {
         const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : '✍️ 주관식';
         const pct = Math.round((data.correct / data.total) * 100) || 0;
         
-        const item = document.createElement('details');
-        item.className = 'history-item history-details';
+        const item = document.createElement('div');
+        item.className = 'history-item';
         item.innerHTML = `
-          <summary class="history-summary">
+          <div class="history-summary">
             <div class="history-header">
               <span class="history-title">${modeLabel} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(${data.dir === 'word2meaning' ? '단어→뜻' : '뜻→단어'})</span></span>
               <span class="history-date">${dateStr}</span>
             </div>
-            <div style="font-size:1.2rem; color:var(--text-muted); opacity:0.7;">▼</div>
-          </summary>
-          <div class="history-content">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="history-score">${data.correct} / ${data.total} 정답 <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--primary-light)' : 'var(--danger)'}">(${pct}%)</span></span>
-            </div>
-            ${data.wrongWords && data.wrongWords.length > 0 ? `<div class="history-wrong"><strong>틀린 단어:</strong><br/>${escapeHTML(data.wrongWords.join(', '))}</div>` : ''}
           </div>
         `;
+        item.onclick = () => {
+          historyDetailTitle.innerHTML = `${modeLabel} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(${data.dir === 'word2meaning' ? '단어→뜻' : '뜻→단어'})</span>`;
+          historyDetailDate.textContent = dateStr;
+          historyDetailScore.innerHTML = `${data.correct} / ${data.total} 정답 <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--primary-light)' : 'var(--danger)'}">(${pct}%)</span>`;
+          
+          if (data.wrongWords && data.wrongWords.length > 0) {
+            historyDetailWrong.innerHTML = `<strong>틀린 단어:</strong><br/>${escapeHTML(data.wrongWords.join(', '))}`;
+            historyDetailWrong.classList.remove('hidden');
+          } else {
+            historyDetailWrong.classList.add('hidden');
+            historyDetailWrong.innerHTML = '';
+          }
+          openModal(historyDetailModal);
+        };
         historyList.appendChild(item);
       });
     } catch (e) {

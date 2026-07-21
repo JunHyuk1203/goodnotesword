@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=6.1" />
+  <link rel="stylesheet" href="style.css?v=6.2" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
 </head>
 <body>
@@ -444,12 +444,30 @@
   <!-- Test History Modal -->
   <div id="history-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
     <div class="modal-screen-content" style="max-width:500px; height:80vh;">
-      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">📝 테스트 기록</h2>
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">내 테스트 기록</h2>
       <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
         <!-- Items injected by JS -->
       </div>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
         <button id="history-close-btn" class="sample-btn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Detail Modal -->
+  <div id="history-detail-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 10001;">
+    <div class="modal-screen-content" style="max-width:500px;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">테스트 상세 결과</h2>
+      <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+        <div style="display:flex; flex-direction:column; gap:0.3rem;">
+          <span id="history-detail-title" style="font-weight:600; font-size:1.05rem;"></span>
+          <span id="history-detail-date" style="font-size:0.85rem; color:var(--text-muted);"></span>
+        </div>
+        <span id="history-detail-score" style="font-size:1.1rem; font-weight:600;"></span>
+      </div>
+      <div id="history-detail-wrong" class="history-wrong hidden"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="history-detail-close-btn" class="sample-btn">확인</button>
       </div>
     </div>
   </div>
@@ -471,6 +489,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=6.1"></script>
+  <script type="module" src="app.js?v=6.2"></script>
 </body>
 </html>
