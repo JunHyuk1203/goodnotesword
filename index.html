@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=4.9" />
+  <link rel="stylesheet" href="style.css?v=5.0" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
 </head>
 <body>
@@ -99,68 +99,7 @@
 
 
 
-        <!-- EXTRACT SECTION (hidden, toggled by button) -->
-        <div id="extract-section" class="hidden" style="border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:2rem; background:var(--bg-card);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <h3 class="step-title" style="margin:0; font-size:1.1rem;">단어 추출기</h3>
-            <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
-          </div>
 
-          <!-- Options -->
-          <div class="options-grid" style="margin-top:0.5rem; margin-bottom:1.5rem;">
-            <div class="option-card">
-              <label class="option-label" for="card-front-sel">📌 앞면</label>
-              <select id="card-front-sel" class="select-input">
-                <option value="word">단어만</option>
-                <option value="word_pos">단어+품사</option>
-                <option value="word_pron">단어+발음</option>
-              </select>
-            </div>
-            <div class="option-card">
-              <label class="option-label" for="card-back-sel">📝 뒷면</label>
-              <select id="card-back-sel" class="select-input">
-                <option value="full" selected>뜻+예문+유의어</option>
-                <option value="meaning_example">뜻+예문</option>
-                <option value="meaning_only">뜻만</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Step 1: Copy Prompt -->
-          <div class="step-card" style="margin-bottom:1.5rem; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card);">
-            <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
-            <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-              아래 프롬프트를 복사하여 ChatGPT, Claude, 또는 Gemini에 단어책 사진이나 텍스트와 함께 붙여넣으세요.
-            </p>
-            <div class="textarea-wrap" style="position:relative;">
-              <textarea id="prompt-output" class="vocab-textarea" rows="6" readonly style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding-right: 90px; color: var(--text); border: 1px solid var(--border); resize: none;"></textarea>
-              <button id="copy-prompt-btn" class="generate-btn" style="position: absolute; right: 10px; top: 10px; width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; z-index: 10;">📋 복사</button>
-            </div>
-          </div>
-
-          <!-- Step 2: Paste JSON -->
-          <div class="step-card" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1.5rem;">
-            <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
-            <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-              외부 AI가 답변해준 결과(코드 블록 전체 또는 텍스트 전부)를 아래에 붙여넣으세요.
-            </p>
-            <div class="textarea-wrap">
-              <textarea id="ai-json-input" class="vocab-textarea" placeholder='[
-  {
-    "word": "significant",
-    "meaning": "1 중요한 2 상당한",
-    "examples": ["This is significant! 이것은 중요하다!"],
-    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]
-  }
-]' rows="8" spellcheck="false"></textarea>
-            </div>
-            <div style="margin-top:1.5rem; text-align:center;">
-              <button id="convert-btn" class="generate-btn" style="font-size: 1rem; padding: 0.8rem 2rem;">
-                <span class="btn-icon">⚡</span> 단어장으로 변환하기
-              </button>
-            </div>
-          </div>
-        </div>
 
         <!-- Card View -->
         <div id="words-card-view"></div>
@@ -205,9 +144,74 @@
 
 
 
+  <!-- ========== EXTRACT MODAL ========== -->
+  <div id="extract-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content extract-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 class="step-title" style="margin:0; font-size:1.1rem;">단어 추출기</h3>
+        <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
+      </div>
+
+      <!-- Options -->
+      <div class="options-grid" style="margin-top:0.5rem; margin-bottom:1.5rem;">
+        <div class="option-card">
+          <label class="option-label" for="card-front-sel">📌 앞면</label>
+          <select id="card-front-sel" class="select-input">
+            <option value="word">단어만</option>
+            <option value="word_pos">단어+품사</option>
+            <option value="word_pron">단어+발음</option>
+          </select>
+        </div>
+        <div class="option-card">
+          <label class="option-label" for="card-back-sel">📝 뒷면</label>
+          <select id="card-back-sel" class="select-input">
+            <option value="full" selected>뜻+예문+유의어</option>
+            <option value="meaning_example">뜻+예문</option>
+            <option value="meaning_only">뜻만</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 1: Copy Prompt -->
+      <div class="step-card" style="margin-bottom:1.5rem; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card);">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          아래 프롬프트를 복사하여 ChatGPT, Claude, 또는 Gemini에 단어책 사진이나 텍스트와 함께 붙여넣으세요.
+        </p>
+        <div class="textarea-wrap" style="position:relative;">
+          <textarea id="prompt-output" class="vocab-textarea" rows="6" readonly style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding-right: 90px; color: var(--text); border: 1px solid var(--border); resize: none;"></textarea>
+          <button id="copy-prompt-btn" class="generate-btn" style="position: absolute; right: 10px; top: 10px; width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; z-index: 10;">📋 복사</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Paste JSON -->
+      <div class="step-card" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1.5rem;">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          외부 AI가 답변해준 결과(코드 블록 전체 또는 텍스트 전부)를 아래에 붙여넣으세요.
+        </p>
+        <div class="textarea-wrap">
+          <textarea id="ai-json-input" class="vocab-textarea" placeholder='[
+  {
+    "word": "significant",
+    "meaning": "1 중요한 2 상당한",
+    "examples": ["This is significant! 이것은 중요하다!"],
+    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]
+  }
+]' rows="8" spellcheck="false"></textarea>
+        </div>
+        <div style="margin-top:1.5rem; text-align:center;">
+          <button id="convert-btn" class="generate-btn" style="font-size: 1rem; padding: 0.8rem 2rem;">
+            <span class="btn-icon">⚡</span> 단어장으로 변환하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== TEST MODE MODAL ========== -->
-  <div id="test-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="test-modal-box">
+  <div id="test-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content test-modal-box">
       <!-- Test setup screen -->
       <div id="test-setup" class="test-screen">
         <h2 class="test-title">🧪 테스트 설정</h2>
@@ -410,9 +414,9 @@
   </div>
 
   <!-- Test History Modal -->
-  <div id="history-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="test-modal-box" style="max-width:500px; padding:2rem;">
-      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">📊 테스트 기록</h2>
+  <div id="history-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content" style="max-width:500px;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">📝 테스트 기록</h2>
       <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
         <!-- Items injected by JS -->
       </div>
@@ -423,8 +427,8 @@
   </div>
 
   <!-- Settings Modal -->
-  <div id="settings-modal" class="modal-overlay hidden" style="z-index: 9999;">
-    <div class="modal-content" style="max-width:400px;">
+  <div id="settings-modal" class="modal-screen hidden" style="z-index: 9999;">
+    <div class="modal-screen-content" style="max-width:400px;">
       <h3 style="margin-top:0;">⚙️ 앱 설정</h3>
       <div style="margin-bottom:1rem;">
         <label for="gemini-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Gemini API 키</label>
@@ -439,6 +443,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=4.9"></script>
+  <script type="module" src="app.js?v=5.0"></script>
 </body>
 </html>

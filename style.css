@@ -913,6 +913,50 @@ body {
   padding: 20px;
   animation: fadeIn 0.2s ease;
 }
+
+/* ─── Unified Slide-up Modal Screens ─── */
+.modal-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 15, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Align to bottom */
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  padding: 0;
+}
+.modal-screen.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-screen.hidden {
+  display: none !important;
+}
+
+.modal-screen-content {
+  background: #0f1029;
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 95vh;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5), 0 0 50px rgba(108,99,255,0.12);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.modal-screen.show .modal-screen-content {
+  transform: translateY(0);
+}
 .modal-box {
   background: #13142a;
   border: 1px solid rgba(108, 99, 255, 0.3);
@@ -1539,6 +1583,17 @@ body.shorts-mode-active #view-words {
   flex-direction: column;
   gap: 1rem;
   flex: 1;
+}
+/* Short answer specific stretch layout */
+#test-short.test-screen {
+  height: 100%;
+  padding-bottom: 0; /* Keyboard goes flush */
+}
+#test-short .quiz-question-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .test-title {
   font-size: 1.5rem;

@@ -124,7 +124,7 @@ const wordsTbody = $('words-tbody');
 const wordsCardView = $('words-card-view');
 const wordsTableView = $('words-table-view');
 const hideToggleBar = $('hide-toggle-bar');
-const extractSection = $('extract-section');
+const extractModal = $('extract-modal');
 const openExtractBtn = $('open-extract-btn');
 const closeExtractBtn = $('close-extract-btn');
 const promptOutput = $('prompt-output');
@@ -161,15 +161,13 @@ let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-    settingsModal.classList.remove('hidden', 'modal-enter');
-    void settingsModal.offsetWidth;
-    settingsModal.classList.add('modal-enter');
+    openModal(settingsModal);
   });
-  settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+  settingsCloseBtn.addEventListener('click', () => closeModal(settingsModal));
   settingsSaveBtn.addEventListener('click', () => {
     geminiApiKey = geminiApiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', geminiApiKey);
-    settingsModal.classList.add('hidden');
+    closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
   });
 }
@@ -1059,8 +1057,8 @@ deleteSelectedBtn.addEventListener('click', async () => {
 // EXTRACT SECTION TOGGLE
 // ═══════════════════════════════════════════════════════════════════════════════
 
-openExtractBtn.addEventListener('click', () => extractSection.classList.remove('hidden'));
-closeExtractBtn.addEventListener('click', () => extractSection.classList.add('hidden'));
+openExtractBtn.addEventListener('click', () => openModal(extractModal));
+closeExtractBtn.addEventListener('click', () => closeModal(extractModal));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PROMPT GENERATOR
@@ -1245,7 +1243,7 @@ async function autoSaveToLibrary(data) {
       await setDoc(wordRef, { ...data[i], order: maxOrder + 1 + i });
     }
     alert(`${data.length}개 단어가 성공적으로 저장되었습니다!`);
-    if (extractSection) extractSection.classList.add('hidden');
+    if (extractModal) closeModal(extractModal);
   } catch (e) {
     console.error(e);
     alert('저장 실패: ' + e.message);
@@ -1292,7 +1290,7 @@ if (startTestBtn) {
     }
     $('test-word-count-info').textContent = `총 ${currentLoadedWords.length}개 단어로 테스트합니다.`;
     showScreen('setup');
-    testModal.classList.remove('hidden');
+    openModal(testModal);
   });
 }
 
@@ -1333,7 +1331,7 @@ function showScreen(name) {
 }
 
 function closeTest() {
-  testModal.classList.add('hidden');
+  closeModal(testModal);
 }
 
 function startTest(words) {
@@ -2079,8 +2077,8 @@ if (viewHistoryBtn) {
   viewHistoryBtn.addEventListener('click', async () => {
     if (!selectedBookId || !selectedChapterId) return;
     
-    historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">기록을 불러오는 중...</p>';
-    historyModal.classList.remove('hidden');
+    historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">기록 불러오는 중...</p>';
+    openModal(historyModal);
 
     try {
       const q = query(
@@ -2124,7 +2122,7 @@ if (viewHistoryBtn) {
 
 if (historyCloseBtn) {
   historyCloseBtn.addEventListener('click', () => {
-    historyModal.classList.add('hidden');
+    closeModal(historyModal);
   });
 }
 
