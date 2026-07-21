@@ -55,6 +55,7 @@ function escapeCSV(s) {
 }
 
 function openModal(modalEl) {
+  document.body.classList.add('modal-open');
   modalEl.classList.remove('hidden');
   void modalEl.offsetWidth;
   modalEl.classList.add('show');
@@ -63,6 +64,9 @@ function closeModal(modalEl) {
   modalEl.classList.remove('show');
   setTimeout(() => {
     modalEl.classList.add('hidden');
+    if (!document.querySelector('.modal-screen.show')) {
+      document.body.classList.remove('modal-open');
+    }
   }, 350);
 }
 
