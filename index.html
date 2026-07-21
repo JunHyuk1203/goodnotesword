@@ -84,7 +84,7 @@
       </div>
 
       <!-- Books Grid -->
-      <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem;"></div>
+      <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
 
       <!-- Add Chapter Button (hidden until inside a book) -->
       <div id="add-chapter-wrap" class="hidden" style="margin-bottom:1rem; text-align:right;">
@@ -92,7 +92,7 @@
       </div>
 
       <!-- Chapters Grid -->
-      <div id="view-chapters" class="hidden" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem;"></div>
+      <div id="view-chapters" class="hidden" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
 
       <!-- Words View -->
       <div id="view-words" class="hidden">
@@ -152,8 +152,47 @@
         <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
       </div>
 
-      <!-- Options -->
-      <div class="options-grid" style="margin-top:0.5rem; margin-bottom:1.5rem;">
+      <!-- Step 1: Copy Prompt -->
+      <div class="step-card" style="margin-bottom:1.5rem; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card);">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          단어책 사진이나 텍스트를 외부 AI(ChatGPT 등)에 전달할 때 사용할 지시문(프롬프트)을 복사합니다.
+        </p>
+        <div style="text-align: center;">
+          <textarea id="prompt-output" style="display:none;"></textarea>
+          <button id="copy-prompt-btn" class="generate-btn" style="width: 100%; padding: 0.8rem; font-size: 1rem;">📋 프롬프트 복사</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Paste JSON -->
+      <div class="step-card" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1.5rem;">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          외부 AI가 답변해준 결과 텍스트 전체를 아래에 붙여넣으세요.
+        </p>
+        <div class="textarea-wrap">
+          <textarea id="ai-json-input" class="vocab-textarea" rows="3" placeholder="AI가 만들어준 데이터를 여기에 붙여넣으세요..." style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 12px; color: var(--text); border: 1px solid var(--border); resize: vertical;"></textarea>
+        </div>
+      </div>
+
+      <!-- Convert Button -->
+      <button id="convert-btn" class="generate-btn" style="width:100%; padding: 0.8rem; font-size: 1rem; background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);">
+        <span class="btn-icon">✨</span> 변환 및 단어장 저장
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== EXPORT MODAL ========== -->
+  <div id="export-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content export-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 class="test-title" style="margin:0; font-size:1.3rem;">📤 CSV 내보내기</h2>
+        <button id="close-export-btn" class="circle-action-btn" style="width:36px; height:36px; font-size:1.5rem; border:none; background:transparent;">×</button>
+      </div>
+      
+      <p class="modal-desc" style="margin-bottom:1.5rem; color:var(--text-secondary);">굿노트(GoodNotes) 단어장에 최적화된 형식으로 단어를 내보냅니다. 앞면과 뒷면에 표시할 데이터를 선택하세요.</p>
+
+      <div class="options-grid" style="margin-bottom: 1.5rem;">
         <div class="option-card">
           <label class="option-label" for="card-front-sel">📌 앞면</label>
           <select id="card-front-sel" class="select-input">
@@ -171,28 +210,6 @@
           </select>
         </div>
       </div>
-
-      <!-- Step 1: Copy Prompt -->
-      <div class="step-card" style="margin-bottom:1.5rem; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card);">
-        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
-        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-          아래 프롬프트를 복사하여 ChatGPT, Claude, 또는 Gemini에 단어책 사진이나 텍스트와 함께 붙여넣으세요.
-        </p>
-        <div class="textarea-wrap" style="position:relative;">
-          <textarea id="prompt-output" class="vocab-textarea" rows="6" readonly style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding-right: 90px; color: var(--text); border: 1px solid var(--border); resize: none;"></textarea>
-          <button id="copy-prompt-btn" class="generate-btn" style="position: absolute; right: 10px; top: 10px; width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; z-index: 10;">📋 복사</button>
-        </div>
-      </div>
-
-      <!-- Step 2: Paste JSON -->
-      <div class="step-card" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1.5rem;">
-        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
-        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-          외부 AI가 답변해준 결과(코드 블록 전체 또는 텍스트 전부)를 아래에 붙여넣으세요.
-        </p>
-        <div class="textarea-wrap">
-          <textarea id="ai-json-input" class="vocab-textarea" placeholder='[
-  {
     "word": "significant",
     "meaning": "1 중요한 2 상당한",
     "examples": ["This is significant! 이것은 중요하다!"],

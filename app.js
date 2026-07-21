@@ -939,6 +939,43 @@ function setupSwipeGestures() {
     });
   }
 
+const exportModal = $('export-modal');
+const closeExportBtn = $('close-export-btn');
+const downloadCsvBtn = $('download-csv-btn');
+
+exportCsvBtn.addEventListener('click', () => {
+  if (!currentLoadedWords.length) { alert('내보낼 단어가 없습니다.'); return; }
+  openModal(exportModal);
+});
+
+if (closeExportBtn) {
+  closeExportBtn.addEventListener('click', () => closeModal(exportModal));
+}
+
+if (downloadCsvBtn) {
+  downloadCsvBtn.addEventListener('click', () => {
+    if (!currentLoadedWords.length) return;
+    const frontOpt = cardFrontSel.value;
+    const backOpt = cardBackSel.value;
+    
+    const csvLines = currentLoadedWords.map(w => {
+      const formatted = formatCard(w, frontOpt, backOpt);
+      return `${escapeCSV(formatted.front)},${escapeCSV(formatted.back)}`;
+    });
+    
+    const csv = '\uFEFF' + csvLines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${crumbChapterName.textContent || 'words'}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    closeModal(exportModal);
+  });
+}
+
   const shuffleBtn = document.getElementById('shuffle-swipe-btn');
   if (shuffleBtn) {
     shuffleBtn.addEventListener('click', (e) => {
@@ -1081,32 +1118,7 @@ closeExtractBtn.addEventListener('click', () => closeModal(extractModal));
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function updatePrompt() {
-  if (!promptOutput || !cardFrontSel || !cardBackSel) return;
-  const frontOpt = cardFrontSel.value;
-  const backOpt = cardBackSel.value;
-
-  const includeExample = backOpt !== 'meaning_only';
-  const includeSynAnt = backOpt === 'full';
-
-  let formatStr = `- "word": The English vocabulary word (required)
-- "meaning": The Korean meaning exactly as written (required)
-- "pos": Part of speech (e.g., ⓝ, ⓥ, ⓐ). You MUST infer and fill this in even if it's not in the image. (required)
-- "pronunciation": Pronunciation symbol (optional)`;
-
-  if (includeExample) formatStr += `\n- "examples": Array of example sentences (optional)`;
-  if (includeSynAnt) formatStr += `
-- "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if it is missing in the image, e.g. [ⓝ], [ⓥ], [ⓐ])
-- "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if missing)
-- "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning". (You MUST infer the POS if missing)`;
-
-  let exampleStr = `[
-  {
-    "word": "significant",
-    "pos": "ⓐ",
-    "meaning": "1 중요한 2 상당한"`;
-  if (includeExample) exampleStr += `,\n    "examples": ["This is significant! 이것은 중요하다!"]`;
-  if (includeSynAnt) exampleStr += `,\n    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]`;
-  exampleStr += `\n  }\n]`;
+  if (!promptOutput) return;
 
   const prompt = `You are an expert vocabulary extraction assistant. Your task is to extract ALL English vocabulary words from the provided source.
 
@@ -1116,23 +1128,27 @@ CRITICAL EXTRACTION RULES:
 3. For multiple images or columns, extract from top-to-bottom, left-to-right.
 
 CRITICAL TRANSCRIBING RULES:
-1. Act purely as an OCR engine, EXCEPT for the POS (Part of Speech). You MUST use your dictionary knowledge to infer and add the correct POS (e.g., ⓝ, ⓥ, ⓐ) for the main word, synonyms, antonyms, and related words if they are not explicitly present in the text.
+1. Act purely as an OCR engine, EXCEPT for the POS (Part of Speech). You MUST use your dictionary knowledge to infer and add the correct POS (e.g., 명, 동, 형) for the main word, synonyms, antonyms, and related words if they are not explicitly present in the text.
 2. For the "meaning" field, you MUST copy the text EXACTLY as it appears. DO NOT summarize.
 
 OUTPUT FORMAT:
-You MUST output a valid JSON array of objects. Do not wrap it in markdown blockquotes.
+You MUST output a valid JSON array of objects.
 Each object MUST have the following keys:
-${formatStr}
+- "word": The English vocabulary word (required)
+- "pos": Part of speech (e.g., 명, 동, 형) (required)
+- "pronunciation": Pronunciation symbol (optional)
+- "meaning": The Korean meaning exactly as written (required)
+- "examples": Array of example sentences (optional)
+- "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
+- "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
+- "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 
-Example:
-${exampleStr}
-`;
+CRITICAL JSON FORMATTING:
+Output MUST be on a SINGLE LINE without any line breaks (minified JSON). DO NOT use pretty printing or newlines. Just output the raw array starting with [ and ending with ].`;
 
   promptOutput.value = prompt;
 }
 
-if (cardFrontSel) cardFrontSel.addEventListener('change', updatePrompt);
-if (cardBackSel) cardBackSel.addEventListener('change', updatePrompt);
 if (promptOutput) updatePrompt();
 
 if (copyPromptBtn) {
@@ -1211,8 +1227,9 @@ if (convertBtn) {
       return;
     }
 
-    const frontOpt = cardFrontSel.value;
-    const backOpt = cardBackSel.value;
+    // Use full options for the database internal representation
+    const frontOpt = 'word_pos';
+    const backOpt = 'full';
 
     convertBtn.disabled = true;
     const orgText = convertBtn.innerHTML;
