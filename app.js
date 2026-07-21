@@ -1204,6 +1204,7 @@ CRITICAL EXTRACTION RULES:
 CRITICAL TRANSCRIBING RULES:
 1. Act purely as an OCR engine, EXCEPT for the POS (Part of Speech). You MUST use your dictionary knowledge to infer and add the correct POS (e.g., 명, 동, 형) for the main word, synonyms, antonyms, and related words if they are not explicitly present in the text.
 2. For the "meaning" field, you MUST copy the text EXACTLY as it appears. DO NOT summarize.
+3. DO NOT use the tilde symbol (~) anywhere in your output. If a Korean meaning requires a placeholder (like "~하다"), use "..." instead (e.g., "...하다"). Tildes cause markdown strikethrough bugs.
 
 OUTPUT FORMAT:
 You MUST output a valid JSON array of objects.
