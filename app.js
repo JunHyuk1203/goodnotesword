@@ -1218,7 +1218,10 @@ Each object MUST have the following keys:
 - "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 
 CRITICAL JSON FORMATTING:
-Output MUST be on a SINGLE LINE without any line breaks (minified JSON). DO NOT use pretty printing or newlines. Just output the raw array starting with [ and ending with ].`;
+1. Output MUST be a RAW, minified JSON array on a SINGLE LINE.
+2. DO NOT use markdown code blocks (\`\`\`json ... \`\`\`).
+3. DO NOT output any bullet points, hyphens, or conversational text.
+4. Just output the raw JSON array starting exactly with [ and ending with ].`;
 
   promptOutput.value = prompt;
 }
