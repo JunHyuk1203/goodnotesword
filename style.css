@@ -2267,6 +2267,7 @@ button:active:not(:disabled) {
   transition: transform 0.35s cubic-bezier(0.25, 1, 0.35, 1), opacity 0.35s ease;
   pointer-events: none;
   opacity: 0;
+  position: absolute; /* Inactive layers do not affect grid height */
 }
 
 .view-layer.active-view, .lib-layer.active-lib {
@@ -2274,6 +2275,7 @@ button:active:not(:disabled) {
   opacity: 1;
   pointer-events: auto;
   z-index: 2;
+  position: relative; /* Active layer sets the grid height */
 }
 
 .view-layer.idle-left, .lib-layer.idle-left {
