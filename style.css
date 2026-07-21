@@ -1050,7 +1050,7 @@ body {
   background: rgba(10, 10, 16, 0.85);
   backdrop-filter: blur(12px);
   padding: 14px 16px 10px 16px;
-  margin: -24px -16px 1rem -16px;
+  margin: -24px -16px 2rem -16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
