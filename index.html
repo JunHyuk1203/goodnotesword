@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5.4" />
+  <link rel="stylesheet" href="style.css?v=5.5" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
 </head>
 <body>
@@ -97,22 +97,24 @@
       <!-- Words View -->
       <div id="view-words" class="hidden">
 
-
-
-
-
-        <!-- Card View -->
-        <div id="words-card-view"></div>
-
-        <!-- Swipe View -->
-        <div id="words-swipe-view" class="hidden"></div>
-
-        <!-- Table View (hidden by default) -->
-        <div id="words-table-view" class="hidden">
-          <table class="preview-table">
-            <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>앞면 (단어)</th><th>뒷면 (뜻/예문)</th><th style="width: 120px;">관리</th></tr></thead>
-            <tbody id="words-tbody"></tbody>
-          </table>
+        <!-- Views Container for Sliding Animation -->
+        <div id="views-container" style="position:relative; overflow-x:hidden; width:100%;">
+          <!-- Card View -->
+          <div id="words-card-view" class="view-layer active-view"></div>
+          
+          <!-- Edit View (Card View with Edit Mode) -->
+          <div id="words-edit-view" class="view-layer idle-right"></div>
+  
+          <!-- Swipe View -->
+          <div id="words-swipe-view" class="view-layer idle-right"></div>
+  
+          <!-- Table View (hidden by default) -->
+          <div id="words-table-view" class="view-layer idle-right">
+            <table class="preview-table">
+              <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>단어 (영어)</th><th>뒷면 (뜻/예문)</th><th style="width: 120px;">관리</th></tr></thead>
+              <tbody id="words-tbody"></tbody>
+            </table>
+          </div>
         </div>
 
       </div>
@@ -153,7 +155,7 @@
       </div>
 
       <!-- Step 1: Copy Prompt -->
-      <div class="step-card" style="margin-bottom:1.5rem; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card);">
+      <div class="step-card" style="margin-bottom:1rem; border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card);">
         <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
         <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
           단어책 사진이나 텍스트를 외부 AI(ChatGPT 등)에 전달할 때 사용할 지시문(프롬프트)을 복사합니다.
@@ -165,7 +167,7 @@
       </div>
 
       <!-- Step 2: Paste JSON -->
-      <div class="step-card" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1.5rem;">
+      <div class="step-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1rem;">
         <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
         <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
           외부 AI가 답변해준 결과 텍스트 전체를 아래에 붙여넣으세요.
@@ -460,6 +462,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=5.4"></script>
+  <script type="module" src="app.js?v=5.5"></script>
 </body>
 </html>

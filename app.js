@@ -138,7 +138,8 @@ const addChapterWrap = $('add-chapter-wrap');
 const wordCountBadge = $('word-count-badge');
 const wordsTbody = $('words-tbody');
 const wordsCardView = $('words-card-view');
-const wordsTableView = $('words-table-view');
+const wordsEditView = $('words-edit-view');
+const wordsSwipeView = $('words-swipe-view');
 const hideToggleBar = $('hide-toggle-bar');
 const extractModal = $('extract-modal');
 const openExtractBtn = $('open-extract-btn');
@@ -187,7 +188,7 @@ if (settingsBtn) {
     alert('설정이 저장되었습니다.');
   });
 }
-const wordsSwipeView = $('words-swipe-view');
+// duplicate declaration removed
 const startTestBtn = $('start-test-btn');
 const viewHistoryBtn = $('view-history-btn');
 const historyModal = $('history-modal');
@@ -671,39 +672,69 @@ editWordSave.addEventListener('click', async () => {
 
 // ─── View Toggle (Card / Edit / Swipe) ───────────────────────────────────────
 function setViewMode(mode) {
+  const oldMode = currentViewMode;
   currentViewMode = mode;
+  
   // Reset all buttons
   [viewCardBtn, viewTableBtn, viewSwipeBtn].forEach(b => b?.classList.remove('active'));
-  // Hide all views
-  wordsCardView.classList.add('hidden');
-  wordsTableView.classList.add('hidden');
-  wordsSwipeView.classList.add('hidden');
-  document.querySelector('.words-card-grid')?.classList.remove('edit-mode-active');
 
   const actionBar = document.querySelector('.words-action-bar');
+  if (actionBar && mode !== 'swipe') actionBar.classList.remove('hidden');
+  
   if (mode === 'card') {
     viewCardBtn.classList.add('active');
-    wordsCardView.classList.remove('hidden');
-    if (actionBar) actionBar.classList.remove('hidden');
     hideToggleBar.classList.remove('hidden');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
     viewTableBtn.classList.add('active');
-    wordsCardView.classList.remove('hidden');
-    if (actionBar) actionBar.classList.remove('hidden');
     hideToggleBar.classList.add('hidden');
-    document.querySelector('.words-card-grid')?.classList.add('edit-mode-active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');
-    wordsSwipeView.classList.remove('hidden');
-    // Do NOT hide words-action-bar — it has the mode switch buttons
     document.body.classList.add('shorts-mode-active');
     renderSwipeView();
     hideToggleBar.classList.add('hidden');
-    // Calculate exact remaining height for swipe view
     requestAnimationFrame(adjustSwipeViewHeight);
   }
+
+  // Animation Sliding Logic
+  const newIndex = mode === 'card' ? 0 : mode === 'edit' ? 1 : 2;
+  const views = [wordsCardView, wordsEditView, wordsSwipeView];
+
+  // Move grid dynamically between Card and Edit views
+  const grid = document.querySelector('.words-card-grid');
+  if (grid) {
+    if (mode === 'card') {
+      if (oldMode === 'edit') {
+        const clone = grid.cloneNode(true);
+        wordsEditView.appendChild(clone);
+        setTimeout(() => clone.remove(), 400); // cleanup clone
+      }
+      wordsCardView.appendChild(grid);
+      grid.classList.remove('edit-mode-active');
+    } else if (mode === 'edit') {
+      if (oldMode === 'card') {
+        const clone = grid.cloneNode(true);
+        wordsCardView.appendChild(clone);
+        setTimeout(() => clone.remove(), 400); // cleanup clone
+      }
+      wordsEditView.appendChild(grid);
+      grid.classList.add('edit-mode-active');
+    }
+  }
+
+  // Apply CSS transition classes
+  views.forEach((v, i) => {
+    if (!v) return;
+    v.classList.remove('active-view', 'idle-left', 'idle-right', 'hidden');
+    if (i < newIndex) {
+      v.classList.add('idle-left');
+    } else if (i > newIndex) {
+      v.classList.add('idle-right');
+    } else {
+      v.classList.add('active-view');
+    }
+  });
 }
 
 viewCardBtn.addEventListener('click', () => setViewMode('card'));
