@@ -466,6 +466,14 @@
         <span id="history-detail-score" style="font-size:1.1rem; font-weight:600;"></span>
       </div>
       <div id="history-detail-wrong" class="history-wrong hidden"></div>
+      
+      <div style="margin-top:1.5rem; border-top:1px dashed var(--border-color); padding-top:1rem;">
+        <button id="generate-ai-report-btn" class="generate-btn" style="width:100%; margin-bottom:1rem;">🤖 AI 학습 리포트 생성</button>
+        <div id="history-ai-report-container" class="hidden" style="background:rgba(108, 99, 255, 0.05); padding:1rem; border-radius:12px; border:1px solid rgba(108, 99, 255, 0.2); font-size:0.95rem; line-height:1.5; color:var(--text-primary);">
+          <!-- AI report rendered here -->
+        </div>
+      </div>
+
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
         <button id="history-detail-close-btn" class="sample-btn">확인</button>
       </div>

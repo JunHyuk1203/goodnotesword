@@ -222,9 +222,120 @@ const historyDetailTitle = $('history-detail-title');
 const historyDetailDate = $('history-detail-date');
 const historyDetailScore = $('history-detail-score');
 const historyDetailWrong = $('history-detail-wrong');
+const generateAiReportBtn = $('generate-ai-report-btn');
+const historyAiReportContainer = $('history-ai-report-container');
+
+let chapterHistoryRecords = [];
+let currentTestRecord = null;
 
 if (historyDetailCloseBtn) {
   historyDetailCloseBtn.addEventListener('click', () => closeModal(historyDetailModal));
+}
+
+function renderSimpleMarkdown(text) {
+  let html = escapeHTML(text);
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // Lists
+  html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+  // Newlines
+  html = html.replace(/\n/g, '<br/>');
+  return html;
+}
+
+if (generateAiReportBtn) {
+  generateAiReportBtn.addEventListener('click', async () => {
+    if (!geminiApiKey) {
+      alert("설정(⚙️) 메뉴에서 API 키를 먼저 등록해주세요.");
+      return;
+    }
+    if (!currentTestRecord) return;
+
+    generateAiReportBtn.disabled = true;
+    generateAiReportBtn.innerHTML = '🤖 리포트 생성 중...';
+    historyAiReportContainer.classList.remove('hidden');
+    historyAiReportContainer.innerHTML = '<div style="text-align:center; padding:1rem;"><div class="progress-spinner" style="margin:0 auto;"></div><div style="margin-top:10px;">AI가 학습 성취도를 분석하고 있습니다...</div></div>';
+
+    try {
+      const chapterWords = currentLoadedWords;
+      const historySummary = chapterHistoryRecords.map(r => {
+        const pct = Math.round((r.correct / r.total) * 100) || 0;
+        const dStr = r.timestamp ? r.timestamp.toDate().toLocaleString() : '최근';
+        const wStr = r.wrongWords && r.wrongWords.length > 0 ? r.wrongWords.join(', ') : '없음';
+        return `- ${dStr} | 정답률: ${pct}% | 오답: ${wStr}`;
+      }).join('\n');
+      
+      const currentPct = Math.round((currentTestRecord.correct / currentTestRecord.total) * 100) || 0;
+      const currentWrong = currentTestRecord.wrongWords && currentTestRecord.wrongWords.length > 0 ? currentTestRecord.wrongWords.join(', ') : '없음';
+
+      const prompt = `당신은 친절하고 전문적인 어휘 학습 AI 튜터입니다.
+학생의 단어장 테스트 결과를 분석하여, 어떤 부분을 헷갈려 하는지, 어떤 부분이 부족한지, 앞으로 어떻게 학습해야 하는지 구체적이고 도움이 되는 1~2문단의 브리핑을 작성해주세요.
+마크다운 서식을 사용하여 깔끔하게 작성하되, 핵심만 요약해주세요.
+
+[현재 테스트 결과]
+- 정답률: ${currentPct}% (${currentTestRecord.correct} / ${currentTestRecord.total})
+- 틀린 단어: ${currentWrong}
+
+[이 단원의 이전 테스트 기록 (최근 순)]
+${historySummary}
+
+[이 단원의 전체 단어 목록 참고]
+${chapterWords.map(w => `${w.word} (${w.meaning})`).join(', ')}`;
+
+      let responseText = '';
+      const apiKey = geminiApiKey.trim();
+
+      if (apiKey.startsWith('sk-')) {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7
+          })
+        });
+        if (!response.ok) throw new Error(`OpenAI API 오류: ${response.status}`);
+        const data = await response.json();
+        responseText = data.choices[0].message.content;
+      } else {
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+        let success = false;
+        for (const model of modelsToTry) {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+              responseText = data.candidates[0].content.parts[0].text;
+              success = true;
+              break;
+            }
+          }
+        }
+        if (!success) throw new Error("Gemini API 호출에 실패했습니다.");
+      }
+
+      historyAiReportContainer.innerHTML = renderSimpleMarkdown(responseText);
+
+    } catch (e) {
+      console.error(e);
+      historyAiReportContainer.innerHTML = `<div style="color:var(--danger);">오류 발생: ${e.message}</div>`;
+    } finally {
+      generateAiReportBtn.disabled = false;
+      generateAiReportBtn.innerHTML = '🤖 AI 학습 리포트 다시 생성';
+    }
+  });
 }
 
 let swipeIndex = 0;
@@ -2217,6 +2328,7 @@ if (viewHistoryBtn) {
       const snap = await getDocs(q);
       
       historyList.innerHTML = '';
+      chapterHistoryRecords = [];
       if (snap.empty) {
         historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">아직 테스트 기록이 없습니다.</p>';
         return;
@@ -2224,6 +2336,7 @@ if (viewHistoryBtn) {
 
       snap.forEach(doc => {
         const data = doc.data();
+        chapterHistoryRecords.push(data);
         const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : '방금 전';
         const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : '✍️ 주관식';
         const pct = Math.round((data.correct / data.total) * 100) || 0;
@@ -2250,6 +2363,9 @@ if (viewHistoryBtn) {
             historyDetailWrong.classList.add('hidden');
             historyDetailWrong.innerHTML = '';
           }
+          currentTestRecord = data;
+          historyAiReportContainer.classList.add('hidden');
+          historyAiReportContainer.innerHTML = '';
           openModal(historyDetailModal);
         };
         historyList.appendChild(item);
