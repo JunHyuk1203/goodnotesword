@@ -52,8 +52,6 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
-  display: flex;
-  justify-content: center;
   min-height: 100vh;
 }
 body.modal-open {

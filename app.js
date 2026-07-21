@@ -1152,12 +1152,15 @@ Output MUST be on a SINGLE LINE without any line breaks (minified JSON). DO NOT 
 if (promptOutput) updatePrompt();
 
 if (copyPromptBtn) {
-  copyPromptBtn.addEventListener('click', () => {
-    promptOutput.select();
-    document.execCommand('copy');
-    const orgText = copyPromptBtn.textContent;
-    copyPromptBtn.textContent = '✅ 복사 완료!';
-    setTimeout(() => copyPromptBtn.textContent = orgText, 2000);
+  copyPromptBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(promptOutput.value);
+      const orgText = copyPromptBtn.textContent;
+      copyPromptBtn.textContent = '✅ 복사 완료!';
+      setTimeout(() => copyPromptBtn.textContent = orgText, 2000);
+    } catch (e) {
+      alert('복사 실패! 브라우저 권한을 확인해주세요.');
+    }
   });
 }
 
