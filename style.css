@@ -1877,6 +1877,7 @@ button:active:not(:disabled) {
   display: flex;
   gap: 10px;
   align-items: stretch;
+  flex-wrap: nowrap;
 }
 .short-answer-input {
   flex: 1;
@@ -1913,6 +1914,7 @@ button:active:not(:disabled) {
   padding: 14px 22px;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s;
   box-shadow: 0 4px 14px var(--primary-glow);
 }
