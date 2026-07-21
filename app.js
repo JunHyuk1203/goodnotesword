@@ -161,7 +161,9 @@ let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-    settingsModal.classList.remove('hidden');
+    settingsModal.classList.remove('hidden', 'modal-enter');
+    void settingsModal.offsetWidth;
+    settingsModal.classList.add('modal-enter');
   });
   settingsCloseBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
   settingsSaveBtn.addEventListener('click', () => {
@@ -301,10 +303,12 @@ function loadChapters(bookId, bookName) {
         viewChapters.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">단원이 없습니다. [+ 새 단원 추가] 버튼을 눌러주세요!</p>';
         return;
       }
+      let idx = 0;
       snap.forEach(d => {
         const data = d.data();
         const div = document.createElement('div');
-        div.className = 'lib-card';
+        div.className = 'lib-card list-item-enter';
+        div.style.animationDelay = `${idx * 0.04}s`;
         div.innerHTML = `<div class="lib-icon">📂</div><div class="lib-title">${escapeHTML(data.name)}</div><button class="lib-delete-btn" title="단원 삭제" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>`;
         div.onclick = () => loadWords(bookId, d.id, data.name);
         div.querySelector('.lib-delete-btn').onclick = async (e) => {
@@ -315,6 +319,7 @@ function loadChapters(bookId, bookName) {
           }
         };
         viewChapters.appendChild(div);
+        idx++;
       });
     }, (e) => {
       console.error(e);
@@ -454,7 +459,8 @@ function renderCardView(docs) {
   docs.forEach((data, idx) => {
     const parsed = parseWordData(data);
     const card = document.createElement('div');
-    card.className = 'word-card';
+    card.className = 'word-card list-item-enter';
+    card.style.animationDelay = `${idx * 0.03}s`;
 
     // Build related sections HTML - each item on its own line
     const buildRelatedSection = (items, emoji, label, cls) => {
@@ -551,6 +557,8 @@ function renderTableView(docs) {
   }
   docs.forEach((data, idx) => {
     const tr = document.createElement('tr');
+    tr.className = 'list-item-enter';
+    tr.style.animationDelay = `${idx * 0.02}s`;
     tr.innerHTML = `<td><input type="checkbox" class="word-chk" data-path="${data._path}" /></td><td>${idx+1}</td><td style="font-weight:600;color:var(--primary-light);">${escapeHTML(data.front)}</td><td style="white-space:pre-wrap;font-size:0.82rem;color:var(--text-secondary);">${escapeHTML(data.back)}</td>
       <td><div style="display:flex;gap:4px;">
         <button class="word-card-edit-btn" style="font-size:0.78rem;padding:4px 10px;">수정</button>
@@ -1298,11 +1306,18 @@ $('test-start-confirm-btn').addEventListener('click', () => {
 
 function showScreen(name) {
   [testSetup, testFlash, testQuiz, testShort, testResult].forEach(s => s.classList.add('hidden'));
-  if (name === 'setup') testSetup.classList.remove('hidden');
-  else if (name === 'flash') testFlash.classList.remove('hidden');
-  else if (name === 'quiz') testQuiz.classList.remove('hidden');
-  else if (name === 'short') testShort.classList.remove('hidden');
-  else if (name === 'result') testResult.classList.remove('hidden');
+  let activeScreen;
+  if (name === 'setup') activeScreen = testSetup;
+  else if (name === 'flash') activeScreen = testFlash;
+  else if (name === 'quiz') activeScreen = testQuiz;
+  else if (name === 'short') activeScreen = testShort;
+  else if (name === 'result') activeScreen = testResult;
+  
+  if (activeScreen) {
+    activeScreen.classList.remove('hidden', 'screen-enter');
+    void activeScreen.offsetWidth; // trigger reflow
+    activeScreen.classList.add('screen-enter');
+  }
 }
 
 function closeTest() {
