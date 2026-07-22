@@ -964,15 +964,13 @@ window.visualViewport?.addEventListener('resize', () => {
 
 async function fetchImageForWord(word, path, containerElement) {
   try {
-    const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(word))}`;
+    // Attempt to fetch from Wikipedia (works best for nouns, no CORS issues, highly reliable)
+    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
     const res = await fetch(url);
     const data = await res.json();
-    const html = data.contents;
     
-    // Find first gstatic image URL
-    const match = html.match(/<img[^>]+src=["'](https:\/\/encrypted-tbn0\.gstatic\.com\/images[^"']+)["']/i);
-    if (match && match[1]) {
-      const imageUrl = match[1];
+    if (data.thumbnail && data.thumbnail.source) {
+      const imageUrl = data.thumbnail.source;
       
       // Update DOM
       const img = containerElement.querySelector('img');
