@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1024,18 +1024,9 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       }
     } catch (e) {}
 
-    // 2. Pollinations.ai (Free, Ultra-fast AI Image Generation)
+    // 2. Unsplash Source (fast, free, high-quality, no API key)
     if (!imageUrl) {
-      try {
-        let aiPrompt = "High quality real photo of " + word + ", clean background, highly detailed";
-        if (meaning) {
-           const koMatch = meaning.match(/[가-힣]+/);
-           if (koMatch) aiPrompt = "High quality real photo representing the concept of " + koMatch[0] + " (" + word + "), minimal, clean background";
-        }
-        
-        const seed = Math.floor(Math.random() * 100000);
-        imageUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(aiPrompt) + "?width=600&height=400&nologo=true&seed=" + seed;
-      } catch (e) {}
+      imageUrl = "https://source.unsplash.com/600x400/?" + encodeURIComponent(word);
     }
 
     // 3. Fallback to LoremFlickr if all else fails
@@ -1044,19 +1035,22 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
     }
     
     if (imageUrl) {
-      // Update DOM
+      // Update DOM immediately - don't wait for onload
       const img = containerElement.querySelector('img');
       const skeleton = containerElement.querySelector('.skeleton-loader');
+      containerElement.classList.remove('skeleton-container');
       if (img) {
         img.src = imageUrl;
-        img.onload = () => {
+        img.classList.add('loaded');
+        img.onload = () => { if (skeleton) skeleton.remove(); };
+        img.onerror = () => {
+          // If image fails, try with LoremFlickr
+          img.src = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
           img.classList.add('loaded');
-          if (skeleton) skeleton.remove();
         };
       }
-      containerElement.classList.remove('skeleton-container');
       
-      // Update Firestore (if not already updating)
+      // Update Firestore
       const docRef = doc(db, path);
       await updateDoc(docRef, { imageUrl });
       
