@@ -1046,9 +1046,9 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       } catch (e) { console.error("Together AI error:", e); }
     }
 
-    // 3. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
+    // 2. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
     if (!imageUrl) {
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("A simple flat vector pictogram icon of " + word + ", minimalist design, solid white background, 2D UI icon style")}?nologo=true&enhance=false&width=1024&height=768`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("A simple flat vector pictogram icon of " + word + ", minimalist design, solid white background, 2D UI icon style")}?nologo=true&enhance=false&width=1024&height=768&t=${Date.now()}`;
     }
     
     if (imageUrl) {
@@ -1067,6 +1067,10 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
           }
         };
         img.src = imageUrl;
+        if (img.complete) {
+          img.classList.add('loaded');
+          if (skeleton) skeleton.remove();
+        }
       }
       
       // Update Firestore
@@ -1076,6 +1080,12 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       // Update local memory so we don't fetch again if they swipe back
       const loadedDoc = currentLoadedWords.find(d => d._path === path);
       if (loadedDoc) loadedDoc.imageUrl = imageUrl;
+      
+      // Update swipe array
+      if (typeof swipeWords !== 'undefined') {
+        const swipeDoc = swipeWords.find(d => d._path === path);
+        if (swipeDoc) swipeDoc.imageUrl = imageUrl;
+      }
     } else {
       // No image found
       if (containerElement) containerElement.style.display = 'none';
