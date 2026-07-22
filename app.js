@@ -251,7 +251,7 @@ if (settingsBtn) {
         closeModal(settingsModal);
         
         // Reload words to reflect changes
-        loadWords(currentChapterPath, crumb-chapter-name.textContent);
+        loadWords(currentChapterPath, $('crumb-chapter-name').textContent);
       } catch (err) {
         console.error(err);
         alert('초기화 중 오류가 발생했습니다.');
