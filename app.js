@@ -1016,7 +1016,7 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
 
     // 1. Wikipedia API (Best for concrete nouns)
     try {
-      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
+      const url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(word);
       const res = await fetch(url);
       const data = await res.json();
       if (data.thumbnail && data.thumbnail.source) {
@@ -1027,16 +1027,14 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
     // 2. Pollinations.ai (Free, Ultra-fast AI Image Generation)
     if (!imageUrl) {
       try {
-        // Create a highly descriptive prompt for the AI
-        let aiPrompt = "High quality real photo of , clean background, highly detailed";
+        let aiPrompt = "High quality real photo of " + word + ", clean background, highly detailed";
         if (meaning) {
            const koMatch = meaning.match(/[가-힣]+/);
-           if (koMatch) aiPrompt = "High quality real photo representing the concept of  (), minimal, clean background";
+           if (koMatch) aiPrompt = "High quality real photo representing the concept of " + koMatch[0] + " (" + word + "), minimal, clean background";
         }
         
-        // Pollinations.ai generates images on the fly via GET request. We append a random seed so it generates immediately.
         const seed = Math.floor(Math.random() * 100000);
-        imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(aiPrompt)}?width=600&height=400&nologo=true&seed=${seed}`;
+        imageUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(aiPrompt) + "?width=600&height=400&nologo=true&seed=" + seed;
       } catch (e) {}
     }
 
