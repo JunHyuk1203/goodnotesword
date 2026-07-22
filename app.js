@@ -188,6 +188,7 @@ const settingsBtn = $('settings-btn');
 const settingsModal = $('settings-modal');
 const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
+const settingsResetImagesBtn = $('settings-reset-images-btn');
 const geminiApiKeyInput = $('gemini-api-key');
 const pixabayApiKeyInput = $('pixabay-api-key');
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
