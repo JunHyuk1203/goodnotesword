@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1010,35 +1010,48 @@ window.visualViewport?.addEventListener('resize', () => {
   if (document.body.classList.contains('shorts-mode-active')) adjustSwipeViewHeight();
 });
 
-async function fetchImageForWord(word, path, containerElement) {
+async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
     let imageUrl = '';
 
-    // 1. Attempt to fetch from Pixabay API if key is provided (Beautiful Stock Images)
-      if (pixabayApiKey) {
-        try {
-          const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(word)}&image_type=photo&per_page=3&safesearch=true`;
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.hits && data.hits.length > 0) {
-            imageUrl = data.hits[0].webformatURL;
-          }
-        } catch (err) {
-          console.error('Pixabay API failed:', err);
-        }
-      }
-    
-    // 2. Fallback to Wikipedia API (works best for nouns, no CORS issues, highly reliable)
-    if (!imageUrl) {
+    // 1. Wikipedia API (Best for concrete nouns)
+    try {
       const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.thumbnail && data.thumbnail.source) {
         imageUrl = data.thumbnail.source;
       }
+    } catch (e) {}
+
+    // 2. Pixabay API with KOREAN Meaning
+    if (!imageUrl && pixabayApiKey && meaning) {
+      const koMatch = meaning.match(/[가-힣]+/);
+      if (koMatch) {
+        try {
+          const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(koMatch[0])}&lang=ko&image_type=photo&per_page=3&safesearch=true`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.hits && data.hits.length > 0) {
+            imageUrl = data.hits[0].webformatURL;
+          }
+        } catch (e) {}
+      }
     }
-    
-    // 3. Fallback to LoremFlickr if Google and Wikipedia fail
+
+    // 3. Pixabay API with English Word
+    if (!imageUrl && pixabayApiKey) {
+      try {
+        const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(word)}&image_type=photo&per_page=3&safesearch=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.hits && data.hits.length > 0) {
+          imageUrl = data.hits[0].webformatURL;
+        }
+      } catch (e) {}
+    }
+
+    // 4. Fallback to LoremFlickr if Google and Wikipedia fail
     if (!imageUrl) {
       imageUrl = `https://loremflickr.com/600/400/${encodeURIComponent(word)}`;
     }
@@ -1182,8 +1195,9 @@ function renderSwipeCard(idx) {
   if (skeletonContainer) {
     const wordToFetch = skeletonContainer.getAttribute('data-fetch-word');
     const wordPath = skeletonContainer.getAttribute('data-fetch-path');
+    const wordMeaning = skeletonContainer.getAttribute('data-fetch-meaning');
     if (wordToFetch && wordPath) {
-      fetchImageForWord(wordToFetch, wordPath, skeletonContainer);
+      fetchImageForWord(wordToFetch, wordPath, wordMeaning, skeletonContainer);
     }
   }
 
