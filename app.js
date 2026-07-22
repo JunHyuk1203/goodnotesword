@@ -6,7 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
   query, orderBy, serverTimestamp, deleteDoc, updateDoc,
-  onSnapshot, initializeFirestore, persistentLocalCache, where
+  onSnapshot, initializeFirestore, persistentLocalCache, where, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -240,12 +240,10 @@ if (settingsBtn) {
         const wordsRef = collection(db, chapterWordsPath);
         const snap = await getDocs(wordsRef);
         
-        const batch = writeBatch(db);
-        snap.forEach(docSnap => {
-          batch.update(docSnap.ref, { imageUrl: '' });
-        });
+        // Update each doc individually (avoids writeBatch import issues)
+        const updates = snap.docs.map(docSnap => updateDoc(docSnap.ref, { imageUrl: '' }));
+        await Promise.all(updates);
         
-        await batch.commit();
         closeModal(settingsModal);
         alert('모든 이미지가 초기화되었습니다! 스와이프 모드에서 카드를 넘기면 새 사진을 가져옵니다.');
         
