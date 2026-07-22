@@ -202,7 +202,7 @@ const googleSearchCxInput = $('google-search-cx');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let googleSearchApiKey = localStorage.getItem('google_search_api_key') || '';
+let googleSearchApiKey = localStorage.getItem('google_search_api_key') || 'AIzaSyAfRw-ZPKEgJDF9t6o8T7-y-ADZnY3dYjA';
 let googleSearchCx = localStorage.getItem('google_search_cx') || '';
 
 if (settingsBtn) {
