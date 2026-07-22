@@ -202,7 +202,7 @@ const togetherApiKeyInput = $('together-api-key');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let togetherApiKey = localStorage.getItem('together_api_key') || '';
+let togetherApiKey = localStorage.getItem('together_api_key') || 'key_CdHCVwRn6zwYhxxGm8kvQ';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
