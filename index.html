@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=7.1" />
+  <link rel="stylesheet" href="style.css?v=7.6" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
   <style>
     /* Hard override: no scrollbars ever, but keep scrollability */
@@ -497,14 +497,9 @@
       </div>
       
       <div style="margin-bottom:1rem;">
-        <label for="google-search-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Custom Search API 키</label>
-        <input type="password" id="google-search-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
-      </div>
-      
-      <div style="margin-bottom:1rem;">
-        <label for="google-search-cx" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Search Engine ID (CX)</label>
-        <input type="text" id="google-search-cx" class="text-input" placeholder="a1b2c3d4..." style="width:100%;">
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">쇼츠 모드에서 가장 정확한 구글 이미지를 가져오기 위해 사용됩니다.</p>
+        <label for="pixabay-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Pixabay (고품질 스톡 이미지) API 키</label>
+        <input type="password" id="pixabay-api-key" class="text-input" placeholder="56807728-8411dd34..." value="56807728-8411dd34a0d87ff28515943bd" style="width:100%;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">무료 가입 후 1초만에 발급받아 복잡한 권한 설정 없이 즉시 사용 가능한 이미지 API입니다.</p>
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
@@ -515,6 +510,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js?v=7.1"></script>
+  <script type="module" src="app.js?v=7.6"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -189,8 +189,7 @@ const settingsModal = $('settings-modal');
 const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
 const geminiApiKeyInput = $('gemini-api-key');
-const googleSearchApiKeyInput = $('google-search-api-key');
-const googleSearchCxInput = $('google-search-cx');
+const pixabayApiKeyInput = $('pixabay-api-key');
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
 (function initDefaultApiKey() {
   const saved = localStorage.getItem('gemini_api_key');
@@ -202,14 +201,12 @@ const googleSearchCxInput = $('google-search-cx');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let googleSearchApiKey = localStorage.getItem('google_search_api_key') || 'AIzaSyD0SS3VKP8zxYVbX1J9p_LqC89Os2Z2A9I';
-let googleSearchCx = localStorage.getItem('google_search_cx') || '37df0d3d93474459c';
+let pixabayApiKey = localStorage.getItem('pixabay_api_key') || '56807728-8411dd34a0d87ff28515943bd';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-    if (googleSearchApiKeyInput) googleSearchApiKeyInput.value = googleSearchApiKey;
-    if (googleSearchCxInput) googleSearchCxInput.value = googleSearchCx;
+    if (pixabayApiKeyInput) pixabayApiKeyInput.value = pixabayApiKey;
     openModal(settingsModal);
   });
   settingsCloseBtn.addEventListener('click', () => closeModal(settingsModal));
@@ -217,14 +214,10 @@ if (settingsBtn) {
     geminiApiKey = geminiApiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', geminiApiKey);
     
-    if (googleSearchApiKeyInput) {
-      googleSearchApiKey = googleSearchApiKeyInput.value.trim();
-      localStorage.setItem('google_search_api_key', googleSearchApiKey);
-    }
-    if (googleSearchCxInput) {
-      googleSearchCx = googleSearchCxInput.value.trim();
-      localStorage.setItem('google_search_cx', googleSearchCx);
-    }
+    if (pixabayApiKeyInput) {
+        pixabayApiKey = pixabayApiKeyInput.value.trim();
+        localStorage.setItem('pixabay_api_key', pixabayApiKey);
+      }
     
     closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
@@ -633,7 +626,7 @@ function parseWordData(data) {
       related: Array.isArray(data.related) ? data.related : [],
       front: data.front || data.word || '',
       back: data.back || '',
-      imageUrl: data.imageUrl || '',
+      imageUrl: (data.imageUrl && (data.imageUrl.includes('loremflickr.com') || data.imageUrl.includes('wikipedia.org'))) ? '' : (data.imageUrl || ''),
       _path: data._path || ''
     };
   }
@@ -982,19 +975,19 @@ async function fetchImageForWord(word, path, containerElement) {
   try {
     let imageUrl = '';
 
-    // 1. Attempt to fetch from Google Custom Search API if keys are provided
-    if (googleSearchApiKey && googleSearchCx) {
-      try {
-        const url = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(word)}&cx=${encodeURIComponent(googleSearchCx)}&searchType=image&key=${encodeURIComponent(googleSearchApiKey)}&num=1`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.items && data.items.length > 0) {
-          imageUrl = data.items[0].link;
+    // 1. Attempt to fetch from Pixabay API if key is provided (Beautiful Stock Images)
+      if (pixabayApiKey) {
+        try {
+          const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(word)}&image_type=photo&per_page=3&safesearch=true`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.hits && data.hits.length > 0) {
+            imageUrl = data.hits[0].webformatURL;
+          }
+        } catch (err) {
+          console.error('Pixabay API failed:', err);
         }
-      } catch (err) {
-        console.error('Google Custom Search API failed:', err);
       }
-    }
     
     // 2. Fallback to Wikipedia API (works best for nouns, no CORS issues, highly reliable)
     if (!imageUrl) {
