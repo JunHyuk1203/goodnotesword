@@ -1006,6 +1006,11 @@ async function fetchImageForWord(word, path, containerElement) {
       }
     }
     
+    // 3. Fallback to LoremFlickr if Google and Wikipedia fail
+    if (!imageUrl) {
+      imageUrl = `https://loremflickr.com/600/400/${encodeURIComponent(word)}`;
+    }
+    
     if (imageUrl) {
       // Update DOM
       const img = containerElement.querySelector('img');
