@@ -1024,30 +1024,27 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       }
     } catch (e) {}
 
-    // 2. Unsplash Source (fast, free, high-quality, no API key)
+    // 2. LoremFlickr (fast, reliable, always returns an image)
     if (!imageUrl) {
-      imageUrl = "https://source.unsplash.com/600x400/?" + encodeURIComponent(word);
-    }
-
-    // 3. Fallback to LoremFlickr if all else fails
-    if (!imageUrl) {
-      imageUrl = `https://loremflickr.com/600/400/${encodeURIComponent(word)}`;
+      imageUrl = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
     }
     
     if (imageUrl) {
-      // Update DOM immediately - don't wait for onload
       const img = containerElement.querySelector('img');
       const skeleton = containerElement.querySelector('.skeleton-loader');
       containerElement.classList.remove('skeleton-container');
       if (img) {
-        img.src = imageUrl;
-        img.classList.add('loaded');
-        img.onload = () => { if (skeleton) skeleton.remove(); };
-        img.onerror = () => {
-          // If image fails, try with LoremFlickr
-          img.src = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
+        img.onload = () => {
           img.classList.add('loaded');
+          if (skeleton) skeleton.remove();
         };
+        img.onerror = () => {
+          // LoremFlickr always works as last resort
+          if (!img.src.includes('loremflickr')) {
+            img.src = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
+          }
+        };
+        img.src = imageUrl;
       }
       
       // Update Firestore
