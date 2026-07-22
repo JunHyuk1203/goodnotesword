@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1024,34 +1024,23 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       }
     } catch (e) {}
 
-    // 2. Pixabay API with KOREAN Meaning
-    if (!imageUrl && pixabayApiKey && meaning) {
-      const koMatch = meaning.match(/[가-힣]+/);
-      if (koMatch) {
-        try {
-          const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(koMatch[0])}&lang=ko&image_type=photo&per_page=3&safesearch=true`;
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.hits && data.hits.length > 0) {
-            imageUrl = data.hits[0].webformatURL;
-          }
-        } catch (e) {}
-      }
-    }
-
-    // 3. Pixabay API with English Word
-    if (!imageUrl && pixabayApiKey) {
+    // 2. Pollinations.ai (Free, Ultra-fast AI Image Generation)
+    if (!imageUrl) {
       try {
-        const url = `https://pixabay.com/api/?key=${encodeURIComponent(pixabayApiKey)}&q=${encodeURIComponent(word)}&image_type=photo&per_page=3&safesearch=true`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.hits && data.hits.length > 0) {
-          imageUrl = data.hits[0].webformatURL;
+        // Create a highly descriptive prompt for the AI
+        let aiPrompt = "High quality real photo of , clean background, highly detailed";
+        if (meaning) {
+           const koMatch = meaning.match(/[가-힣]+/);
+           if (koMatch) aiPrompt = "High quality real photo representing the concept of  (), minimal, clean background";
         }
+        
+        // Pollinations.ai generates images on the fly via GET request. We append a random seed so it generates immediately.
+        const seed = Math.floor(Math.random() * 100000);
+        imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(aiPrompt)}?width=600&height=400&nologo=true&seed=${seed}`;
       } catch (e) {}
     }
 
-    // 4. Fallback to LoremFlickr if Google and Wikipedia fail
+    // 3. Fallback to LoremFlickr if all else fails
     if (!imageUrl) {
       imageUrl = `https://loremflickr.com/600/400/${encodeURIComponent(word)}`;
     }
