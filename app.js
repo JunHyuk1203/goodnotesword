@@ -190,7 +190,7 @@ const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
 const settingsResetImagesBtn = $('settings-reset-images-btn');
 const geminiApiKeyInput = $('gemini-api-key');
-const pixabayApiKeyInput = $('pixabay-api-key');
+const togetherApiKeyInput = $('together-api-key');
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
 (function initDefaultApiKey() {
   const saved = localStorage.getItem('gemini_api_key');
@@ -202,23 +202,22 @@ const pixabayApiKeyInput = $('pixabay-api-key');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let pixabayApiKey = localStorage.getItem('pixabay_api_key') || '56807728-8411dd34a0d87ff28515943bd';
+let togetherApiKey = localStorage.getItem('together_api_key') || '';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-    if (pixabayApiKeyInput) pixabayApiKeyInput.value = pixabayApiKey;
+      if (togetherApiKeyInput) togetherApiKeyInput.value = togetherApiKey;
     openModal(settingsModal);
   });
   settingsCloseBtn.addEventListener('click', () => closeModal(settingsModal));
   settingsSaveBtn.addEventListener('click', () => {
     geminiApiKey = geminiApiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', geminiApiKey);
-    
-    if (pixabayApiKeyInput) {
-        pixabayApiKey = pixabayApiKeyInput.value.trim();
-        localStorage.setItem('pixabay_api_key', pixabayApiKey);
-      }
+        if (togetherApiKeyInput) {
+          togetherApiKey = togetherApiKeyInput.value.trim();
+          localStorage.setItem('together_api_key', togetherApiKey);
+        }
     
     closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
@@ -1021,9 +1020,35 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
       }
     } catch (e) {}
 
-    // 2. LoremFlickr (fast, reliable, always returns an image)
+    // 2. Together AI (Flux) for ultra fast 0.3s generation
+    if (!imageUrl && togetherApiKey) {
+      try {
+        const res = await fetch("https://api.together.xyz/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + togetherApiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "black-forest-labs/FLUX.1-schnell-Free",
+            prompt: "High quality aesthetic photo of " + word + ", clean background, ultra realistic",
+            width: 1024,
+            height: 768,
+            steps: 4,
+            n: 1,
+            response_format: "url"
+          })
+        });
+        const data = await res.json();
+        if (data && data.data && data.data[0]) {
+          imageUrl = data.data[0].url;
+        }
+      } catch (e) { console.error("Together AI error:", e); }
+    }
+
+    // 3. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
     if (!imageUrl) {
-      imageUrl = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("High quality photo of " + word + ", clean background")}?nologo=true&enhance=false&width=1024&height=768`;
     }
     
     if (imageUrl) {
