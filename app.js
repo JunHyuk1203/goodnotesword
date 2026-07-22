@@ -226,7 +226,7 @@ if (settingsBtn) {
   
   if (settingsResetImagesBtn) {
     settingsResetImagesBtn.addEventListener('click', async () => {
-      if (!currentChapterPath) {
+      if (!selectedBookId || !selectedChapterId) {
         alert('단어장이 선택되지 않았습니다. 단어장을 연 상태에서 초기화해주세요.');
         return;
       }
@@ -236,25 +236,24 @@ if (settingsBtn) {
       settingsResetImagesBtn.textContent = '초기화 중...';
       
       try {
-        const wordsRef = collection(db, currentChapterPath, 'words');
+        const chapterWordsPath = `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`;
+        const wordsRef = collection(db, chapterWordsPath);
         const snap = await getDocs(wordsRef);
         
         const batch = writeBatch(db);
         snap.forEach(docSnap => {
-          if (docSnap.data().imageUrl) {
-            batch.update(docSnap.ref, { imageUrl: '' });
-          }
+          batch.update(docSnap.ref, { imageUrl: '' });
         });
         
         await batch.commit();
-        alert('모든 이미지가 초기화되었습니다! 카드를 넘기면 새 고화질 사진을 가져옵니다.');
         closeModal(settingsModal);
+        alert('모든 이미지가 초기화되었습니다! 스와이프 모드에서 카드를 넘기면 새 사진을 가져옵니다.');
         
         // Reload words to reflect changes
-        loadWords(currentChapterPath, $('crumb-chapter-name').textContent);
+        loadWords(selectedBookId, selectedChapterId, $('crumb-chapter-name').textContent);
       } catch (err) {
         console.error(err);
-        alert('초기화 중 오류가 발생했습니다.');
+        alert('초기화 중 오류가 발생했습니다: ' + err.message);
       } finally {
         settingsResetImagesBtn.disabled = false;
         settingsResetImagesBtn.textContent = '모든 단어 이미지 초기화 (재검색)';
