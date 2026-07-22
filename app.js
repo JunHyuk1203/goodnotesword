@@ -189,6 +189,8 @@ const settingsModal = $('settings-modal');
 const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
 const geminiApiKeyInput = $('gemini-api-key');
+const googleSearchApiKeyInput = $('google-search-api-key');
+const googleSearchCxInput = $('google-search-cx');
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
 (function initDefaultApiKey() {
   const saved = localStorage.getItem('gemini_api_key');
@@ -200,16 +202,30 @@ const geminiApiKeyInput = $('gemini-api-key');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+let googleSearchApiKey = localStorage.getItem('google_search_api_key') || '';
+let googleSearchCx = localStorage.getItem('google_search_cx') || '';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
+    if (googleSearchApiKeyInput) googleSearchApiKeyInput.value = googleSearchApiKey;
+    if (googleSearchCxInput) googleSearchCxInput.value = googleSearchCx;
     openModal(settingsModal);
   });
   settingsCloseBtn.addEventListener('click', () => closeModal(settingsModal));
   settingsSaveBtn.addEventListener('click', () => {
     geminiApiKey = geminiApiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', geminiApiKey);
+    
+    if (googleSearchApiKeyInput) {
+      googleSearchApiKey = googleSearchApiKeyInput.value.trim();
+      localStorage.setItem('google_search_api_key', googleSearchApiKey);
+    }
+    if (googleSearchCxInput) {
+      googleSearchCx = googleSearchCxInput.value.trim();
+      localStorage.setItem('google_search_cx', googleSearchCx);
+    }
+    
     closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
   });
@@ -964,14 +980,33 @@ window.visualViewport?.addEventListener('resize', () => {
 
 async function fetchImageForWord(word, path, containerElement) {
   try {
-    // Attempt to fetch from Wikipedia (works best for nouns, no CORS issues, highly reliable)
-    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    let imageUrl = '';
+
+    // 1. Attempt to fetch from Google Custom Search API if keys are provided
+    if (googleSearchApiKey && googleSearchCx) {
+      try {
+        const url = `https://customsearch.googleapis.com/customsearch/v1?q=${encodeURIComponent(word)}&cx=${encodeURIComponent(googleSearchCx)}&searchType=image&key=${encodeURIComponent(googleSearchApiKey)}&num=1`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.items && data.items.length > 0) {
+          imageUrl = data.items[0].link;
+        }
+      } catch (err) {
+        console.error('Google Custom Search API failed:', err);
+      }
+    }
     
-    if (data.thumbnail && data.thumbnail.source) {
-      const imageUrl = data.thumbnail.source;
-      
+    // 2. Fallback to Wikipedia API (works best for nouns, no CORS issues, highly reliable)
+    if (!imageUrl) {
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.thumbnail && data.thumbnail.source) {
+        imageUrl = data.thumbnail.source;
+      }
+    }
+    
+    if (imageUrl) {
       // Update DOM
       const img = containerElement.querySelector('img');
       const skeleton = containerElement.querySelector('.skeleton-loader');
