@@ -223,6 +223,44 @@ if (settingsBtn) {
     closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
   });
+  
+  if (settingsResetImagesBtn) {
+    settingsResetImagesBtn.addEventListener('click', async () => {
+      if (!currentChapterPath) {
+        alert('단어장이 선택되지 않았습니다. 단어장을 연 상태에서 초기화해주세요.');
+        return;
+      }
+      if (!confirm('현재 열려있는 단어장의 모든 이미지 데이터를 지우고 다시 불러오시겠습니까?')) return;
+      
+      settingsResetImagesBtn.disabled = true;
+      settingsResetImagesBtn.textContent = '초기화 중...';
+      
+      try {
+        const wordsRef = collection(db, currentChapterPath, 'words');
+        const snap = await getDocs(wordsRef);
+        
+        const batch = writeBatch(db);
+        snap.forEach(docSnap => {
+          if (docSnap.data().imageUrl) {
+            batch.update(docSnap.ref, { imageUrl: '' });
+          }
+        });
+        
+        await batch.commit();
+        alert('모든 이미지가 초기화되었습니다! 카드를 넘기면 새 고화질 사진을 가져옵니다.');
+        closeModal(settingsModal);
+        
+        // Reload words to reflect changes
+        loadWords(currentChapterPath, crumb-chapter-name.textContent);
+      } catch (err) {
+        console.error(err);
+        alert('초기화 중 오류가 발생했습니다.');
+      } finally {
+        settingsResetImagesBtn.disabled = false;
+        settingsResetImagesBtn.textContent = '모든 단어 이미지 초기화 (재검색)';
+      }
+    });
+  }
 }
 // duplicate declaration removed
 const startTestBtn = $('start-test-btn');
