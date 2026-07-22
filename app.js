@@ -1031,7 +1031,7 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
           },
           body: JSON.stringify({
             model: "black-forest-labs/FLUX.1-schnell-Free",
-            prompt: "Minimalist flat vector pictogram icon of " + word + ", simple solid colors, pure white background, 2D UI icon graphic, no gradients, no shading, no 3D, no realistic details",
+            prompt: "A highly intuitive, clear, simple flat vector UI icon of " + word + ", minimalist pictogram, pure white background, flat colors, strictly 2D, no realistic details",
             width: 1024,
             height: 768,
             steps: 4,
@@ -1048,7 +1048,7 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
 
     // 2. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
     if (!imageUrl) {
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("Minimalist flat vector pictogram icon of " + word + ", simple solid colors, pure white background, 2D UI icon graphic, no gradients, no shading, no 3D, no realistic details")}?nologo=true&enhance=false&width=1024&height=768&t=${Date.now()}`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("A highly intuitive, clear, simple flat vector UI icon of " + word + ", minimalist pictogram, pure white background, flat colors, strictly 2D, no realistic details")}?nologo=true&enhance=false&width=1024&height=768&seed=${Math.floor(Math.random() * 1000000)}`;
     }
     
     if (imageUrl) {
@@ -1061,9 +1061,9 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
           if (skeleton) skeleton.remove();
         };
         img.onerror = () => {
-          // LoremFlickr always works as last resort
-          if (!img.src.includes('loremflickr')) {
-            img.src = "https://loremflickr.com/600/400/" + encodeURIComponent(word);
+          // ui-avatars always works and provides a clean initial letter icon
+          if (!img.src.includes('ui-avatars')) {
+            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(word)}&background=random&color=fff&size=512&font-size=0.4&bold=true`;
           }
         };
         img.src = imageUrl;
@@ -2627,7 +2627,15 @@ window.resetAllImages = async function() {
     document.getElementById('settings-modal')?.classList.add('hidden');
     document.body.style.overflow = '';
     alert(`✅ ${snap.docs.length}개 단어 이미지 초기화 완료! 스와이프 모드에서 카드를 넘기면 새 이미지를 가져옵니다.`);
+    
+    // Update words cache and UI
     loadWords(selectedBookId, selectedChapterId, document.getElementById('crumb-chapter-name')?.textContent || '');
+    
+    // Force Swipe View refresh if active
+    if (document.body.classList.contains('shorts-mode-active')) {
+      renderSwipeView();
+      requestAnimationFrame(adjustSwipeViewHeight);
+    }
   } catch (e) {
     alert('오류: ' + e.message);
   } finally {
