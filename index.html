@@ -489,11 +489,24 @@
   <div id="settings-modal" class="modal-screen hidden" style="z-index: 9999;">
     <div class="modal-screen-content" style="max-width:400px;">
       <h3 style="margin-top:0;">⚙️ 앱 설정</h3>
+      
       <div style="margin-bottom:1rem;">
         <label for="gemini-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Gemini API 키</label>
         <input type="password" id="gemini-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
         <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">주관식 이의제기 기능(AI 채점)을 사용하려면 무료 Gemini API 키가 필요합니다. 키는 브라우저에만 안전하게 저장됩니다.</p>
       </div>
+      
+      <div style="margin-bottom:1rem;">
+        <label for="google-search-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Custom Search API 키</label>
+        <input type="password" id="google-search-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
+      </div>
+      
+      <div style="margin-bottom:1rem;">
+        <label for="google-search-cx" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Search Engine ID (CX)</label>
+        <input type="text" id="google-search-cx" class="text-input" placeholder="a1b2c3d4..." style="width:100%;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">쇼츠 모드에서 가장 정확한 구글 이미지를 가져오기 위해 사용됩니다.</p>
+      </div>
+
       <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
         <button id="settings-close-btn" class="sample-btn">닫기</button>
         <button id="settings-save-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem;">저장</button>
