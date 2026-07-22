@@ -1031,7 +1031,7 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
           },
           body: JSON.stringify({
             model: "black-forest-labs/FLUX.1-schnell-Free",
-            prompt: "High quality aesthetic photo of " + word + ", clean background, ultra realistic",
+            prompt: "A simple flat vector pictogram icon of " + word + ", minimalist design, solid white background, 2D UI icon style, clean and crisp",
             width: 1024,
             height: 768,
             steps: 4,
@@ -1048,7 +1048,7 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
 
     // 3. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
     if (!imageUrl) {
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("High quality photo of " + word + ", clean background")}?nologo=true&enhance=false&width=1024&height=768`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("A simple flat vector pictogram icon of " + word + ", minimalist design, solid white background, 2D UI icon style")}?nologo=true&enhance=false&width=1024&height=768`;
     }
     
     if (imageUrl) {
