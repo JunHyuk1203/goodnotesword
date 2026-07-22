@@ -202,8 +202,8 @@ const googleSearchCxInput = $('google-search-cx');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let googleSearchApiKey = localStorage.getItem('google_search_api_key') || 'AIzaSyAfRw-ZPKEgJDF9t6o8T7-y-ADZnY3dYjA';
-let googleSearchCx = localStorage.getItem('google_search_cx') || '';
+let googleSearchApiKey = localStorage.getItem('google_search_api_key') || 'AIzaSyALy6JDnROUtqsIfFDwcS0hm-uVY01DW9s';
+let googleSearchCx = localStorage.getItem('google_search_cx') || '37df0d3d93474459c';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
