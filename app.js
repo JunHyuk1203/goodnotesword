@@ -2581,7 +2581,6 @@ window.resetAllImages = async function() {
     alert('단어장이 선택되지 않았습니다. 단어장을 연 상태에서 초기화해주세요.');
     return;
   }
-  if (!confirm('현재 열려있는 단어장의 모든 이미지를 초기화하고 새로 불러올까요?')) return;
 
   const btn = document.getElementById('settings-reset-images-btn');
   if (btn) { btn.disabled = true; btn.textContent = '초기화 중...'; }
@@ -2591,7 +2590,8 @@ window.resetAllImages = async function() {
     const snap = await getDocs(collection(db, path));
     await Promise.all(snap.docs.map(d => updateDoc(d.ref, { imageUrl: '' })));
     document.getElementById('settings-modal')?.classList.add('hidden');
-    alert('✅ 초기화 완료! 스와이프 모드에서 카드를 넘기면 새 이미지를 가져옵니다.');
+    document.body.style.overflow = '';
+    alert(`✅ ${snap.docs.length}개 단어 이미지 초기화 완료! 스와이프 모드에서 카드를 넘기면 새 이미지를 가져옵니다.`);
     loadWords(selectedBookId, selectedChapterId, document.getElementById('crumb-chapter-name')?.textContent || '');
   } catch (e) {
     alert('오류: ' + e.message);
