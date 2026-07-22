@@ -617,6 +617,8 @@ function parseWordData(data) {
       related: Array.isArray(data.related) ? data.related : [],
       front: data.front || data.word || '',
       back: data.back || '',
+      imageUrl: data.imageUrl || '',
+      _path: data._path || ''
     };
   }
 
@@ -960,6 +962,47 @@ window.visualViewport?.addEventListener('resize', () => {
   if (document.body.classList.contains('shorts-mode-active')) adjustSwipeViewHeight();
 });
 
+async function fetchImageForWord(word, path, containerElement) {
+  try {
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(word))}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const html = data.contents;
+    
+    // Find first gstatic image URL
+    const match = html.match(/<img[^>]+src=["'](https:\/\/encrypted-tbn0\.gstatic\.com\/images[^"']+)["']/i);
+    if (match && match[1]) {
+      const imageUrl = match[1];
+      
+      // Update DOM
+      const img = containerElement.querySelector('img');
+      const skeleton = containerElement.querySelector('.skeleton-loader');
+      if (img) {
+        img.src = imageUrl;
+        img.onload = () => {
+          img.classList.add('loaded');
+          if (skeleton) skeleton.remove();
+        };
+      }
+      containerElement.classList.remove('skeleton-container');
+      
+      // Update Firestore (if not already updating)
+      const docRef = doc(db, path);
+      await updateDoc(docRef, { imageUrl });
+      
+      // Update local memory so we don't fetch again if they swipe back
+      const loadedDoc = currentLoadedWords.find(d => d._path === path);
+      if (loadedDoc) loadedDoc.imageUrl = imageUrl;
+    } else {
+      // No image found
+      if (containerElement) containerElement.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('Failed to fetch image:', err);
+    if (containerElement) containerElement.style.display = 'none';
+  }
+}
+
 // ─── Swipe (Shorts) View ──────────────────────────────────────────────────────
 function buildSwipeCardHTML(parsed, originalIdx) {
   const buildRelatedSection = (items, emoji, label) => {
@@ -985,23 +1028,30 @@ function buildSwipeCardHTML(parsed, originalIdx) {
   const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
   const hasRelated = (parsed.synonyms?.length || parsed.antonyms?.length || parsed.related?.length);
 
+  const imageHTML = parsed.imageUrl 
+    ? `<div class="shorts-image-container"><img src="${escapeHTML(parsed.imageUrl)}" class="loaded" /><div class="shorts-image-overlay"></div></div>`
+    : `<div class="shorts-image-container skeleton-container" data-fetch-word="${escapeHTML(parsed.word)}" data-fetch-path="${escapeHTML(parsed._path)}"><div class="skeleton-loader"></div><img src="" /><div class="shorts-image-overlay"></div></div>`;
+
   return `
-    <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
-      <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
-      <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
-      ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
-      ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
-      <span class="word-card-num">${originalIdx + 1}</span>
+    ${imageHTML}
+    <div class="swipe-card-content">
+      <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
+        <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
+        <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
+        ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
+        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+        <span class="word-card-num">${originalIdx + 1}</span>
+      </div>
+      ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
+        <div class="word-card-section-label">📌 뜻</div>
+        <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
+      </div>` : ''}
+      ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
+        <div class="word-card-section-label">📖 예문</div>
+        <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
+      </div>` : ''}
+      ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
     </div>
-    ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
-      <div class="word-card-section-label">📌 뜻</div>
-      <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
-    </div>` : ''}
-    ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
-      <div class="word-card-section-label">📖 예문</div>
-      <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
-    </div>` : ''}
-    ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
   `;
 }
 
@@ -1057,6 +1107,15 @@ function renderSwipeCard(idx) {
   
   card.innerHTML = buildSwipeCardHTML(parsed, originalIdx);
   counter.textContent = `${idx + 1} / ${swipeWords.length}`;
+
+  const skeletonContainer = card.querySelector('.skeleton-container');
+  if (skeletonContainer) {
+    const wordToFetch = skeletonContainer.getAttribute('data-fetch-word');
+    const wordPath = skeletonContainer.getAttribute('data-fetch-path');
+    if (wordToFetch && wordPath) {
+      fetchImageForWord(wordToFetch, wordPath, skeletonContainer);
+    }
+  }
 
   if (autoPlayPronunciation) {
     playPronunciation(parsed.word);
