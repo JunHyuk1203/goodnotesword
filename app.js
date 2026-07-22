@@ -1062,7 +1062,7 @@ function buildSwipeCardHTML(parsed, originalIdx) {
 
   const imageHTML = parsed.imageUrl 
     ? `<div class="shorts-image-container"><img src="${escapeHTML(parsed.imageUrl)}" class="loaded" /><div class="shorts-image-overlay"></div></div>`
-    : `<div class="shorts-image-container skeleton-container" data-fetch-word="${escapeHTML(parsed.word)}" data-fetch-path="${escapeHTML(parsed._path)}"><div class="skeleton-loader"></div><img src="" /><div class="shorts-image-overlay"></div></div>`;
+    : `<div class="shorts-image-container skeleton-container" data-fetch-word="${escapeHTML(parsed.word)}" data-fetch-path="${escapeHTML(parsed._path)}" data-fetch-meaning="${escapeHTML(parsed.meaning || '')}"><div class="skeleton-loader"></div><img src="" /><div class="shorts-image-overlay"></div></div>`;
 
   return `
     ${imageHTML}
