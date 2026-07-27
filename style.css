@@ -138,6 +138,27 @@ body.modal-open {
   color: var(--text-secondary);
   margin-top: 4px;
 }
+.word-section-etymology {
+  margin-top: 14px;
+}
+.ety-container {
+  padding-left: 2px;
+}
+.ety-chip {
+  background: rgba(108, 99, 255, 0.15);
+  color: var(--primary-light);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9em;
+  border: 1px solid rgba(108, 99, 255, 0.3);
+}
+.ety-plus {
+  color: var(--text-muted);
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 0 4px;
+}
 .badge-row {
   display: flex;
   gap: 8px;

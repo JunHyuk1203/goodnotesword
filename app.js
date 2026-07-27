@@ -653,6 +653,7 @@ function parseWordData(data) {
   let synonyms = [];
   let antonyms = [];
   let related = [];
+  let etymology = [];
 
   const sections = back.split(/\n\n/);
   for (const section of sections) {
@@ -661,6 +662,8 @@ function parseWordData(data) {
       meaning = trimmed.replace(/^📌 뜻\n?/, '').trim();
     } else if (trimmed.startsWith('📖 예문')) {
       examples = trimmed.replace(/^📖 예문\n?/, '').split('\n').map(s => s.replace(/^•\s*/, '').trim()).filter(Boolean);
+    } else if (trimmed.startsWith('🧩 어원')) {
+      etymology = trimmed.replace(/^🧩 어원\n?/, '').replace(/^•\s*/, '').split(/\s*\+\s*/).map(s => s.trim()).filter(Boolean);
     } else if (trimmed.startsWith('✅ 유의어')) {
       synonyms = trimmed.replace(/^✅ 유의어\n?/, '').split('\n').map(s => s.replace(/^•\s*/, '').trim()).filter(Boolean);
     } else if (trimmed.startsWith('❌ 반의어')) {
@@ -678,7 +681,7 @@ function parseWordData(data) {
     meaning = back;
   }
 
-  return { ...data, word, pos, pronunciation, meaning, examples, synonyms, antonyms, related, front, back };
+  return { ...data, word, pos, pronunciation, meaning, examples, synonyms, antonyms, related, etymology, front, back };
 }
 
 // ─── Render Card View ─────────────────────────────────────────────────────────
@@ -734,6 +737,19 @@ function renderCardView(docs) {
         </div>`;
     };
 
+    const buildEtymologySection = (items) => {
+      if (!items || !items.length) return '';
+      const lines = items.map((s, idx) => {
+        const isLast = idx === items.length - 1;
+        return `<span class="ety-chip">${escapeHTML(s)}</span>${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+      }).join('');
+      return `<div class="word-card-section word-section-etymology">
+        <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:4px;">🧩 어원 분석</div>
+        <div class="ety-container" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">${lines}</div>
+      </div>`;
+    };
+
+    const etySection = buildEtymologySection(parsed.etymology);
     const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
     const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
     const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
@@ -753,6 +769,7 @@ function renderCardView(docs) {
           <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
         </div>
       ` : ''}
+      ${etySection}
       ${parsed.examples.length ? `
         <div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
           <div class="word-card-section-label">📖 예문</div>
@@ -992,6 +1009,19 @@ function buildSwipeCardHTML(parsed, originalIdx) {
       <div class="word-card-related-list">${lines}</div>
     </div>`;
   };
+  const buildEtymologySection = (items) => {
+    if (!items || !items.length) return '';
+    const lines = items.map((s, idx) => {
+      const isLast = idx === items.length - 1;
+      return `<span class="ety-chip">${escapeHTML(s)}</span>${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+    }).join('');
+    return `<div class="word-card-section word-section-etymology">
+      <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:4px;">🧩 어원 분석</div>
+      <div class="ety-container" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">${lines}</div>
+    </div>`;
+  };
+
+  const etySection = buildEtymologySection(parsed.etymology);
   const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
   const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
   const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
@@ -1010,6 +1040,7 @@ function buildSwipeCardHTML(parsed, originalIdx) {
         <div class="word-card-section-label">📌 뜻</div>
         <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
       </div>` : ''}
+      ${etySection}
       ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
         <div class="word-card-section-label">📖 예문</div>
         <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
@@ -1393,6 +1424,7 @@ Each object MUST have the following keys:
 - "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
+- "etymology": Array of strings (optional). MUST format as "morpheme(meaning)". For example: ["re(다시)", "view(보다)"] or empty array if not applicable.
 
 CRITICAL JSON FORMATTING:
 1. Output MUST be a RAW, minified JSON array on a SINGLE LINE.
@@ -1450,9 +1482,11 @@ function formatCard(item, frontOpt, backOpt) {
   const parts = [];
   if (item.meaning) parts.push(`📌 뜻\n${item.pos ? item.pos + ' ' : ''}${item.meaning}`);
   if (backOpt === 'full') {
+    const etys = ensureStringArray(item.etymology);
     const syns = ensureStringArray(item.synonyms);
     const ants = ensureStringArray(item.antonyms);
     const rels = ensureStringArray(item.related);
+    if (etys.length) parts.push(`🧩 어원\n• ${etys.join(' + ')}`);
     if (syns.length) parts.push(`✅ 유의어\n• ${syns.join('\n• ')}`);
     if (ants.length) parts.push(`❌ 반의어\n• ${ants.join('\n• ')}`);
     if (rels.length) parts.push(`🔗 관련어\n• ${rels.join('\n• ')}`);
@@ -1469,6 +1503,7 @@ function formatCard(item, frontOpt, backOpt) {
     pronunciation: item.pronunciation || '',
     meaning: item.meaning || '',
     examples: ensureStringArray(item.examples),
+    etymology: ensureStringArray(item.etymology),
     synonyms: ensureStringArray(item.synonyms),
     antonyms: ensureStringArray(item.antonyms),
     related: ensureStringArray(item.related),
