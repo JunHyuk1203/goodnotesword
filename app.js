@@ -838,6 +838,7 @@ function openEditModal(docData) {
   $('edit-pron').value = parsed.pronunciation || '';
   $('edit-meaning').value = parsed.meaning || '';
   $('edit-examples').value = (parsed.examples || []).join('\n');
+  $('edit-etymology').value = (parsed.etymology || []).join('\n');
   $('edit-synonyms').value = (parsed.synonyms || []).join('\n');
   $('edit-antonyms').value = (parsed.antonyms || []).join('\n');
   $('edit-related').value = (parsed.related || []).join('\n');
@@ -858,6 +859,7 @@ editWordSave.addEventListener('click', async () => {
   
   const getArray = (id) => $(id).value.split('\n').map(s=>s.trim()).filter(Boolean);
   const examples = getArray('edit-examples');
+  const etymology = getArray('edit-etymology');
   const synonyms = getArray('edit-synonyms');
   const antonyms = getArray('edit-antonyms');
   const related = getArray('edit-related');
@@ -868,6 +870,7 @@ editWordSave.addEventListener('click', async () => {
 
   const parts = [];
   if (meaning) parts.push(`📌 뜻\n${pos ? pos + ' ' : ''}${meaning}`);
+  if (etymology.length) parts.push(`🧩 어원\n• ${etymology.join(' + ')}`);
   if (synonyms.length) parts.push(`✅ 유의어\n• ${synonyms.join('\n• ')}`);
   if (antonyms.length) parts.push(`❌ 반의어\n• ${antonyms.join('\n• ')}`);
   if (related.length) parts.push(`🔗 관련어\n• ${related.join('\n• ')}`);
@@ -875,7 +878,7 @@ editWordSave.addEventListener('click', async () => {
   const back = parts.join('\n\n');
 
   const updatedData = {
-    word, pos, pronunciation: pron, meaning, examples, synonyms, antonyms, related, front, back
+    word, pos, pronunciation: pron, meaning, examples, synonyms, antonyms, related, etymology, front, back
   };
 
   try {
@@ -1424,7 +1427,7 @@ Each object MUST have the following keys:
 - "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
-- "etymology": Array of strings (optional). MUST format as "morpheme(meaning)". For example: ["re(다시)", "view(보다)"] or empty array if not applicable.
+- "etymology": Array of strings. MUST aggressively analyze the etymology (prefix/root/suffix) of the word. Format as "morpheme(meaning)". For example: ["re(다시)", "view(보다)"]. If absolutely no etymology can be found, use an empty array.
 
 CRITICAL JSON FORMATTING:
 1. Output MUST be a RAW, minified JSON array on a SINGLE LINE.
