@@ -190,6 +190,9 @@ body.modal-open {
     inset 0 -2px 0 rgba(0,0,0,0.2);
   z-index: 2;
 }
+.ety-chip:last-of-type::after {
+  display: none;
+}
 .ety-chip:nth-of-type(1) { background: #6C63FF; z-index: 10; }
 .ety-chip:nth-of-type(2) { background: #00d4aa; z-index: 9; margin-left: -1px; }
 .ety-chip:nth-of-type(3) { background: #fbbf24; z-index: 8; margin-left: -1px; }
