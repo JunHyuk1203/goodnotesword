@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.16 (Android Chrome TTS Fix)");
+console.log("GoodNotes Vocab App Loaded - v10.17 (Scroll + Final Android TTS Fix)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -376,7 +376,14 @@ if ('speechSynthesis' in window) {
 
 function playPronunciation(wordText) {
   if (!wordText) return;
+  const isAndroidChrome = /Android/i.test(navigator.userAgent) && /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
+  
   try {
+    if (isAndroidChrome) {
+      _ttsAudioFallback(wordText);
+      return;
+    }
+
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       _currentUtterance = new SpeechSynthesisUtterance(wordText);

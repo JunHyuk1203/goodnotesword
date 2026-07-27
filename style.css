@@ -48,6 +48,11 @@ html {
   overscroll-behavior: none; /* Prevent elastic scroll and stretch */
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
 body {
   font-family: var(--font-sans);
   background: var(--bg);
