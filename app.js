@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.12 (Etymology UI Active)");
+console.log("GoodNotes Vocab App Loaded - v10.13 (Etymology Data Patch)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -624,6 +624,7 @@ function parseWordData(data) {
       synonyms: Array.isArray(data.synonyms) ? data.synonyms : [],
       antonyms: Array.isArray(data.antonyms) ? data.antonyms : [],
       related: Array.isArray(data.related) ? data.related : [],
+      etymology: Array.isArray(data.etymology) ? data.etymology : [],
       front: data.front || data.word || '',
       back: data.back || '',
       _path: data._path || ''
