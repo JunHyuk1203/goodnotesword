@@ -188,7 +188,6 @@ const settingsBtn = $('settings-btn');
 const settingsModal = $('settings-modal');
 const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
-const settingsResetImagesBtn = $('settings-reset-images-btn');
 const geminiApiKeyInput = $('gemini-api-key');
 const togetherApiKeyInput = $('together-api-key');
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
@@ -223,44 +222,6 @@ if (settingsBtn) {
     alert('설정이 저장되었습니다.');
   });
   
-  if (settingsResetImagesBtn) {
-    settingsResetImagesBtn.addEventListener('click', async () => {
-      if (!selectedBookId || !selectedChapterId) {
-        alert('단어장이 선택되지 않았습니다. 단어장을 연 상태에서 초기화해주세요.');
-        return;
-      }
-      if (!confirm('현재 열려있는 단어장의 모든 이미지 데이터를 지우고 다시 불러오시겠습니까?')) return;
-      
-      settingsResetImagesBtn.disabled = true;
-      settingsResetImagesBtn.textContent = '초기화 중...';
-      
-      // Cancel pending image requests
-      _queueVersion++;
-      _fetchingWords.clear();
-      
-      try {
-        const chapterWordsPath = `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`;
-        const wordsRef = collection(db, chapterWordsPath);
-        const snap = await getDocs(wordsRef);
-        
-        // Update each doc individually (avoids writeBatch import issues)
-        const updates = snap.docs.map(docSnap => updateDoc(docSnap.ref, { imageUrl: '' }));
-        await Promise.all(updates);
-        
-        closeModal(settingsModal);
-        alert('모든 이미지가 초기화되었습니다! 스와이프 모드에서 카드를 넘기면 새 사진을 가져옵니다.');
-        
-        // Reload words to reflect changes
-        loadWords(selectedBookId, selectedChapterId, $('crumb-chapter-name').textContent);
-      } catch (err) {
-        console.error(err);
-        alert('초기화 중 오류가 발생했습니다: ' + err.message);
-      } finally {
-        settingsResetImagesBtn.disabled = false;
-        settingsResetImagesBtn.textContent = '모든 단어 이미지 초기화 (재검색)';
-      }
-    });
-  }
 }
 // duplicate declaration removed
 const startTestBtn = $('start-test-btn');
@@ -665,7 +626,6 @@ function parseWordData(data) {
       related: Array.isArray(data.related) ? data.related : [],
       front: data.front || data.word || '',
       back: data.back || '',
-      imageUrl: (data.imageUrl && (data.imageUrl.includes('loremflickr.com') || data.imageUrl.includes('wikipedia.org'))) ? '' : (data.imageUrl || ''),
       _path: data._path || ''
     };
   }
@@ -1010,115 +970,7 @@ window.visualViewport?.addEventListener('resize', () => {
   if (document.body.classList.contains('shorts-mode-active')) adjustSwipeViewHeight();
 });
 
-// ── Image generation queue (prevents Pollinations 429 rate-limit) ──────────
-let _imgQueue = Promise.resolve();
-let _lastImgReq = 0;
-const IMG_COOLDOWN = 2500; // ms between requests
-let _fetchingWords = new Set();
-let _queueVersion = 0;
 
-function queueImageFetch(word, path, meaning, containerElement) {
-  if (_fetchingWords.has(path)) return;
-  _fetchingWords.add(path);
-  
-  const currentVersion = _queueVersion;
-
-  _imgQueue = _imgQueue.then(async () => {
-    if (currentVersion !== _queueVersion) {
-      _fetchingWords.delete(path);
-      return;
-    }
-    const now = Date.now();
-    const wait = Math.max(0, IMG_COOLDOWN - (now - _lastImgReq));
-    if (wait > 0) await new Promise(r => setTimeout(r, wait));
-    
-    if (currentVersion !== _queueVersion) {
-      _fetchingWords.delete(path);
-      return;
-    }
-    
-    _lastImgReq = Date.now();
-    await fetchImageForWord(word, path, meaning, containerElement);
-    _fetchingWords.delete(path);
-  });
-}
-
-async function fetchImageForWord(word, path, meaning, containerElement) {
-  try {
-    const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
-    let seed = Math.floor(Math.random() * 9999999);
-    let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${seed}&model=turbo`;
-    const fallbackUrl = `https://api.dicebear.com/8.x/bottts/svg?seed=${encodeURIComponent(word)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
-
-    // Wait for the image to load in memory to handle rate limits / retries
-    let loaded = await new Promise((resolve) => {
-      const tempImg = new Image();
-      let isDone = false;
-
-      const finish = (success, finalUrl) => {
-        if (isDone) return;
-        isDone = true;
-        imageUrl = finalUrl;
-        resolve(success);
-      };
-
-      // Strict 4-second timeout for Pollinations (it hangs when rate-limited)
-      const timeoutId = setTimeout(() => {
-        if (!isDone) {
-          const fallbackImg = new Image();
-          fallbackImg.onload = () => finish(true, fallbackUrl);
-          fallbackImg.onerror = () => finish(false, fallbackUrl);
-          fallbackImg.src = fallbackUrl;
-        }
-      }, 4000);
-
-      tempImg.onload = () => {
-        clearTimeout(timeoutId);
-        finish(true, imageUrl);
-      };
-      
-      tempImg.onerror = () => {
-        clearTimeout(timeoutId);
-        // Instant fallback on 429 rate limit error
-        const fallbackImg = new Image();
-        fallbackImg.onload = () => finish(true, fallbackUrl);
-        fallbackImg.onerror = () => finish(false, fallbackUrl);
-        fallbackImg.src = fallbackUrl;
-      };
-
-      tempImg.src = imageUrl;
-    });
-
-    if (!loaded) return;
-
-    // Update DOM if it's still there
-    if (document.contains(containerElement)) {
-      const img = containerElement.querySelector('img');
-      const skeleton = containerElement.querySelector('.skeleton-loader');
-      containerElement.classList.remove('skeleton-container');
-      if (img) {
-        img.src = imageUrl;
-        img.classList.add('loaded');
-        if (skeleton) skeleton.remove();
-      }
-    }
-
-    // Update local memory and swipe array
-    const loadedDoc = currentLoadedWords.find(d => d._path === path);
-    if (loadedDoc) loadedDoc.imageUrl = imageUrl;
-    if (typeof swipeWords !== 'undefined') {
-      const swipeDoc = swipeWords.find(d => d._path === path);
-      if (swipeDoc) swipeDoc.imageUrl = imageUrl;
-    }
-
-    // Save to Firestore (fire-and-forget)
-    const docRef = doc(db, path);
-    updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
-
-  } catch (err) {
-    console.error('Failed to fetch image:', err);
-  }
-}
 
 // ─── Swipe (Shorts) View ──────────────────────────────────────────────────────
 function buildSwipeCardHTML(parsed, originalIdx) {
@@ -1145,12 +997,7 @@ function buildSwipeCardHTML(parsed, originalIdx) {
   const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
   const hasRelated = (parsed.synonyms?.length || parsed.antonyms?.length || parsed.related?.length);
 
-  const imageHTML = parsed.imageUrl 
-    ? `<div class="shorts-image-container"><img src="${escapeHTML(parsed.imageUrl)}" class="loaded" /><div class="shorts-image-overlay"></div></div>`
-    : `<div class="shorts-image-container skeleton-container" data-fetch-word="${escapeHTML(parsed.word)}" data-fetch-path="${escapeHTML(parsed._path)}" data-fetch-meaning="${escapeHTML(parsed.meaning || '')}"><div class="skeleton-loader"></div><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Loading" /><div class="shorts-image-overlay"></div></div>`;
-
   return `
-    ${imageHTML}
     <div class="swipe-card-content">
       <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
         <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
@@ -1225,15 +1072,7 @@ function renderSwipeCard(idx) {
   card.innerHTML = buildSwipeCardHTML(parsed, originalIdx);
   counter.textContent = `${idx + 1} / ${swipeWords.length}`;
 
-  const skeletonContainer = card.querySelector('.skeleton-container');
-  if (skeletonContainer) {
-    const wordToFetch = skeletonContainer.getAttribute('data-fetch-word');
-    const wordPath = skeletonContainer.getAttribute('data-fetch-path');
-    const wordMeaning = skeletonContainer.getAttribute('data-fetch-meaning');
-    if (wordToFetch && wordPath) {
-      queueImageFetch(wordToFetch, wordPath, wordMeaning, skeletonContainer);
-    }
-  }
+
 
   if (autoPlayPronunciation) {
     playPronunciation(parsed.word);
@@ -2634,39 +2473,4 @@ async function fetchLatestVersion() {
 loadBooks();
 fetchLatestVersion();
 
-// ─── Global function accessible from HTML onclick (bypasses ES module scope) ──
-window.resetAllImages = async function() {
-  if (!selectedBookId || !selectedChapterId) {
-    alert('단어장이 선택되지 않았습니다. 단어장을 연 상태에서 초기화해주세요.');
-    return;
-  }
 
-  const btn = document.getElementById('settings-reset-images-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '초기화 중...'; }
-
-  // Cancel pending image requests
-  _queueVersion++;
-  _fetchingWords.clear();
-
-  try {
-    const path = `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`;
-    const snap = await getDocs(collection(db, path));
-    await Promise.all(snap.docs.map(d => updateDoc(d.ref, { imageUrl: '' })));
-    document.getElementById('settings-modal')?.classList.add('hidden');
-    document.body.style.overflow = '';
-    alert(`✅ ${snap.docs.length}개 단어 이미지 초기화 완료! 스와이프 모드에서 카드를 넘기면 새 이미지를 가져옵니다.`);
-    
-    // Update words cache and UI
-    loadWords(selectedBookId, selectedChapterId, document.getElementById('crumb-chapter-name')?.textContent || '');
-    
-    // Force Swipe View refresh if active
-    if (document.body.classList.contains('shorts-mode-active')) {
-      renderSwipeView();
-      requestAnimationFrame(adjustSwipeViewHeight);
-    }
-  } catch (e) {
-    alert('오류: ' + e.message);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '모든 단어 이미지 초기화 (재검색)'; }
-  }
-};
