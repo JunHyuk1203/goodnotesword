@@ -234,6 +234,10 @@ if (settingsBtn) {
       settingsResetImagesBtn.disabled = true;
       settingsResetImagesBtn.textContent = '초기화 중...';
       
+      // Cancel pending image requests
+      _queueVersion++;
+      _fetchingWords.clear();
+      
       try {
         const chapterWordsPath = `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`;
         const wordsRef = collection(db, chapterWordsPath);
@@ -1010,14 +1014,32 @@ window.visualViewport?.addEventListener('resize', () => {
 let _imgQueue = Promise.resolve();
 let _lastImgReq = 0;
 const IMG_COOLDOWN = 2500; // ms between requests
+let _fetchingWords = new Set();
+let _queueVersion = 0;
 
 function queueImageFetch(word, path, meaning, containerElement) {
+  if (_fetchingWords.has(path)) return;
+  _fetchingWords.add(path);
+  
+  const currentVersion = _queueVersion;
+
   _imgQueue = _imgQueue.then(async () => {
+    if (currentVersion !== _queueVersion) {
+      _fetchingWords.delete(path);
+      return;
+    }
     const now = Date.now();
     const wait = Math.max(0, IMG_COOLDOWN - (now - _lastImgReq));
     if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    
+    if (currentVersion !== _queueVersion) {
+      _fetchingWords.delete(path);
+      return;
+    }
+    
     _lastImgReq = Date.now();
     await fetchImageForWord(word, path, meaning, containerElement);
+    _fetchingWords.delete(path);
   });
 }
 
@@ -2602,6 +2624,10 @@ window.resetAllImages = async function() {
 
   const btn = document.getElementById('settings-reset-images-btn');
   if (btn) { btn.disabled = true; btn.textContent = '초기화 중...'; }
+
+  // Cancel pending image requests
+  _queueVersion++;
+  _fetchingWords.clear();
 
   try {
     const path = `users/${currentUser.uid}/books/${selectedBookId}/chapters/${selectedChapterId}/words`;
