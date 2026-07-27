@@ -1013,7 +1013,6 @@ const IMG_COOLDOWN = 2500; // ms between requests
 
 function queueImageFetch(word, path, meaning, containerElement) {
   _imgQueue = _imgQueue.then(async () => {
-    // Respect cooldown between requests
     const now = Date.now();
     const wait = Math.max(0, IMG_COOLDOWN - (now - _lastImgReq));
     if (wait > 0) await new Promise(r => setTimeout(r, wait));
@@ -1024,37 +1023,43 @@ function queueImageFetch(word, path, meaning, containerElement) {
 
 async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
-    // Check if container is still in the DOM (user may have swiped away)
-    if (!document.contains(containerElement)) return;
-
     const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
-    const seed = Math.floor(Math.random() * 9999999);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${seed}&model=turbo`;
+    let seed = Math.floor(Math.random() * 9999999);
+    let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${seed}&model=turbo`;
 
-    // Check again after async gap
-    if (!document.contains(containerElement)) return;
+    // Wait for the image to load in memory to handle rate limits / retries
+    let loaded = await new Promise((resolve) => {
+      const tempImg = new Image();
+      tempImg.onload = () => resolve(true);
+      tempImg.onerror = () => {
+        // Retry once on failure (429 rate limit or error)
+        setTimeout(() => {
+          const retrySeed = Math.floor(Math.random() * 9999999);
+          imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=512&height=512&seed=${retrySeed}&model=turbo`;
+          const retryImg = new Image();
+          retryImg.onload = () => resolve(true);
+          retryImg.onerror = () => resolve(false);
+          retryImg.src = imageUrl;
+        }, 2000);
+      };
+      tempImg.src = imageUrl;
+    });
 
-    const img = containerElement.querySelector('img');
-    const skeleton = containerElement.querySelector('.skeleton-loader');
-    containerElement.classList.remove('skeleton-container');
-    if (!img) return;
+    if (!loaded) {
+      console.warn('Image generation failed twice:', word);
+      return; // Skip saving broken images
+    }
 
-    img.onload = () => {
-      img.classList.add('loaded');
-      if (skeleton) skeleton.remove();
-    };
-    img.onerror = () => {
-      // Retry once with different seed
-      if (!img.dataset.retried) {
-        img.dataset.retried = '1';
-        const seed2 = Math.floor(Math.random() * 9999999);
-        img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=512&height=512&seed=${seed2}&model=turbo`;
+    // Update DOM if it's still there
+    if (document.contains(containerElement)) {
+      const img = containerElement.querySelector('img');
+      const skeleton = containerElement.querySelector('.skeleton-loader');
+      containerElement.classList.remove('skeleton-container');
+      if (img) {
+        img.src = imageUrl;
+        img.classList.add('loaded');
+        if (skeleton) skeleton.remove();
       }
-    };
-    img.src = imageUrl;
-    if (img.complete && img.naturalWidth > 0) {
-      img.classList.add('loaded');
-      if (skeleton) skeleton.remove();
     }
 
     // Update local memory and swipe array
@@ -1071,7 +1076,6 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
 
   } catch (err) {
     console.error('Failed to fetch image:', err);
-    if (containerElement) containerElement.style.display = 'none';
   }
 }
 
