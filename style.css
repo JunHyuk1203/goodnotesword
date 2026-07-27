@@ -1355,7 +1355,7 @@ body.modal-open {
   padding-bottom: 0.4rem;
 }
 .word-card-word {
-  font-size: 1.5em;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--text);
   font-family: var(--font-rounded);
@@ -2224,7 +2224,7 @@ button:active:not(:disabled) {
   .download-section { flex-direction: column; }
   .words-card-grid { grid-template-columns: 1fr; gap: 0.4rem; }
   .word-card { padding: 0.65rem 0.75rem 0.55rem; border-radius: 10px; }
-  .word-card-word { font-size: 1.1rem; }
+  .word-card-word { font-size: 1.65rem; }
   .test-modal-box { padding: 1.2rem; }
   .flashcard-front, .flashcard-back { font-size: 1.2rem; min-height: 160px; }
   .quiz-question-word { font-size: 1.5rem; }
