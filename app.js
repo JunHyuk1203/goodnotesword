@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.23 (Bulletproof Horizontal Scroll Fix)");
+console.log("GoodNotes Vocab App Loaded - v10.24 (Example Translation & Jua Font)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -813,7 +813,13 @@ function renderCardView(docs) {
       ${parsed.examples.length ? `
         <div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
           <div class="word-card-section-label">📖 예문</div>
-          <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
+          <div class="word-card-example">${parsed.examples.map(e => {
+            const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
+            if (match) {
+              return `<div class="ex-en">${escapeHTML(match[1])}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
+            }
+            return `<div class="ex-en">${escapeHTML(e)}</div>`;
+          }).join('')}</div>
         </div>
       ` : ''}
       ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
@@ -1096,7 +1102,13 @@ function buildSwipeCardHTML(parsed, originalIdx) {
       ${etySection}
       ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
         <div class="word-card-section-label">📖 예문</div>
-        <div class="word-card-example">${parsed.examples.map(e => escapeHTML(e)).join('\n')}</div>
+        <div class="word-card-example">${parsed.examples.map(e => {
+            const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
+            if (match) {
+              return `<div class="ex-en">${escapeHTML(match[1])}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
+            }
+            return `<div class="ex-en">${escapeHTML(e)}</div>`;
+          }).join('')}</div>
       </div>` : ''}
       ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}
     </div>

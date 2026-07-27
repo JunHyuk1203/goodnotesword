@@ -41,6 +41,7 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --font-rounded: 'Nunito', sans-serif;
+  --font-ko-rounded: 'Jua', sans-serif;
 }
 
 html { 
@@ -1399,14 +1400,26 @@ body.modal-open {
 }
 .word-card-meaning {
   color: var(--text);
+  font-family: var(--font-ko-rounded);
+  font-size: 1.25rem;
+  font-weight: 400;
   white-space: pre-wrap;
+  letter-spacing: 0.5px;
 }
 .word-card-example {
-  color: var(--text-secondary);
-  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border-left: 2px solid var(--border);
   padding-left: 10px;
-  white-space: pre-wrap;
+}
+.ex-en {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.ex-ko {
+  color: var(--text-muted);
+  font-size: 0.85em;
 }
 .word-card-related-group {
   display: flex;
