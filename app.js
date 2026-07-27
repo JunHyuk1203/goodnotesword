@@ -1010,9 +1010,38 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
     let imageUrl = '';
   
-    // Use Pollinations with cartoon style (fast, reliable, free)
     const prompt = `cute cartoon illustration of "${word}", simple and intuitive stock image style, bright flat colors, pure white background, friendly character art, no text, no letters, no watermark`;
-    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=flux`;
+
+    // 1. Together AI (Flux) for ultra fast 0.3s generation
+    if (typeof togetherApiKey !== 'undefined' && togetherApiKey) {
+      try {
+        const res = await fetch("https://api.together.xyz/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + togetherApiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "black-forest-labs/FLUX.1-schnell-Free",
+            prompt: prompt,
+            width: 1024,
+            height: 768,
+            steps: 4,
+            n: 1,
+            response_format: "url"
+          })
+        });
+        const data = await res.json();
+        if (data && data.data && data.data[0]) {
+          imageUrl = data.data[0].url;
+        }
+      } catch (e) { console.error("Together AI error:", e); }
+    }
+  
+    // 2. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
+    if (!imageUrl) {
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=flux`;
+    }
     
     if (imageUrl) {
       const img = containerElement.querySelector('img');
@@ -1038,19 +1067,17 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
         }
       }
       
-      // Update Firestore
-      const docRef = doc(db, path);
-      await updateDoc(docRef, { imageUrl });
-      
-      // Update local memory so we don't fetch again if they swipe back
+      // Update local memory and swipe array only (don't updateDoc to avoid onSnapshot re-rendering all cards)
       const loadedDoc = currentLoadedWords.find(d => d._path === path);
       if (loadedDoc) loadedDoc.imageUrl = imageUrl;
-      
-      // Update swipe array
       if (typeof swipeWords !== 'undefined') {
         const swipeDoc = swipeWords.find(d => d._path === path);
         if (swipeDoc) swipeDoc.imageUrl = imageUrl;
       }
+      
+      // Save to Firestore in the background (fire-and-forget)
+      const docRef = doc(db, path);
+      updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
     } else {
       // No image found
       if (containerElement) containerElement.style.display = 'none';
