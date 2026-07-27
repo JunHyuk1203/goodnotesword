@@ -1009,41 +1009,38 @@ window.visualViewport?.addEventListener('resize', () => {
 async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
     let imageUrl = '';
+    let imageBlob = null;
   
     const prompt = `cute cartoon illustration of "${word}", simple and intuitive stock image style, bright flat colors, pure white background, friendly character art, no text, no letters, no watermark`;
 
-    // 1. Together AI (Flux) for ultra fast 0.3s generation
-    if (typeof togetherApiKey !== 'undefined' && togetherApiKey) {
+    // 1. Gemini Imagen API (cheapest Google image model)
+    if (geminiApiKey) {
       try {
-        const res = await fetch("https://api.together.xyz/v1/images/generations", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + togetherApiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "black-forest-labs/FLUX.1-schnell-Free",
-            prompt: prompt,
-            width: 1024,
-            height: 768,
-            steps: 4,
-            n: 1,
-            response_format: "url"
-          })
-        });
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-fast-generate-001:predict?key=${geminiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              instances: [{ prompt: prompt }],
+              parameters: { sampleCount: 1, aspectRatio: "1:1" }
+            })
+          }
+        );
         const data = await res.json();
-        if (data && data.data && data.data[0]) {
-          imageUrl = data.data[0].url;
+        if (data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded) {
+          imageBlob = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
         }
-      } catch (e) { console.error("Together AI error:", e); }
+      } catch (e) { console.error("Imagen error:", e); }
     }
-  
-    // 2. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
-    if (!imageUrl) {
+
+    // 2. Fallback to Pollinations
+    if (!imageBlob) {
       imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=flux`;
     }
     
-    if (imageUrl) {
+    
+    if (imageBlob || imageUrl) {
       const img = containerElement.querySelector('img');
       const skeleton = containerElement.querySelector('.skeleton-loader');
       containerElement.classList.remove('skeleton-container');
@@ -1060,24 +1057,29 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
             img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?nologo=true&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=turbo`;
           }
         };
-        img.src = imageUrl;
+        img.src = imageBlob || imageUrl;
         if (img.complete) {
           img.classList.add('loaded');
           if (skeleton) skeleton.remove();
         }
       }
       
+      // Use imageBlob (base64, can't store) or imageUrl for cache
+      const urlToSave = imageBlob || imageUrl;
+      
       // Update local memory and swipe array only (don't updateDoc to avoid onSnapshot re-rendering all cards)
       const loadedDoc = currentLoadedWords.find(d => d._path === path);
-      if (loadedDoc) loadedDoc.imageUrl = imageUrl;
+      if (loadedDoc) loadedDoc.imageUrl = urlToSave;
       if (typeof swipeWords !== 'undefined') {
         const swipeDoc = swipeWords.find(d => d._path === path);
-        if (swipeDoc) swipeDoc.imageUrl = imageUrl;
+        if (swipeDoc) swipeDoc.imageUrl = urlToSave;
       }
       
-      // Save to Firestore in the background (fire-and-forget)
-      const docRef = doc(db, path);
-      updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
+      // Save to Firestore in the background (fire-and-forget, only save URL not blob)
+      if (imageUrl && !imageBlob) {
+        const docRef = doc(db, path);
+        updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
+      }
     } else {
       // No image found
       if (containerElement) containerElement.style.display = 'none';
