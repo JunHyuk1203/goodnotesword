@@ -1048,29 +1048,48 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
     const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
     let seed = Math.floor(Math.random() * 9999999);
     let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${seed}&model=turbo`;
+    const fallbackUrl = `https://api.dicebear.com/8.x/bottts/svg?seed=${encodeURIComponent(word)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 
     // Wait for the image to load in memory to handle rate limits / retries
     let loaded = await new Promise((resolve) => {
       const tempImg = new Image();
-      tempImg.onload = () => resolve(true);
-      tempImg.onerror = () => {
-        // Retry once on failure (429 rate limit or error)
-        setTimeout(() => {
-          const retrySeed = Math.floor(Math.random() * 9999999);
-          imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=512&height=512&seed=${retrySeed}&model=turbo`;
-          const retryImg = new Image();
-          retryImg.onload = () => resolve(true);
-          retryImg.onerror = () => resolve(false);
-          retryImg.src = imageUrl;
-        }, 2000);
+      let isDone = false;
+
+      const finish = (success, finalUrl) => {
+        if (isDone) return;
+        isDone = true;
+        imageUrl = finalUrl;
+        resolve(success);
       };
+
+      // Strict 4-second timeout for Pollinations (it hangs when rate-limited)
+      const timeoutId = setTimeout(() => {
+        if (!isDone) {
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => finish(true, fallbackUrl);
+          fallbackImg.onerror = () => finish(false, fallbackUrl);
+          fallbackImg.src = fallbackUrl;
+        }
+      }, 4000);
+
+      tempImg.onload = () => {
+        clearTimeout(timeoutId);
+        finish(true, imageUrl);
+      };
+      
+      tempImg.onerror = () => {
+        clearTimeout(timeoutId);
+        // Instant fallback on 429 rate limit error
+        const fallbackImg = new Image();
+        fallbackImg.onload = () => finish(true, fallbackUrl);
+        fallbackImg.onerror = () => finish(false, fallbackUrl);
+        fallbackImg.src = fallbackUrl;
+      };
+
       tempImg.src = imageUrl;
     });
 
-    if (!loaded) {
-      console.warn('Image generation failed twice:', word);
-      return; // Skip saving broken images
-    }
+    if (!loaded) return;
 
     // Update DOM if it's still there
     if (document.contains(containerElement)) {
