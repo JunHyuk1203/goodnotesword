@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.13 (Etymology Data Patch)");
+console.log("GoodNotes Vocab App Loaded - v10.14 (Etymology UI Revamp)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -738,19 +738,28 @@ function renderCardView(docs) {
         </div>`;
     };
 
-    const buildEtymologySection = (items) => {
+    const buildEtymologySection = (items, targetWord) => {
       if (!items || !items.length) return '';
       const lines = items.map((s, idx) => {
         const isLast = idx === items.length - 1;
-        return `<span class="ety-chip">${escapeHTML(s)}</span>${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+        const match = s.match(/(.+?)\((.+?)\)/);
+        let chipHtml = `<span class="ety-chip">${escapeHTML(s)}</span>`;
+        if (match) {
+          chipHtml = `<span class="ety-chip"><span class="ety-en">${escapeHTML(match[1].trim())}</span><span class="ety-ko">${escapeHTML(match[2].trim())}</span></span>`;
+        }
+        return `${chipHtml}${isLast ? '' : '<span class="ety-plus">+</span>'}`;
       }).join('');
       return `<div class="word-card-section word-section-etymology">
-        <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:4px;">🧩 어원 분석</div>
-        <div class="ety-container" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">${lines}</div>
+        <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 공식</div>
+        <div class="ety-container">
+          ${lines}
+          <span class="ety-arrow">➔</span>
+          <span class="ety-result">${escapeHTML(targetWord)}</span>
+        </div>
       </div>`;
     };
 
-    const etySection = buildEtymologySection(parsed.etymology);
+    const etySection = buildEtymologySection(parsed.etymology, parsed.word);
     const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
     const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
     const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');
@@ -1013,19 +1022,28 @@ function buildSwipeCardHTML(parsed, originalIdx) {
       <div class="word-card-related-list">${lines}</div>
     </div>`;
   };
-  const buildEtymologySection = (items) => {
+  const buildEtymologySection = (items, targetWord) => {
     if (!items || !items.length) return '';
     const lines = items.map((s, idx) => {
       const isLast = idx === items.length - 1;
-      return `<span class="ety-chip">${escapeHTML(s)}</span>${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+      const match = s.match(/(.+?)\((.+?)\)/);
+      let chipHtml = `<span class="ety-chip">${escapeHTML(s)}</span>`;
+      if (match) {
+        chipHtml = `<span class="ety-chip"><span class="ety-en">${escapeHTML(match[1].trim())}</span><span class="ety-ko">${escapeHTML(match[2].trim())}</span></span>`;
+      }
+      return `${chipHtml}${isLast ? '' : '<span class="ety-plus">+</span>'}`;
     }).join('');
     return `<div class="word-card-section word-section-etymology">
-      <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:4px;">🧩 어원 분석</div>
-      <div class="ety-container" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">${lines}</div>
+      <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 공식</div>
+      <div class="ety-container">
+        ${lines}
+        <span class="ety-arrow">➔</span>
+        <span class="ety-result">${escapeHTML(targetWord)}</span>
+      </div>
     </div>`;
   };
 
-  const etySection = buildEtymologySection(parsed.etymology);
+  const etySection = buildEtymologySection(parsed.etymology, parsed.word);
   const synSection = buildRelatedSection(parsed.synonyms, '✅', '유의어');
   const antSection = buildRelatedSection(parsed.antonyms, '❌', '반의어');
   const relSection = buildRelatedSection(parsed.related, '🔗', '관련어');

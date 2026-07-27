@@ -139,25 +139,61 @@ body.modal-open {
   margin-top: 4px;
 }
 .word-section-etymology {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 .ety-container {
-  padding-left: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(108, 99, 255, 0.4);
 }
 .ety-chip {
-  background: rgba(108, 99, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(108, 99, 255, 0.2) 0%, rgba(108, 99, 255, 0.05) 100%);
+  border: 1px solid rgba(108, 99, 255, 0.5);
+  border-radius: 8px;
+  padding: 4px 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.ety-en {
+  font-family: var(--font-mono);
+  font-weight: 700;
   color: var(--primary-light);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.9em;
-  border: 1px solid rgba(108, 99, 255, 0.3);
+  font-size: 1.05rem;
+}
+.ety-ko {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 .ety-plus {
-  color: var(--text-muted);
-  font-weight: bold;
-  font-size: 1.1em;
-  padding: 0 4px;
+  color: var(--primary-light);
+  font-weight: 900;
+  font-size: 1.2rem;
+  padding: 0 2px;
+  opacity: 0.8;
+}
+.ety-arrow {
+  color: var(--primary-light);
+  font-weight: 900;
+  font-size: 1.2rem;
+  margin: 0 4px;
+}
+.ety-result {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--primary-light);
+  text-decoration: underline;
+  text-decoration-color: rgba(108, 99, 255, 0.5);
+  text-underline-offset: 4px;
 }
 .badge-row {
   display: flex;
