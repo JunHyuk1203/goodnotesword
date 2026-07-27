@@ -158,7 +158,7 @@ body.modal-open {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 10px 5px 14px;
+  padding: 6px 12px 6px 16px;
   border-radius: 4px;
   color: white;
   box-shadow: 
@@ -168,16 +168,16 @@ body.modal-open {
   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .ety-chip:first-of-type {
-  padding-left: 10px;
+  padding-left: 12px;
 }
 .ety-chip::after {
   content: '';
   position: absolute;
-  right: -6px;
+  right: -8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 6px;
-  height: 14px;
+  width: 8px;
+  height: 18px;
   background: inherit;
   border-radius: 0 3px 3px 0;
   box-shadow: 
@@ -198,15 +198,16 @@ body.modal-open {
 
 .ety-en {
   font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.95rem;
+  font-weight: 900;
+  font-size: 1.15rem;
   line-height: 1.1;
+  letter-spacing: 0.5px;
 }
 .ety-ko {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  opacity: 0.9;
-  margin-top: 2px;
+  opacity: 0.95;
+  margin-top: 4px;
 }
 .ety-result-wrap {
   display: inline-flex;
@@ -221,13 +222,14 @@ body.modal-open {
   margin-right: 8px;
 }
 .ety-result {
-  font-weight: 800;
-  font-size: 1.05rem;
+  font-weight: 900;
+  font-size: 1.3rem;
   color: var(--primary-light);
   background: rgba(108, 99, 255, 0.15);
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 8px;
-  border: 2px dashed rgba(108, 99, 255, 0.4);
+  border: 2px dashed rgba(108, 99, 255, 0.5);
+  letter-spacing: 0.5px;
 }
 .badge-row {
   display: flex;
