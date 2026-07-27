@@ -40,6 +40,7 @@
 
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-rounded: 'Nunito', sans-serif;
 }
 
 html { 
@@ -197,7 +198,7 @@ body.modal-open {
 .ety-chip:nth-of-type(n+6) { background: #38bdf8; z-index: 5; margin-left: -1px; }
 
 .ety-en {
-  font-family: var(--font-mono);
+  font-family: var(--font-rounded);
   font-weight: 900;
   font-size: 1.15rem;
   line-height: 1.1;
@@ -222,6 +223,7 @@ body.modal-open {
   margin-right: 8px;
 }
 .ety-result {
+  font-family: var(--font-rounded);
   font-weight: 900;
   font-size: 1.3rem;
   color: var(--primary-light);
@@ -1354,10 +1356,10 @@ body.modal-open {
 }
 .word-card-word {
   font-size: 1.5em;
-  font-weight: 700;
+  font-weight: 900;
   color: var(--text);
-  font-family: var(--font-mono);
-  letter-spacing: -0.01em;
+  font-family: var(--font-rounded);
+  letter-spacing: 0.5px;
 }
 .pronounce-btn {
   font-size: 1.3em;
