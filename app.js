@@ -1006,61 +1006,69 @@ window.visualViewport?.addEventListener('resize', () => {
   if (document.body.classList.contains('shorts-mode-active')) adjustSwipeViewHeight();
 });
 
+// ── Image generation queue (prevents Pollinations 429 rate-limit) ──────────
+let _imgQueue = Promise.resolve();
+let _lastImgReq = 0;
+const IMG_COOLDOWN = 2500; // ms between requests
+
+function queueImageFetch(word, path, meaning, containerElement) {
+  _imgQueue = _imgQueue.then(async () => {
+    // Respect cooldown between requests
+    const now = Date.now();
+    const wait = Math.max(0, IMG_COOLDOWN - (now - _lastImgReq));
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    _lastImgReq = Date.now();
+    await fetchImageForWord(word, path, meaning, containerElement);
+  });
+}
+
 async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
-    let imageUrl = '';
-    let imageBlob = null;
-  
-    const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
+    // Check if container is still in the DOM (user may have swiped away)
+    if (!document.contains(containerElement)) return;
 
-    // Pollinations with turbo model (fast ~2-3 seconds)
-    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=turbo`;
-    
-    
-    if (imageBlob || imageUrl) {
-      const img = containerElement.querySelector('img');
-      const skeleton = containerElement.querySelector('.skeleton-loader');
-      containerElement.classList.remove('skeleton-container');
-      if (img) {
-        img.onload = () => {
-          img.classList.add('loaded');
-          if (skeleton) skeleton.remove();
-        };
-        img.onerror = () => {
-          // Try Pollinations with a different seed as last resort
-          if (!img.dataset.retried) {
-            img.dataset.retried = '1';
-            const fallbackPrompt = `cute simple cartoon drawing of ${word}, white background, bright colors, no text`;
-            img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?nologo=true&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=turbo`;
-          }
-        };
-        img.src = imageBlob || imageUrl;
-        if (img.complete) {
-          img.classList.add('loaded');
-          if (skeleton) skeleton.remove();
-        }
+    const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
+    const seed = Math.floor(Math.random() * 9999999);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${seed}&model=turbo`;
+
+    // Check again after async gap
+    if (!document.contains(containerElement)) return;
+
+    const img = containerElement.querySelector('img');
+    const skeleton = containerElement.querySelector('.skeleton-loader');
+    containerElement.classList.remove('skeleton-container');
+    if (!img) return;
+
+    img.onload = () => {
+      img.classList.add('loaded');
+      if (skeleton) skeleton.remove();
+    };
+    img.onerror = () => {
+      // Retry once with different seed
+      if (!img.dataset.retried) {
+        img.dataset.retried = '1';
+        const seed2 = Math.floor(Math.random() * 9999999);
+        img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=512&height=512&seed=${seed2}&model=turbo`;
       }
-      
-      // Use imageBlob (base64, can't store) or imageUrl for cache
-      const urlToSave = imageBlob || imageUrl;
-      
-      // Update local memory and swipe array only (don't updateDoc to avoid onSnapshot re-rendering all cards)
-      const loadedDoc = currentLoadedWords.find(d => d._path === path);
-      if (loadedDoc) loadedDoc.imageUrl = urlToSave;
-      if (typeof swipeWords !== 'undefined') {
-        const swipeDoc = swipeWords.find(d => d._path === path);
-        if (swipeDoc) swipeDoc.imageUrl = urlToSave;
-      }
-      
-      // Save to Firestore in the background (fire-and-forget, only save URL not blob)
-      if (imageUrl && !imageBlob) {
-        const docRef = doc(db, path);
-        updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
-      }
-    } else {
-      // No image found
-      if (containerElement) containerElement.style.display = 'none';
+    };
+    img.src = imageUrl;
+    if (img.complete && img.naturalWidth > 0) {
+      img.classList.add('loaded');
+      if (skeleton) skeleton.remove();
     }
+
+    // Update local memory and swipe array
+    const loadedDoc = currentLoadedWords.find(d => d._path === path);
+    if (loadedDoc) loadedDoc.imageUrl = imageUrl;
+    if (typeof swipeWords !== 'undefined') {
+      const swipeDoc = swipeWords.find(d => d._path === path);
+      if (swipeDoc) swipeDoc.imageUrl = imageUrl;
+    }
+
+    // Save to Firestore (fire-and-forget)
+    const docRef = doc(db, path);
+    updateDoc(docRef, { imageUrl }).catch(e => console.warn('Image save failed:', e));
+
   } catch (err) {
     console.error('Failed to fetch image:', err);
     if (containerElement) containerElement.style.display = 'none';
@@ -1178,7 +1186,7 @@ function renderSwipeCard(idx) {
     const wordPath = skeletonContainer.getAttribute('data-fetch-path');
     const wordMeaning = skeletonContainer.getAttribute('data-fetch-meaning');
     if (wordToFetch && wordPath) {
-      fetchImageForWord(wordToFetch, wordPath, wordMeaning, skeletonContainer);
+      queueImageFetch(wordToFetch, wordPath, wordMeaning, skeletonContainer);
     }
   }
 
