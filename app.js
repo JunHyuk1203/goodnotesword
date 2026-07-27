@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.14 (Etymology UI Revamp)");
+console.log("GoodNotes Vocab App Loaded - v10.15 (Etymology Lego Blocks)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -740,21 +740,22 @@ function renderCardView(docs) {
 
     const buildEtymologySection = (items, targetWord) => {
       if (!items || !items.length) return '';
-      const lines = items.map((s, idx) => {
-        const isLast = idx === items.length - 1;
+      const lines = items.map((s) => {
         const match = s.match(/(.+?)\((.+?)\)/);
         let chipHtml = `<span class="ety-chip">${escapeHTML(s)}</span>`;
         if (match) {
           chipHtml = `<span class="ety-chip"><span class="ety-en">${escapeHTML(match[1].trim())}</span><span class="ety-ko">${escapeHTML(match[2].trim())}</span></span>`;
         }
-        return `${chipHtml}${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+        return chipHtml;
       }).join('');
       return `<div class="word-card-section word-section-etymology">
-        <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 공식</div>
+        <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 블록</div>
         <div class="ety-container">
           ${lines}
-          <span class="ety-arrow">➔</span>
-          <span class="ety-result">${escapeHTML(targetWord)}</span>
+          <div class="ety-result-wrap">
+            <span class="ety-arrow">➔</span>
+            <span class="ety-result">${escapeHTML(targetWord)}</span>
+          </div>
         </div>
       </div>`;
     };
@@ -1024,21 +1025,22 @@ function buildSwipeCardHTML(parsed, originalIdx) {
   };
   const buildEtymologySection = (items, targetWord) => {
     if (!items || !items.length) return '';
-    const lines = items.map((s, idx) => {
-      const isLast = idx === items.length - 1;
+    const lines = items.map((s) => {
       const match = s.match(/(.+?)\((.+?)\)/);
       let chipHtml = `<span class="ety-chip">${escapeHTML(s)}</span>`;
       if (match) {
         chipHtml = `<span class="ety-chip"><span class="ety-en">${escapeHTML(match[1].trim())}</span><span class="ety-ko">${escapeHTML(match[2].trim())}</span></span>`;
       }
-      return `${chipHtml}${isLast ? '' : '<span class="ety-plus">+</span>'}`;
+      return chipHtml;
     }).join('');
     return `<div class="word-card-section word-section-etymology">
-      <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 공식</div>
+      <div class="word-card-section-label" style="color:var(--primary); font-weight:600; margin-bottom:6px;">🧩 어원 결합 블록</div>
       <div class="ety-container">
         ${lines}
-        <span class="ety-arrow">➔</span>
-        <span class="ety-result">${escapeHTML(targetWord)}</span>
+        <div class="ety-result-wrap">
+          <span class="ety-arrow">➔</span>
+          <span class="ety-result">${escapeHTML(targetWord)}</span>
+        </div>
       </div>
     </div>`;
   };
