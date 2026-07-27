@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.15 (Etymology Lego Blocks)");
+console.log("GoodNotes Vocab App Loaded - v10.16 (Android Chrome TTS Fix)");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -365,19 +365,40 @@ let autoPlayPronunciation = true; // Enabled by default in Shorts mode
 
 // ─── Pronunciation ────────────────────────────────────────────────────────────
 let _ttsAudio = null;
+let _currentUtterance = null; // Prevent Android Chrome Garbage Collection bug
+let _speechVoices = [];
+
+if ('speechSynthesis' in window) {
+  const fetchVoices = () => { _speechVoices = window.speechSynthesis.getVoices(); };
+  fetchVoices();
+  window.speechSynthesis.onvoiceschanged = fetchVoices;
+}
+
 function playPronunciation(wordText) {
   if (!wordText) return;
   try {
-    // Try Web Speech API first (works on desktop/some Android Chrome)
     if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(wordText);
-      utterance.lang = 'en-US';
-      utterance.onerror = () => _ttsAudioFallback(wordText);
-      // If speech doesn't start in 500ms, use audio fallback
+      window.speechSynthesis.cancel();
+      _currentUtterance = new SpeechSynthesisUtterance(wordText);
+      _currentUtterance.lang = 'en-US';
+      
+      // Explicitly set voice to fix Android Chrome silent bug
+      if (_speechVoices.length > 0) {
+        let voice = _speechVoices.find(v => v.lang === 'en-US' && (v.name.includes('Google') || v.name.includes('Chrome')));
+        if (!voice) voice = _speechVoices.find(v => v.lang === 'en-US');
+        if (!voice) voice = _speechVoices.find(v => v.lang.startsWith('en'));
+        if (voice) _currentUtterance.voice = voice;
+      }
+
+      _currentUtterance.onerror = () => _ttsAudioFallback(wordText);
+      
       const timer = setTimeout(() => _ttsAudioFallback(wordText), 800);
-      utterance.onstart = () => clearTimeout(timer);
-      speechSynthesis.speak(utterance);
+      _currentUtterance.onstart = () => clearTimeout(timer);
+      
+      window.speechSynthesis.speak(_currentUtterance);
+      
+      // Fix for Chrome getting stuck in paused state
+      if (window.speechSynthesis.resume) window.speechSynthesis.resume();
     } else {
       _ttsAudioFallback(wordText);
     }
@@ -385,8 +406,8 @@ function playPronunciation(wordText) {
     _ttsAudioFallback(wordText);
   }
 }
+
 function _ttsAudioFallback(wordText) {
-  // Use Google Translate TTS as fallback - works in WebView
   try {
     if (_ttsAudio) { _ttsAudio.pause(); _ttsAudio = null; }
     const encoded = encodeURIComponent(wordText);
@@ -396,15 +417,16 @@ function _ttsAudioFallback(wordText) {
   } catch (e) {}
 }
 
-// Unlock speech synthesis on first user interaction (required by mobile browsers)
 let speechUnlocked = false;
 function unlockSpeech() {
   if (speechUnlocked) return;
   speechUnlocked = true;
   try {
-    const unlock = new SpeechSynthesisUtterance('');
-    unlock.volume = 0;
-    speechSynthesis.speak(unlock);
+    if ('speechSynthesis' in window) {
+      const unlock = new SpeechSynthesisUtterance('');
+      unlock.volume = 0;
+      window.speechSynthesis.speak(unlock);
+    }
   } catch (e) {}
 }
 document.addEventListener('touchstart', unlockSpeech, { passive: true });
