@@ -1011,33 +1011,10 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
     let imageUrl = '';
     let imageBlob = null;
   
-    const prompt = `cute cartoon illustration of "${word}", simple and intuitive stock image style, bright flat colors, pure white background, friendly character art, no text, no letters, no watermark`;
+    const prompt = `cute cartoon illustration of ${word}, simple, bright colors, white background, no text`;
 
-    // 1. Gemini Imagen API (cheapest Google image model)
-    if (geminiApiKey) {
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-fast-generate-001:predict?key=${geminiApiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              instances: [{ prompt: prompt }],
-              parameters: { sampleCount: 1, aspectRatio: "1:1" }
-            })
-          }
-        );
-        const data = await res.json();
-        if (data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded) {
-          imageBlob = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-        }
-      } catch (e) { console.error("Imagen error:", e); }
-    }
-
-    // 2. Fallback to Pollinations
-    if (!imageBlob) {
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=flux`;
-    }
+    // Pollinations with turbo model (fast ~2-3 seconds)
+    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=turbo`;
     
     
     if (imageBlob || imageUrl) {
