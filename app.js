@@ -1009,47 +1009,10 @@ window.visualViewport?.addEventListener('resize', () => {
 async function fetchImageForWord(word, path, meaning, containerElement) {
   try {
     let imageUrl = '';
-
-    // 1. Wikipedia API (Best for concrete nouns)
-    try {
-      const url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(word);
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.thumbnail && data.thumbnail.source) {
-        imageUrl = data.thumbnail.source;
-      }
-    } catch (e) {}
-
-    // 2. Together AI (Flux) for ultra fast 0.3s generation
-    if (!imageUrl && togetherApiKey) {
-      try {
-        const res = await fetch("https://api.together.xyz/v1/images/generations", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + togetherApiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "black-forest-labs/FLUX.1-schnell-Free",
-            prompt: "A highly intuitive, clear, simple flat vector UI icon of " + word + ", minimalist pictogram, pure white background, flat colors, strictly 2D, no realistic details",
-            width: 1024,
-            height: 768,
-            steps: 4,
-            n: 1,
-            response_format: "url"
-          })
-        });
-        const data = await res.json();
-        if (data && data.data && data.data[0]) {
-          imageUrl = data.data[0].url;
-        }
-      } catch (e) { console.error("Together AI error:", e); }
-    }
-
-    // 2. Fallback to Pollinations (fast mode without nologo/enhance LLM overhead)
-    if (!imageUrl) {
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent("A highly intuitive, clear, simple flat vector UI icon of " + word + ", minimalist pictogram, pure white background, flat colors, strictly 2D, no realistic details")}?nologo=true&enhance=false&width=1024&height=768&seed=${Math.floor(Math.random() * 1000000)}`;
-    }
+  
+    // Use Pollinations with cartoon style (fast, reliable, free)
+    const prompt = `cute cartoon illustration of "${word}", simple and intuitive stock image style, bright flat colors, pure white background, friendly character art, no text, no letters, no watermark`;
+    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=false&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=flux`;
     
     if (imageUrl) {
       const img = containerElement.querySelector('img');
@@ -1061,9 +1024,11 @@ async function fetchImageForWord(word, path, meaning, containerElement) {
           if (skeleton) skeleton.remove();
         };
         img.onerror = () => {
-          // ui-avatars always works and provides a clean initial letter icon
-          if (!img.src.includes('ui-avatars')) {
-            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(word)}&background=random&color=fff&size=512&font-size=0.4&bold=true`;
+          // Try Pollinations with a different seed as last resort
+          if (!img.dataset.retried) {
+            img.dataset.retried = '1';
+            const fallbackPrompt = `cute simple cartoon drawing of ${word}, white background, bright colors, no text`;
+            img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?nologo=true&width=512&height=512&seed=${Math.floor(Math.random() * 9999999)}&model=turbo`;
           }
         };
         img.src = imageUrl;
