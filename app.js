@@ -718,7 +718,7 @@ function parseWordData(data) {
     meaning = back;
   }
 
-  return { word, pos, pronunciation, meaning, examples, synonyms, antonyms, related, front, back };
+  return { ...data, word, pos, pronunciation, meaning, examples, synonyms, antonyms, related, front, back };
 }
 
 // ─── Render Card View ─────────────────────────────────────────────────────────
