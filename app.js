@@ -2796,12 +2796,18 @@ function showAuthError(msg) {
 }
 if (privacyViewBtn) {
   privacyViewBtn.addEventListener('click', () => {
-    if (privacyModal) privacyModal.classList.remove('hidden');
+    if (privacyModal) {
+      privacyModal.classList.remove('hidden');
+      requestAnimationFrame(() => privacyModal.classList.add('show'));
+    }
   });
 }
 if (privacyCloseBtn) {
   privacyCloseBtn.addEventListener('click', () => {
-    if (privacyModal) privacyModal.classList.add('hidden');
+    if (privacyModal) {
+      privacyModal.classList.remove('show');
+      setTimeout(() => privacyModal.classList.add('hidden'), 300);
+    }
   });
 }
 
