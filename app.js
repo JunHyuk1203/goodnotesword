@@ -37,7 +37,7 @@ import {
   signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged,
   sendPasswordResetEmail, browserLocalPersistence, setPersistence,
   sendEmailVerification, updatePassword, linkWithPopup, EmailAuthProvider,
-  fetchSignInMethodsForEmail
+  fetchSignInMethodsForEmail, getAdditionalUserInfo, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
@@ -2877,7 +2877,13 @@ if (authGoogleBtn) {
     }
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const additionalInfo = getAdditionalUserInfo(result);
+      if (isLoginMode && additionalInfo && additionalInfo.isNewUser) {
+        await deleteUser(result.user);
+        showAuthError("가입되지 않은 구글 계정입니다. '회원가입' 탭에서 개인정보 수집 동의 후 진행해주세요.");
+        return;
+      }
     } catch (err) {
       showAuthError(getKoreanAuthError(err.code) || err.message);
     }
