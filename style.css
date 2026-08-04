@@ -1580,6 +1580,7 @@ body[data-theme="light"] .hide-toggle-bar {
 }
 .hide-toggle-btn {
   background: transparent;
+  -webkit-tap-highlight-color: transparent;
   flex: 1;
   border: none;
   border-radius: 12px;
@@ -2795,11 +2796,11 @@ button:active:not(:disabled) {
 .word-section-word, .word-section-meaning, .word-section-example, .word-section-related {
   transition: filter 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
-body.hide-word-state .word-section-word,
-body.hide-word-state .word-section-etymology,
-body.hide-meaning-state .word-section-meaning,
-body.hide-example-state .word-section-example,
-body.hide-related-state .word-section-related {
+.hide-word-state .word-section-word,
+.hide-word-state .word-section-etymology,
+.hide-meaning-state .word-section-meaning,
+.hide-example-state .word-section-example,
+.hide-related-state .word-section-related {
   filter: blur(5px) grayscale(50%);
   opacity: 0.35;
   user-select: none;
@@ -2808,11 +2809,11 @@ body.hide-related-state .word-section-related {
   will-change: filter, opacity, transform;
 }
 
-body.hide-word-state .word-section-word.peeking,
-body.hide-word-state .word-section-etymology.peeking,
-body.hide-meaning-state .word-section-meaning.peeking,
-body.hide-example-state .word-section-example.peeking,
-body.hide-related-state .word-section-related.peeking {
+.hide-word-state .word-section-word.peeking,
+.hide-word-state .word-section-etymology.peeking,
+.hide-meaning-state .word-section-meaning.peeking,
+.hide-example-state .word-section-example.peeking,
+.hide-related-state .word-section-related.peeking {
   filter: none !important;
   opacity: 1 !important;
   transform: scale(1) !important;

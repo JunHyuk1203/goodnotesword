@@ -1526,10 +1526,21 @@ function updateHideToggleAvailability(words) {
 }
 
 function applyHideState() {
-  document.body.classList.toggle('hide-word-state', !hideState.word);
-  document.body.classList.toggle('hide-meaning-state', !hideState.meaning);
-  document.body.classList.toggle('hide-example-state', !hideState.example);
-  document.body.classList.toggle('hide-related-state', !hideState.related);
+  const states = [
+    { cls: 'hide-word-state', val: !hideState.word },
+    { cls: 'hide-meaning-state', val: !hideState.meaning },
+    { cls: 'hide-example-state', val: !hideState.example },
+    { cls: 'hide-related-state', val: !hideState.related }
+  ];
+  
+  states.forEach(s => {
+    document.body.classList.toggle(s.cls, s.val);
+    if (wordsCardView) wordsCardView.classList.toggle(s.cls, s.val);
+    if (wordsSwipeView) wordsSwipeView.classList.toggle(s.cls, s.val);
+  });
+  
+  // Force reflow for Safari bug
+  if (wordsCardView) void wordsCardView.offsetHeight;
 }
 
 document.querySelectorAll('.hide-toggle-btn[data-target]').forEach(btn => {
