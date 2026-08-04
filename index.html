@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>단어장 스터디 앱</title>
+  <title>superword</title>
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@700;800;900&family=Jua&display=swap" rel="stylesheet" />
@@ -26,8 +26,54 @@
   <div class="bg-orb orb-3"></div>
 
   <div class="app-container">
+    <!-- ========== AUTH SCREEN ========== -->
+    <div id="auth-screen" class="auth-screen hidden">
+      <div class="auth-container">
+        <div class="auth-header">
+          <div class="bg-orb orb-1" style="width: 150px; height: 150px; top: -50px; left: -50px;"></div>
+          <h1 class="auth-title">superword</h1>
+          <p class="auth-subtitle">학습을 시작하려면 로그인하세요</p>
+        </div>
+        
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tab-login">로그인</button>
+          <button class="auth-tab-btn" id="tab-signup">회원가입</button>
+        </div>
+
+        <form id="auth-form" class="auth-form" onsubmit="return false;">
+          <div class="input-group">
+            <input type="email" id="auth-email" class="auth-input" placeholder="이메일" required />
+          </div>
+          <div class="input-group">
+            <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" required />
+          </div>
+          
+          <div id="privacy-checkbox-container" class="hidden" style="margin-bottom: 15px; font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <input type="checkbox" id="privacy-agree" style="width: 16px; height: 16px; accent-color: var(--primary);">
+            <label for="privacy-agree" style="cursor: pointer;">[필수] 개인정보 수집 및 이용 동의</label>
+            <span id="privacy-view-btn" style="color: var(--primary); cursor: pointer; text-decoration: underline;">(보기)</span>
+          </div>
+          
+          <div class="auth-actions">
+            <button type="submit" id="auth-submit-btn" class="auth-btn primary-btn">로그인</button>
+          </div>
+
+          <div class="auth-divider"><span>또는</span></div>
+          
+          <button type="button" id="auth-google-btn" class="auth-btn google-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+            Google로 계속하기
+          </button>
+          
+          <button type="button" id="auth-reset-btn" class="auth-text-btn">비밀번호를 잊으셨나요?</button>
+        </form>
+        
+        <div id="auth-error" class="auth-error hidden"></div>
+      </div>
+    </div>
+
     <!-- ========== LIBRARY (단어장) ========== -->
-    <div id="library-content">
+    <div id="library-content" class="hidden">
 
 
       <!-- ── Apple Navigation Bar ── -->
@@ -40,7 +86,7 @@
               <span class="ios-nav-back-chevron">‹</span>
               <span id="ios-back-text">목록</span>
             </button>
-            <div id="ios-nav-title-inline" class="ios-nav-title-inline">단어장 스터디</div>
+            <div id="ios-nav-title-inline" class="ios-nav-title-inline">superword</div>
             <div class="ios-nav-actions">
               <span id="word-count-badge" class="badge badge-ai hidden" style="font-size:12px; padding:2px 6px;">0 단어</span>
               <button id="settings-btn" class="ios-nav-action-btn" title="설정">
@@ -158,7 +204,7 @@
     </div>
 
     <footer class="app-footer">
-      <p>단어장 스터디 앱 ✦ GoodNotes 호환 CSV 내보내기</p>
+      <p>superword ✦ GoodNotes 호환 CSV 내보내기</p>
       <p id="build-time" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;"></p>
     </footer>
   </div>
@@ -524,6 +570,39 @@
       <!-- Settings Form Content -->
       <div style="display:flex; flex-direction:column; gap:16px;">
         
+        <!-- Account Section -->
+        <div class="word-card-related-group" style="padding:0; background:transparent;">
+          <div class="word-card-section-label" style="padding: 0 12px;">계정</div>
+          <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; overflow:hidden;">
+            <div style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 0.5px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size: 20px;">👤</span>
+                <div style="display:flex; flex-direction:column;">
+                  <span id="settings-user-email" style="font-weight: 500; font-size: 15px;">user@example.com</span>
+                  <div id="settings-user-providers" style="display:flex; gap:6px; margin-top:4px;"></div>
+                </div>
+              </div>
+              <button id="settings-logout-btn" style="background:var(--danger); color:#fff; border:none; padding:6px 12px; border-radius:16px; font-weight:600; font-size:13px; cursor:pointer;">로그아웃</button>
+            </div>
+            
+            <div id="settings-add-password-container" class="hidden" style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 0.5px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size: 20px;">🔑</span>
+                <span style="font-weight: 500; font-size: 14px;">일반 로그인 비밀번호 추가</span>
+              </div>
+              <button id="settings-add-password-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">설정하기</button>
+            </div>
+            
+            <div id="settings-link-google-container" class="hidden" style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size: 20px;"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:20px;height:20px;"></span>
+                <span style="font-weight: 500; font-size: 14px;">Google 계정 연동</span>
+              </div>
+              <button id="settings-link-google-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">연동하기</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Theme Section -->
         <div class="word-card-related-group" style="padding:0; background:transparent;">
           <div class="word-card-section-label" style="padding: 0 12px;">화면 모드</div>
@@ -565,7 +644,32 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Privacy Policy Modal -->
+  <div id="privacy-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 10002;">
+    <div class="modal-screen-content" style="max-width:500px;">
+      <h2 style="margin-bottom:1rem; font-size:1.3rem;">개인정보 처리방침</h2>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:12px; padding:16px; font-size:13px; line-height:1.6; color:var(--text-secondary); max-height:400px; overflow-y:auto; text-align:left; word-break:keep-all;">
+        <strong>1. 수집하는 개인정보 항목</strong><br>
+        - 필수항목: 이메일 주소, 비밀번호(암호화되어 저장됨), 이름/프로필사진(Google 연동 시)<br>
+        <br>
+        <strong>2. 개인정보의 수집 및 이용 목적</strong><br>
+        - 회원 식별 및 본인 확인<br>
+        - 단어장 데이터 저장, 동기화 및 백업 서비스 제공<br>
+        - 불량 회원의 부정 이용 방지와 비인가 사용 방지<br>
+        <br>
+        <strong>3. 개인정보의 보유 및 이용 기간</strong><br>
+        - 원칙적으로 개인정보 수집 및 이용 목적이 달성된 후(회원 탈퇴 시)에는 해당 정보를 지체 없이 파기합니다.<br>
+        - 단, 관계법령의 규정에 의하여 보존할 필요가 있는 경우 관련 법령에서 정한 일정한 기간 동안 회원정보를 보관합니다.<br>
+        <br>
+        <strong>4. 동의를 거부할 권리</strong><br>
+        - 사용자는 개인정보 수집 및 이용에 대해 동의를 거부할 수 있습니다. 단, 필수항목 수집 동의 거부 시 서비스 가입 및 이용이 제한됩니다.
+      </div>
+      <div style="margin-top:20px;">
+        <button id="privacy-close-btn" class="primary-action-btn">확인</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="app.js?v=11.0"></script>
-</div>
 </body>
 </html>

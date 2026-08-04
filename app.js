@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
+// superword - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log("GoodNotes Vocab App Loaded - v11.0 (Apple HIG Design System)");
 
@@ -32,6 +32,13 @@ import {
   query, orderBy, serverTimestamp, deleteDoc, updateDoc,
   onSnapshot, initializeFirestore, persistentLocalCache, where, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged,
+  sendPasswordResetEmail, browserLocalPersistence, setPersistence,
+  sendEmailVerification, updatePassword, linkWithPopup, EmailAuthProvider,
+  fetchSignInMethodsForEmail
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 // ─── Firebase Init ────────────────────────────────────────────────────────────
 const firebaseApp = initializeApp({
@@ -46,9 +53,11 @@ const firebaseApp = initializeApp({
 const db = initializeFirestore(firebaseApp, {
   localCache: persistentLocalCache()
 });
+const auth = getAuth(firebaseApp);
+setPersistence(auth, browserLocalPersistence);
 
 // ─── Global State ─────────────────────────────────────────────────────────────
-const currentUser = { uid: "default_user" };
+let currentUser = null;
 let unsubBooks = null;
 let unsubChapters = null;
 let unsubWords = null;
@@ -2742,7 +2751,254 @@ async function fetchLatestVersion() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-loadBooks();
+// --- Firebase Auth & UI Logic ---
+const authScreen = document.getElementById('auth-screen');
+const libraryContent = document.getElementById('library-content');
+const tabLogin = document.getElementById('tab-login');
+const tabSignup = document.getElementById('tab-signup');
+const authForm = document.getElementById('auth-form');
+const authEmail = document.getElementById('auth-email');
+const authPassword = document.getElementById('auth-password');
+const authSubmitBtn = document.getElementById('auth-submit-btn');
+const authGoogleBtn = document.getElementById('auth-google-btn');
+const authResetBtn = document.getElementById('auth-reset-btn');
+const authError = document.getElementById('auth-error');
+const privacyCheckboxContainer = document.getElementById('privacy-checkbox-container');
+const privacyCheckbox = document.getElementById('privacy-agree');
+const privacyViewBtn = document.getElementById('privacy-view-btn');
+const privacyModal = document.getElementById('privacy-modal');
+const privacyCloseBtn = document.getElementById('privacy-close-btn');
+const settingsUserEmail = document.getElementById('settings-user-email');
+const settingsLogoutBtn = document.getElementById('settings-logout-btn');
+
+let isLoginMode = true;
+
+function getKoreanAuthError(code) {
+  switch (code) {
+    case 'auth/invalid-email': return "유효하지 않은 이메일 형식입니다.";
+    case 'auth/user-not-found': return "가입되지 않은 이메일이거나 삭제된 계정입니다.";
+    case 'auth/wrong-password': return "비밀번호가 틀렸습니다.";
+    case 'auth/invalid-credential': return "이메일 또는 비밀번호가 올바르지 않습니다.";
+    case 'auth/email-already-in-use': return "이미 가입된 이메일입니다.";
+    case 'auth/weak-password': return "비밀번호는 6자리 이상이어야 합니다.";
+    case 'auth/too-many-requests': return "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
+    case 'auth/network-request-failed': return "네트워크 연결에 실패했습니다.";
+    case 'auth/credential-already-in-use': return "이 계정은 이미 다른 사용자와 연동되어 있습니다.";
+    case 'auth/requires-recent-login': return "보안을 위해 다시 로그인한 후 시도해주세요.";
+    default: return "오류가 발생했습니다. (" + code + ")";
+  }
+}
+
+function showAuthError(msg) {
+  if (!authError) return;
+  authError.textContent = msg;
+  authError.classList.remove('hidden');
+}
+if (privacyViewBtn) {
+  privacyViewBtn.addEventListener('click', () => {
+    if (privacyModal) privacyModal.classList.remove('hidden');
+  });
+}
+if (privacyCloseBtn) {
+  privacyCloseBtn.addEventListener('click', () => {
+    if (privacyModal) privacyModal.classList.add('hidden');
+  });
+}
+
+function hideAuthError() {
+  if (!authError) return;
+  authError.classList.add('hidden');
+}
+
+if (tabLogin && tabSignup) {
+  tabLogin.addEventListener('click', () => {
+    isLoginMode = true;
+    tabLogin.classList.add('active');
+    tabSignup.classList.remove('active');
+    if (authSubmitBtn) authSubmitBtn.textContent = '로그인';
+    if (privacyCheckboxContainer) privacyCheckboxContainer.classList.add('hidden');
+    hideAuthError();
+  });
+  tabSignup.addEventListener('click', () => {
+    isLoginMode = false;
+    tabSignup.classList.add('active');
+    tabLogin.classList.remove('active');
+    if (authSubmitBtn) authSubmitBtn.textContent = '회원가입';
+    if (privacyCheckboxContainer) privacyCheckboxContainer.classList.remove('hidden');
+    hideAuthError();
+  });
+}
+
+if (authForm) {
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = authEmail.value.trim();
+    const password = authPassword.value.trim();
+    hideAuthError();
+    
+    try {
+      if (isLoginMode) {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCred.user.emailVerified) {
+          alert("이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.");
+          await signOut(auth);
+          return;
+        }
+      } else {
+        if (privacyCheckbox && !privacyCheckbox.checked) {
+          showAuthError('개인정보 수집 및 이용에 동의해주세요.');
+          return;
+        }
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCred.user);
+        alert("회원가입이 완료되었습니다. 이메일 인증 링크를 발송했으니, 메일함을 확인하신 후 다시 로그인해주세요.");
+        await signOut(auth);
+      }
+    } catch (err) {
+      showAuthError(getKoreanAuthError(err.code) || err.message);
+    }
+  });
+}
+
+if (authGoogleBtn) {
+  authGoogleBtn.addEventListener('click', async () => {
+    hideAuthError();
+    if (!isLoginMode && privacyCheckbox && !privacyCheckbox.checked) {
+      showAuthError('개인정보 수집 및 이용에 동의해주세요.');
+      return;
+    }
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      showAuthError(getKoreanAuthError(err.code) || err.message);
+    }
+  });
+}
+
+if (authResetBtn) {
+  authResetBtn.addEventListener('click', async () => {
+    const email = authEmail.value.trim();
+    if (!email) {
+      showAuthError("비밀번호를 재설정할 이메일을 위에 입력해주세요.");
+      return;
+    }
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.length === 0) {
+        showAuthError("가입되지 않은 이메일입니다.");
+        return;
+      }
+      await sendPasswordResetEmail(auth, email);
+      alert("비밀번호 재설정 이메일이 발송되었습니다. 확인 후 다시 로그인해주세요.");
+    } catch (err) {
+      showAuthError(getKoreanAuthError(err.code) || err.message);
+    }
+  });
+}
+
+if (settingsLogoutBtn) {
+  settingsLogoutBtn.addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      const closeBtn = document.getElementById('settings-close-btn');
+      if (closeBtn) closeBtn.click();
+    } catch (err) {
+      console.error("Logout Error:", err);
+    }
+  });
+}
+
+const addPasswordBtn = document.getElementById('settings-add-password-btn');
+if (addPasswordBtn) {
+  addPasswordBtn.addEventListener('click', async () => {
+    const newPassword = prompt("새로 설정할 일반 로그인 비밀번호를 입력해주세요 (6자리 이상):");
+    if (!newPassword) return;
+    if (newPassword.length < 6) {
+      alert("비밀번호는 6자리 이상이어야 합니다.");
+      return;
+    }
+    try {
+      await updatePassword(auth.currentUser, newPassword);
+      alert("비밀번호가 성공적으로 설정되었습니다. 보안을 위해 다시 로그인해주세요.");
+      document.getElementById('settings-add-password-container').classList.add('hidden');
+      await signOut(auth);
+      const closeBtn = document.getElementById('settings-close-btn');
+      if (closeBtn) closeBtn.click();
+    } catch (err) {
+      alert(getKoreanAuthError(err.code) || err.message);
+    }
+  });
+}
+
+const linkGoogleBtn = document.getElementById('settings-link-google-btn');
+if (linkGoogleBtn) {
+  linkGoogleBtn.addEventListener('click', async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await linkWithPopup(auth.currentUser, provider);
+      alert("Google 계정이 성공적으로 연동되었습니다. 이제 Google 로그인 버튼으로도 접속하실 수 있습니다!");
+      document.getElementById('settings-link-google-container').classList.add('hidden');
+    } catch (err) {
+      alert(getKoreanAuthError(err.code) || err.message);
+    }
+  });
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    if (user.email === 'tntgame1203@gmail.com') {
+      currentUser = { uid: "default_user", email: user.email };
+    } else {
+      currentUser = { uid: user.uid, email: user.email };
+    }
+    
+    if (settingsUserEmail) settingsUserEmail.textContent = user.email;
+    
+    // Check providers to show/hide account management UI
+    const providers = user.providerData.map(p => p.providerId);
+    const hasPassword = providers.includes('password');
+    const hasGoogle = providers.includes('google.com');
+    
+    const providersContainer = document.getElementById('settings-user-providers');
+    if (providersContainer) {
+      providersContainer.innerHTML = '';
+      if (hasPassword) {
+        providersContainer.innerHTML += '<span style="background:var(--bg-tertiary); color:var(--text-secondary); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">이메일 연동됨</span>';
+      }
+      if (hasGoogle) {
+        providersContainer.innerHTML += '<span style="background:var(--bg-tertiary); color:var(--text-secondary); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">Google 연동됨</span>';
+      }
+    }
+    
+    const pwContainer = document.getElementById('settings-add-password-container');
+    const googleContainer = document.getElementById('settings-link-google-container');
+    
+    if (pwContainer) {
+      if (!hasPassword) pwContainer.classList.remove('hidden');
+      else pwContainer.classList.add('hidden');
+    }
+    
+    if (googleContainer) {
+      if (!hasGoogle) googleContainer.classList.remove('hidden');
+      else googleContainer.classList.add('hidden');
+    }
+    
+    if (authScreen) authScreen.classList.add('hidden');
+    if (libraryContent) libraryContent.classList.remove('hidden');
+    
+    loadBooks();
+  } else {
+    currentUser = null;
+    if (authScreen) authScreen.classList.remove('hidden');
+    if (libraryContent) libraryContent.classList.add('hidden');
+    
+    if (typeof unsubBooks !== "undefined" && unsubBooks) { unsubBooks(); unsubBooks = null; }
+    if (typeof unsubChapters !== "undefined" && unsubChapters) { unsubChapters(); unsubChapters = null; }
+    if (typeof unsubWords !== "undefined" && unsubWords) { unsubWords(); unsubWords = null; }
+  }
+});
+
 fetchLatestVersion();
 
 

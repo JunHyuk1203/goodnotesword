@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>단어장 스터디 앱</title>
+  <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@700;800;900&family=Jua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=7.6" />
+  <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
+  <style>
+    /* Hard override: no scrollbars ever, but keep scrollability */
+    ::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+    html, body { overscroll-behavior: none; }
+  </style>
+</head>
+<body>
+<div id="page-wrapper" style="overflow-x: hidden; position: relative; min-height: 100vh; width: 100%;">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="app-container">
+    <!-- ========== LIBRARY (단어장) ========== -->
+    <div id="library-content">
+
+
+      <!-- Sticky Header Area -->
+      <div class="sticky-top-bar">
+        <!-- Breadcrumb -->
+        <div id="breadcrumb" style="font-size:0.75rem; display:flex; align-items:center; flex-wrap:wrap; gap: 8px;">
+          <div>
+            <span id="crumb-home" style="cursor:pointer; color:var(--primary); font-weight:600;">🏠 단어장 목록</span>
+            <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
+            <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
+          </div>
+          <div style="margin-left:auto; display:flex; gap: 8px; align-items:center;">
+            <span id="word-count-badge" class="badge badge-ai hidden">0 단어</span>
+            <button id="settings-btn" class="circle-action-btn" title="설정" style="width:28px; height:28px; background:transparent; border:none;">
+              <span class="icon" style="font-size:1.2rem;">⚙️</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Top action bar (Moved here) -->
+        <div id="words-action-wrapper" class="hidden">
+          <div class="words-action-bar">
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; width: 100%;">
+              <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:0.8rem; margin-right:auto;">🗑 삭제</button>
+              <!-- View mode: card vs edit -->
+              <div class="view-toggle-group">
+                <button id="view-card-btn" class="view-toggle-btn active" title="카드 모드">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+                </button>
+                <button id="view-table-btn" class="view-toggle-btn" title="수정 모드">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                </button>
+                <button id="view-swipe-btn" class="view-toggle-btn" title="쇼츠 모드">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" width="14" height="14"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 9l4-3v6l-4-3z" fill="currentColor"/></svg>
+                </button>
+              </div>
+              <button id="start-test-btn" class="circle-action-btn" title="테스트" style="background: rgba(108, 99, 255, 0.15); border: 1px solid rgba(108, 99, 255, 0.4); color: var(--primary-light);">
+                <span class="icon">🧪</span>
+                <span class="label">테스트</span>
+              </button>
+              <button id="view-history-btn" class="circle-action-btn" title="학습 기록" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);">
+                <span class="icon">📊</span>
+                <span class="label">기록</span>
+              </button>
+              <button id="open-extract-btn" class="circle-action-btn" title="추출" style="background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%); border: none; color: white; box-shadow: var(--shadow-glow);">
+                <span class="icon">✨</span>
+                <span class="label">추출</span>
+              </button>
+              <button id="export-csv-btn" class="circle-action-btn" title="CSV 내보내기" style="background: transparent; border: 1px solid var(--primary); color: var(--primary-light);">
+                <span class="icon">📤</span>
+                <span class="label">내보내기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Library Views Container -->
+      <div id="lib-views-container" style="display: grid; align-items: start; width:100%; min-height: 60vh; overflow: hidden; position: relative;">
+        
+        <!-- LEVEL 0: Books -->
+        <div id="layer-books" class="lib-layer active-lib" style="grid-area: 1 / 1;">
+          <!-- Add Book Button -->
+          <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
+            <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
+          </div>
+          <!-- Books Grid -->
+          <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
+        </div>
+
+        <!-- LEVEL 1: Chapters -->
+        <div id="layer-chapters" class="lib-layer idle-right" style="grid-area: 1 / 1;">
+          <!-- Add Chapter Button (hidden until inside a book) -->
+          <div id="add-chapter-wrap" style="margin-bottom:1rem; text-align:right;">
+            <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
+          </div>
+          <!-- Chapters Grid -->
+          <div id="view-chapters" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
+        </div>
+
+        <!-- LEVEL 2: Words -->
+        <div id="layer-words" class="lib-layer idle-right" style="grid-area: 1 / 1;">
+      <div id="view-words">
+
+        <!-- Views Container for Sliding Animation -->
+        <div id="views-container" style="display: grid; align-items: start; width:100%; overflow: hidden; position: relative;">
+          <!-- Card View -->
+          <div id="words-card-view" class="view-layer active-view"></div>
+          
+          <!-- Edit View (Card View with Edit Mode) -->
+          <div id="words-edit-view" class="view-layer idle-right"></div>
+  
+          <!-- Swipe View -->
+          <div id="words-swipe-view" class="view-layer idle-right"></div>
+  
+          <!-- Table View (hidden by default) -->
+          <div id="words-table-view" class="view-layer idle-right">
+            <table class="preview-table">
+              <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>단어 (영어)</th><th>뒷면 (뜻/예문)</th><th style="width: 120px;">관리</th></tr></thead>
+              <tbody id="words-tbody"></tbody>
+            </table>
+          </div>
+          </div>
+  
+        </div>
+        </div> <!-- End layer-words -->
+      </div> <!-- End lib-views-container -->
+
+    <!-- Error -->
+    <div id="error-section" class="error-section hidden" role="alert">
+      <div class="error-icon">⚠</div>
+      <div>
+        <p class="error-title" id="error-title">오류 발생</p>
+        <p class="error-msg" id="error-msg"></p>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <p>단어장 스터디 앱 ✦ GoodNotes 호환 CSV 내보내기</p>
+      <p id="build-time" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;"></p>
+    </footer>
+  </div>
+
+  <!-- Floating Hide Toggle Bar (fixed bottom) -->
+  <div class="hide-toggle-bar hidden" id="hide-toggle-bar">
+    <span class="hide-toggle-label">가리기</span>
+    <button class="hide-toggle-btn active" id="toggle-word" data-target="word">단어</button>
+    <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">뜻</button>
+    <button class="hide-toggle-btn active" id="toggle-example" data-target="example">예문</button>
+    <button class="hide-toggle-btn active" id="toggle-related" data-target="related">유의어</button>
+  </div>
+
+
+
+  <!-- ========== EXTRACT MODAL ========== -->
+  <div id="extract-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content extract-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 class="step-title" style="margin:0; font-size:1.1rem;">단어 추출기</h3>
+        <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
+      </div>
+
+      <!-- Step 1: Copy Prompt -->
+      <div class="step-card" style="margin-bottom:1rem; border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card);">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          단어책 사진이나 텍스트를 외부 AI(ChatGPT 등)에 전달할 때 사용할 지시문(프롬프트)을 복사합니다.
+        </p>
+        <div style="text-align: center;">
+          <textarea id="prompt-output" style="display:none;"></textarea>
+          <button id="copy-prompt-btn" class="generate-btn" style="width: 100%; padding: 0.8rem; font-size: 1rem;">📋 프롬프트 복사</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Paste JSON -->
+      <div class="step-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1rem;">
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
+          외부 AI가 답변해준 결과 텍스트 전체를 아래에 붙여넣으세요.
+        </p>
+        <div class="textarea-wrap">
+          <textarea id="ai-json-input" class="vocab-textarea" rows="3" placeholder="AI가 만들어준 데이터를 여기에 붙여넣으세요..." style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 12px; color: var(--text); border: 1px solid var(--border); resize: vertical;"></textarea>
+        </div>
+      </div>
+
+      <!-- Convert Button -->
+      <button id="convert-btn" class="generate-btn" style="width:100%; padding: 0.8rem; font-size: 1rem; background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);">
+        <span class="btn-icon">✨</span> 변환 및 단어장 저장
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== EXPORT MODAL ========== -->
+  <div id="export-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content export-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 class="test-title" style="margin:0; font-size:1.3rem;">📤 CSV 내보내기</h2>
+        <button id="close-export-btn" class="circle-action-btn" style="width:36px; height:36px; font-size:1.5rem; border:none; background:transparent;">×</button>
+      </div>
+      
+      <p class="modal-desc" style="margin-bottom:1.5rem; color:var(--text-secondary);">굿노트(GoodNotes) 단어장에 최적화된 형식으로 단어를 내보냅니다. 앞면과 뒷면에 표시할 데이터를 선택하세요.</p>
+
+      <div class="options-grid" style="margin-bottom: 1.5rem;">
+        <div class="option-card">
+          <label class="option-label" for="card-front-sel">📌 앞면</label>
+          <select id="card-front-sel" class="select-input">
+            <option value="word">단어만</option>
+            <option value="word_pos">단어+품사</option>
+            <option value="word_pron">단어+발음</option>
+          </select>
+        </div>
+        <div class="option-card">
+          <label class="option-label" for="card-back-sel">📝 뒷면</label>
+          <select id="card-back-sel" class="select-input">
+            <option value="full" selected>뜻+예문+유의어</option>
+            <option value="meaning_example">뜻+예문</option>
+            <option value="meaning_only">뜻만</option>
+          </select>
+        </div>
+      </div>
+    "word": "significant",
+    "meaning": "1 중요한 2 상당한",
+    "examples": ["This is significant! 이것은 중요하다!"],
+    "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]
+  }
+]' rows="8" spellcheck="false"></textarea>
+        </div>
+        <div style="margin-top:1.5rem; text-align:center;">
+          <button id="convert-btn" class="generate-btn" style="font-size: 1rem; padding: 0.8rem 2rem;">
+            <span class="btn-icon">⚡</span> 단어장으로 변환하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TEST MODE MODAL ========== -->
+  <div id="test-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content test-modal-box">
+      <!-- Test setup screen -->
+      <div id="test-setup" class="test-screen">
+        <h2 class="test-title">🧪 테스트 설정</h2>
+        <p id="test-word-count-info" style="color:var(--text-secondary); margin-bottom:1.5rem;"></p>
+        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:2rem;">
+          <div class="option-card">
+            <label class="option-label">📋 테스트 방식</label>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+              <button class="test-mode-btn active" id="mode-flash" data-mode="flash">🃏 플래시카드</button>
+              <button class="test-mode-btn" id="mode-quiz" data-mode="quiz">✏️ 4지선다</button>
+              <button class="test-mode-btn" id="mode-short" data-mode="short">✍️ 주관식</button>
+            </div>
+          </div>
+          <div class="option-card">
+            <label class="option-label">🔄 방향</label>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+              <button class="test-mode-btn active" id="dir-w2m" data-dir="word2meaning">단어 → 뜻</button>
+              <button class="test-mode-btn" id="dir-m2w" data-dir="meaning2word">뜻 → 단어</button>
+            </div>
+          </div>
+          <div class="option-card">
+            <label class="option-label">🔀 순서</label>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+              <button class="test-mode-btn active" id="order-seq" data-order="sequential">순서대로</button>
+              <button class="test-mode-btn" id="order-rand" data-order="random">랜덤</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button id="test-cancel-btn" class="sample-btn">취소</button>
+          <button id="test-start-confirm-btn" class="generate-btn" style="width:auto; padding:0.7rem 1.8rem;">시작하기 →</button>
+        </div>
+      </div>
+
+      <!-- Flashcard screen -->
+      <div id="test-flash" class="test-screen hidden">
+        <div class="test-progress-wrap">
+          <div class="test-progress-bar"><div class="test-progress-fill" id="test-progress-fill"></div></div>
+          <span id="test-progress-text" class="test-progress-label">1 / 20</span>
+        </div>
+        <div class="flashcard-container" id="flashcard-container">
+          <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="flashcard-front" id="flashcard-front"></div>
+            <div class="flashcard-back" id="flashcard-back"></div>
+          </div>
+          <p class="flip-hint" id="flip-hint">탭하여 뒤집기</p>
+        </div>
+        <div class="flash-actions" id="flash-actions">
+          <button class="flash-wrong-btn" id="flash-wrong-btn">❌ 몰랐어요</button>
+          <button class="flash-correct-btn" id="flash-correct-btn">✅ 알았어요</button>
+        </div>
+        <button id="flash-close-btn" class="sample-btn" style="margin-top:1rem;">✕ 테스트 종료</button>
+      </div>
+
+      <!-- Quiz screen -->
+      <div id="test-quiz" class="test-screen hidden">
+        <div class="test-progress-wrap">
+          <div class="test-progress-bar"><div class="test-progress-fill" id="quiz-progress-fill"></div></div>
+          <span id="quiz-progress-text" class="test-progress-label">1 / 20</span>
+        </div>
+        <div class="quiz-question-box">
+          <p class="quiz-question-label">다음 단어의 뜻은?</p>
+          <p class="quiz-question-word" id="quiz-question-word"></p>
+        </div>
+        <div class="quiz-choices" id="quiz-choices"></div>
+        <div id="quiz-feedback" class="short-feedback"></div>
+        <div style="display:flex; gap:0.5rem; justify-content:center; margin-top:0.8rem;">
+          <button id="quiz-close-btn" class="sample-btn">✕ 테스트 종료</button>
+        </div>
+      </div>
+
+      <!-- Short Answer screen -->
+      <div id="test-short" class="test-screen hidden">
+        <div class="test-progress-wrap">
+          <div class="test-progress-bar"><div class="test-progress-fill" id="short-progress-fill"></div></div>
+          <span id="short-progress-text" class="test-progress-label">1 / 20</span>
+        </div>
+        <div class="quiz-question-box">
+          <p class="quiz-question-label" id="short-question-label">다음 단어의 뜻을 입력하세요</p>
+          <p class="quiz-question-word" id="short-question-word"></p>
+        </div>
+        <div class="short-answer-wrap">
+          <input type="text" id="short-answer-input" class="short-answer-input" placeholder="정답을 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <button id="short-submit-btn" class="short-submit-btn">확인 →</button>
+        </div>
+        <div id="short-feedback" class="short-feedback"></div>
+        <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-top:0.5rem;">
+          <button id="short-dontknow-btn" class="sample-btn" style="border-color:#fbbf24; color:#fbbf24;">🤔 모름</button>
+          <button id="short-appeal-btn" class="sample-btn hidden" style="border-color:var(--primary); color:var(--primary-light);">🤖 AI 이의제기</button>
+          <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;">다음</button>
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; margin-top:0.5rem; gap:10px;">
+          <button id="short-close-btn" class="sample-btn">✕ 테스트 종료</button>
+          <label class="vk-toggle-label">
+            <input type="checkbox" id="native-kbd-switch">
+            <span class="vk-toggle-text">기본 키보드 사용</span>
+          </label>
+        </div>
+        
+        <div id="virtual-keyboard-container" class="vk-container">
+          <!-- Keyboard rows injected by JS -->
+        </div>
+      </div>
+
+      <!-- Result screen -->
+      <div id="test-result" class="test-screen hidden">
+        <div class="result-circle-wrap">
+          <svg class="result-circle" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--primary)" stroke-width="10"
+              stroke-dasharray="327" id="result-circle-dash" stroke-dashoffset="327"
+              stroke-linecap="round" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="result-circle-text">
+            <span id="result-pct">0%</span>
+          </div>
+        </div>
+        <h2 class="test-title" id="result-title">테스트 완료!</h2>
+        <p id="result-desc" style="color:var(--text-secondary); margin-bottom:1.5rem;"></p>
+        <div id="result-wrong-list" class="result-wrong-list"></div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
+          <button id="result-retry-wrong-btn" class="sample-btn hidden">🔁 틀린 단어만 다시</button>
+          <button id="result-retry-btn" class="generate-btn" style="width:auto; padding:0.7rem 1.5rem;">↩ 처음부터</button>
+          <button id="result-close-btn" class="sample-btn">✕ 닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Word Modal -->
+  <div id="edit-word-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="test-modal-box" style="max-width:500px; padding:2rem;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">✏️ 단어 편집</h2>
+      <div style="display:flex; flex-direction:column; gap:12px; max-height:65vh; overflow-y:auto; padding-right:10px;">
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">단어 (Word)</label>
+          <input type="text" id="edit-word" class="text-input" />
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
+            <label class="option-label">품사 (POS)</label>
+            <input type="text" id="edit-pos" class="text-input" placeholder="ex) ⓝ" />
+          </div>
+          <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
+            <label class="option-label">발음 (Pronunciation)</label>
+            <input type="text" id="edit-pron" class="text-input" placeholder="ex) [sɪɡˈnɪfɪkənt]" />
+          </div>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">뜻 (Meaning)</label>
+          <textarea id="edit-meaning" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">예문 (Examples - 줄바꿈으로 구분)</label>
+          <textarea id="edit-examples" class="text-input" rows="3" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">어원 분석 (엔터로 구분, 예: re(다시)+view(보다))</label>
+          <textarea id="edit-etymology" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">유의어 (Synonyms - 줄바꿈으로 구분)</label>
+          <textarea id="edit-synonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">반의어 (Antonyms - 줄바꿈으로 구분)</label>
+          <textarea id="edit-antonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+        <div class="input-group" style="flex-direction:column;gap:4px;">
+          <label class="option-label">관련어 (Related - 줄바꿈으로 구분)</label>
+          <textarea id="edit-related" class="text-input" rows="2" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="edit-word-cancel" class="sample-btn">취소</button>
+        <button id="edit-word-save" class="generate-btn" style="width:auto; padding:0.6rem 1.5rem;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Prompt Modal -->
+  <div id="custom-prompt-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:420px;">
+      <p id="custom-prompt-message" class="modal-desc" style="margin-bottom:14px;font-size:1rem;"></p>
+      <div class="modal-input-wrap">
+        <input type="text" id="custom-prompt-input" class="text-input modal-text-input" autocomplete="off" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+        <button id="custom-prompt-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
+        <button id="custom-prompt-ok" class="modal-save-btn" style="margin-top:0;">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Confirm Modal -->
+  <div id="custom-confirm-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:380px;">
+      <p id="custom-confirm-message" class="modal-desc" style="margin-bottom:20px;font-size:1rem;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="custom-confirm-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
+        <button id="custom-confirm-ok" style="padding:8px 20px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-weight:600;">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test History Modal -->
+  <div id="history-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
+    <div class="modal-screen-content" style="max-width:500px; height:80vh;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">내 테스트 기록</h2>
+      <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
+        <!-- Items injected by JS -->
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="history-close-btn" class="sample-btn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Detail Modal -->
+  <div id="history-detail-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 10001;">
+    <div class="modal-screen-content" style="max-width:500px;">
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">테스트 상세 결과</h2>
+      <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+        <div style="display:flex; flex-direction:column; gap:0.3rem;">
+          <span id="history-detail-title" style="font-weight:600; font-size:1.05rem;"></span>
+          <span id="history-detail-date" style="font-size:0.85rem; color:var(--text-muted);"></span>
+        </div>
+        <span id="history-detail-score" style="font-size:1.1rem; font-weight:600;"></span>
+      </div>
+      <div id="history-detail-wrong" class="history-wrong hidden"></div>
+      
+      <div style="margin-top:1.5rem; border-top:1px dashed var(--border-color); padding-top:1rem;">
+        <button id="generate-ai-report-btn" class="generate-btn" style="width:100%; margin-bottom:1rem;">🤖 AI 학습 리포트 생성</button>
+        <div id="history-ai-report-container" class="hidden" style="background:rgba(108, 99, 255, 0.05); padding:1rem; border-radius:12px; border:1px solid rgba(108, 99, 255, 0.2); font-size:0.95rem; line-height:1.5; color:var(--text-primary);">
+          <!-- AI report rendered here -->
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button id="history-detail-close-btn" class="sample-btn">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-screen hidden" style="z-index: 9999;">
+    <div class="modal-screen-content" style="max-width:400px;">
+      <h3 style="margin-top:0;">⚙️ 앱 설정</h3>
+      
+      <!-- Theme Toggle -->
+      <div style="margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px 16px;">
+        <div>
+          <div style="font-weight:600; font-size:0.95rem;">🌓 화면 모드</div>
+          <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">라이트 / 다크 모드 선택</div>
+        </div>
+        <div style="display:flex; gap:4px; background:var(--bg-tertiary,#2c2c2e); border-radius:10px; padding:3px;">
+          <button id="theme-btn-dark" onclick="window.setTheme('dark')" style="padding:5px 12px; border:none; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;">🌙 다크</button>
+          <button id="theme-btn-light" onclick="window.setTheme('light')" style="padding:5px 12px; border:none; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;">☀️ 라이트</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <label for="gemini-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Gemini API 키</label>
+        <input type="password" id="gemini-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">주관식 이의제기 기능(AI 채점)을 사용하려면 무료 Gemini API 키가 필요합니다. 키는 브라우저에만 안전하게 저장됩니다.</p>
+      </div>
+      
+      <div style="margin-bottom:1rem;">
+        <label for="together-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Together AI (초고속 이미지 생성) API 키</label>
+        <input type="password" id="together-api-key" class="text-input" placeholder="API Key 입력..." style="width:100%;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">together.ai 가입 시 제공되는 무료 크레딧으로 0.3초만에 생성되는 FLUX 모델을 사용합니다.</p>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button id="settings-close-btn" class="sample-btn">닫기</button>
+        <button id="settings-save-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="app.js?v=11.0"></script>
+</div>
+</body>
+</html>
