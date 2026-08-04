@@ -1605,7 +1605,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
   background: #007AFF;
   box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
 }
-.hide-toggle-btn:hover { background: var(--bg-card-hover); }
+
 .hide-toggle-btn:active { transform: scale(0.93); 
   transform: scale(0.94);
   transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
@@ -1630,6 +1630,8 @@ body[data-theme="light"] .hide-toggle-btn.active {
   flex-direction: column;
   gap: 0;
   position: relative;
+  transform: translateZ(0);
+  will-change: transform;
   transition: background 0.12s;
 }
 
