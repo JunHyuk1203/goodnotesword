@@ -1425,11 +1425,15 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .view-toggle-group {
   display: flex;
   position: relative;
-  background: rgba(118, 118, 128, 0.24);
+  background: rgba(118, 118, 128, 0.15); /* Transparent for liquid glass */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 9px;
   padding: 2px;
   gap: 0;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 /* Sliding active indicator */
 .view-toggle-group::before {
