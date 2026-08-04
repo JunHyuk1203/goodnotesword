@@ -2771,6 +2771,7 @@ const privacyViewBtn = document.getElementById('privacy-view-btn');
 const privacyModal = document.getElementById('privacy-modal');
 const privacyCloseBtn = document.getElementById('privacy-close-btn');
 const settingsUserEmail = document.getElementById('settings-user-email');
+const settingsAdminBadge = document.getElementById('settings-admin-badge');
 const settingsLogoutBtn = document.getElementById('settings-logout-btn');
 
 let isLoginMode = true;
@@ -2968,6 +2969,13 @@ onAuthStateChanged(auth, (user) => {
     }
     
     if (settingsUserEmail) settingsUserEmail.textContent = user.email;
+    if (settingsAdminBadge) {
+        if (user.email === 'tntgame1203@gmail.com') {
+          settingsAdminBadge.classList.remove('hidden');
+        } else {
+          settingsAdminBadge.classList.add('hidden');
+        }
+      }
     
     // Check providers to show/hide account management UI
     const providers = user.providerData.map(p => p.providerId);
