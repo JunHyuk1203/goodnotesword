@@ -1319,9 +1319,9 @@ function handlePeekClick(e) {
   section.classList.remove('peeking');
   void section.offsetWidth;  // force reflow to restart animation
   section.classList.add('peeking');
-  section.addEventListener('animationend', () => {
+  setTimeout(() => {
     section.classList.remove('peeking');
-  }, { once: true });
+  }, 2000);
 }
 
 wordsCardView.addEventListener('click', handlePeekClick);

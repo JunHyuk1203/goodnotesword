@@ -1615,8 +1615,8 @@ body[data-theme="light"] .hide-toggle-btn.active {
 .words-card-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* gap between grouped sections */
-  padding: 0;
+  gap: 8px;
+  padding: 0 0 80px 0;
 }
 
 /* Each word-card = one individual card */
@@ -1650,6 +1650,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
 
 /* Main word — Title 3 (20pt, Semibold) */
 .word-card-word {
+  display: inline-block;
   font-family: var(--font-sf);
   font-size: 20px;
   font-weight: 600;
@@ -2021,19 +2022,6 @@ body.shorts-mode-active .shorts-only {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-}
-/* Peek animation: temporarily reveal hidden content */
-@keyframes peekReveal {
-  0%   { filter: blur(6px); }
-  10%  { filter: blur(0px); }
-  90%  { filter: blur(0px); }
-  100% { filter: blur(6px); }
-}
-.peeking {
-  animation: peekReveal 2s ease-in-out forwards;
-  transition: none !important;
-  cursor: pointer;
-  user-select: none;
 }
 
 /* Edit mode: show actions panel, Card mode: hide it */
@@ -2819,6 +2807,17 @@ body.hide-related-state .word-section-related {
   user-select: none;
   cursor: pointer;
   transform: scale(0.98);
+}
+
+body.hide-word-state .word-section-word.peeking,
+body.hide-word-state .word-section-etymology.peeking,
+body.hide-meaning-state .word-section-meaning.peeking,
+body.hide-example-state .word-section-example.peeking,
+body.hide-related-state .word-section-related.peeking {
+  filter: none !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  transition: filter 0.2s ease-out, opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .custom-toast {
