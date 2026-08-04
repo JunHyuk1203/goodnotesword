@@ -1055,7 +1055,7 @@ function setViewMode(mode) {
   currentViewMode = mode;
   
   // Reset all buttons
-  [viewCardBtn, viewTableBtn, viewSwipeBtn].forEach(b => b?.classList.remove('active'));
+  [viewCardBtn, viewSwipeBtn].forEach(b => b?.classList.remove('active'));
 
   const actionBar = document.querySelector('.words-action-bar');
   if (actionBar && mode !== 'swipe') actionBar.classList.remove('hidden');
@@ -1064,7 +1064,6 @@ function setViewMode(mode) {
     viewCardBtn.classList.add('active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
-    viewTableBtn.classList.add('active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');

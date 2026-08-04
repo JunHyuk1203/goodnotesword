@@ -1973,11 +1973,13 @@ body.shorts-mode-active #view-words {
   transition: filter 0.3s;
 }
 
-#swipe-counter {
-  display: none;
+#swipe-counter,
+.shorts-only {
+  display: none !important;
 }
-body.shorts-mode-active #swipe-counter {
-  display: inline-block;
+body.shorts-mode-active #swipe-counter,
+body.shorts-mode-active .shorts-only {
+  display: inline-flex !important;
 }
 /* Peek animation: temporarily reveal hidden content */
 @keyframes peekReveal {
