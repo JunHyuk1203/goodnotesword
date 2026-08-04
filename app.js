@@ -265,7 +265,7 @@ const settingsModal = $('settings-modal');
 const settingsCloseBtn = $('settings-close-btn');
 const settingsSaveBtn = $('settings-save-btn');
 const geminiApiKeyInput = $('gemini-api-key');
-const togetherApiKeyInput = $('together-api-key');
+
 // 기본 API 키 초기화 (사용자가 별도로 설정하지 않은 경우에만 적용)
 (function initDefaultApiKey() {
   const saved = localStorage.getItem('gemini_api_key');
@@ -282,7 +282,7 @@ let togetherApiKey = localStorage.getItem('together_api_key') || 'key_CdHCVwRn6z
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-    if (togetherApiKeyInput) togetherApiKeyInput.value = togetherApiKey;
+
     // Sync theme buttons
     const currentTheme = document.body.getAttribute('data-theme') || 'dark';
     window.setTheme(currentTheme);
@@ -292,11 +292,7 @@ if (settingsBtn) {
   settingsSaveBtn.addEventListener('click', () => {
     geminiApiKey = geminiApiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', geminiApiKey);
-        if (togetherApiKeyInput) {
-          togetherApiKey = togetherApiKeyInput.value.trim();
-          localStorage.setItem('together_api_key', togetherApiKey);
-        }
-    
+
     closeModal(settingsModal);
     alert('설정이 저장되었습니다.');
   });
