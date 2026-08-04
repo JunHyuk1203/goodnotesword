@@ -71,6 +71,18 @@ let testIsFlipped = false;
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
+function highlightExample(enText, keyword) {
+  let escaped = escapeHTML(enText);
+  if (!keyword) return escaped;
+  // Use regex to highlight the keyword, ignoring case.
+  try {
+    const re = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(re, '<strong>$&</strong>');
+  } catch(e) {
+    return escaped;
+  }
+}
+
 function escapeHTML(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escapeCSV(s) {
   if (s == null) return '';
