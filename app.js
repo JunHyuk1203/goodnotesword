@@ -2752,6 +2752,8 @@ async function fetchLatestVersion() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // --- Firebase Auth & UI Logic ---
+const landingScreen = document.getElementById('landing-screen');
+const landingStartBtn = document.getElementById('landing-start-btn');
 const authScreen = document.getElementById('auth-screen');
 const libraryContent = document.getElementById('library-content');
 const tabLogin = document.getElementById('tab-login');
@@ -2991,12 +2993,14 @@ onAuthStateChanged(auth, (user) => {
     }
     
     if (authScreen) authScreen.classList.add('hidden');
+    if (landingScreen) landingScreen.classList.add('hidden');
     if (libraryContent) libraryContent.classList.remove('hidden');
     
     loadBooks();
   } else {
     currentUser = null;
-    if (authScreen) authScreen.classList.remove('hidden');
+    if (landingScreen) landingScreen.classList.remove('hidden');
+    if (authScreen) authScreen.classList.add('hidden');
     if (libraryContent) libraryContent.classList.add('hidden');
     
     if (typeof unsubBooks !== "undefined" && unsubBooks) { unsubBooks(); unsubBooks = null; }
@@ -3118,4 +3122,11 @@ function pushHistoryState(level, data) {
 // Push initial state if none exists
 if (!history.state) {
   history.replaceState({ level: 0 }, '');
+}
+
+if (landingStartBtn) {
+  landingStartBtn.addEventListener('click', () => {
+    if (landingScreen) landingScreen.classList.add('hidden');
+    if (authScreen) authScreen.classList.remove('hidden');
+  });
 }
