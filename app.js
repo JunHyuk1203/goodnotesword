@@ -1359,23 +1359,7 @@ function setupSwipeGestures() {
     if (Math.abs(e.deltaY) < 30) return;
     navigateSwipe(e.deltaY > 0 ? 1 : -1);
   }, { passive: true });
-
-
-  const autoPlayBtn = document.getElementById('auto-play-toggle');
-  if (autoPlayBtn) {
-    // Set initial active state
-    if (autoPlayPronunciation) autoPlayBtn.classList.add('active');
-    autoPlayBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      autoPlayPronunciation = !autoPlayPronunciation;
-      autoPlayBtn.textContent = autoPlayPronunciation ? '🔊' : '🔇';
-      autoPlayBtn.classList.toggle('active', autoPlayPronunciation);
-      if (autoPlayPronunciation) {
-         const parsed = parseWordData(swipeWords[swipeIndex]);
-         playPronunciation(parsed.word);
-      }
-    });
-  }
+}
 
 const exportModal = $('export-modal');
 const closeExportBtn = $('close-export-btn');
@@ -1414,36 +1398,51 @@ if (downloadCsvBtn) {
   });
 }
 
-  const shuffleBtn = document.getElementById('shuffle-swipe-btn');
-  if (shuffleBtn) {
-    shuffleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const wrap = document.getElementById('swipe-wrap');
-      if (!wrap) return;
+const shuffleBtn = document.getElementById('shuffle-swipe-btn');
+if (shuffleBtn) {
+  shuffleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const wrap = document.getElementById('swipe-wrap');
+    if (!wrap) return;
 
-      shuffleBtn.style.transform = 'scale(0.9)';
-      setTimeout(() => shuffleBtn.style.transform = 'scale(1)', 150);
+    shuffleBtn.style.transform = 'scale(0.9)';
+    setTimeout(() => shuffleBtn.style.transform = 'scale(1)', 150);
 
-      wrap.style.transition = 'none';
-      wrap.classList.add('shuffle-anim');
-      
-      setTimeout(() => {
-        // Swap data halfway through animation
-        // Only shuffle from the current card (swipeIndex) onwards, preserving studied cards
-        for (let i = swipeWords.length - 1; i > swipeIndex; i--) {
-          const j = Math.floor(Math.random() * (i - swipeIndex + 1)) + swipeIndex;
-          [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
-        }
-        // Do not reset swipeIndex to 0. Keep them at their current position!
-        renderSwipeCard(swipeIndex);
-      }, 200);
+    wrap.style.transition = 'none';
+    wrap.classList.add('shuffle-anim');
+    
+    setTimeout(() => {
+      // Swap data halfway through animation
+      // Only shuffle from the current card (swipeIndex) onwards, preserving studied cards
+      for (let i = swipeWords.length - 1; i > swipeIndex; i--) {
+        const j = Math.floor(Math.random() * (i - swipeIndex + 1)) + swipeIndex;
+        [swipeWords[i], swipeWords[j]] = [swipeWords[j], swipeWords[i]];
+      }
+      // Do not reset swipeIndex to 0. Keep them at their current position!
+      renderSwipeCard(swipeIndex);
+    }, 200);
 
-      setTimeout(() => {
-        wrap.classList.remove('shuffle-anim');
-        wrap.style.transition = '';
-      }, 400);
-    });
-  }
+    setTimeout(() => {
+      wrap.classList.remove('shuffle-anim');
+      wrap.style.transition = '';
+    }, 400);
+  });
+}
+
+const autoPlayBtn = document.getElementById('auto-play-toggle');
+if (autoPlayBtn) {
+  // Set initial active state
+  if (autoPlayPronunciation) autoPlayBtn.classList.add('active');
+  autoPlayBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    autoPlayPronunciation = !autoPlayPronunciation;
+    autoPlayBtn.textContent = autoPlayPronunciation ? '🔊' : '🔇';
+    autoPlayBtn.classList.toggle('active', autoPlayPronunciation);
+    if (autoPlayPronunciation && swipeWords[swipeIndex]) {
+       const parsed = parseWordData(swipeWords[swipeIndex]);
+       playPronunciation(parsed.word);
+    }
+  });
 }
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
@@ -1466,7 +1465,7 @@ function applyHideState() {
   });
 }
 
-document.querySelectorAll('.hide-toggle-btn').forEach(btn => {
+document.querySelectorAll('.hide-toggle-btn[data-target]').forEach(btn => {
   btn.addEventListener('click', () => {
     const target = btn.dataset.target;
     hideState[target] = !hideState[target];
