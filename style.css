@@ -1972,6 +1972,13 @@ body.shorts-mode-active #view-words {
   cursor: pointer;
   transition: filter 0.3s;
 }
+
+#swipe-counter {
+  display: none;
+}
+body.shorts-mode-active #swipe-counter {
+  display: inline-block;
+}
 /* Peek animation: temporarily reveal hidden content */
 @keyframes peekReveal {
   0%   { filter: blur(6px); }

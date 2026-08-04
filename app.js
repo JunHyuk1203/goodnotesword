@@ -1233,13 +1233,6 @@ function renderSwipeView() {
     <div id="swipe-wrap" class="swipe-card-wrap slide-in-top">
       <div class="swipe-card" id="swipe-card"></div>
     </div>
-    <div class="shorts-bottom-bar">
-      <span class="swipe-counter" id="swipe-counter">1 / ${swipeWords.length}</span>
-      <div class="shorts-bottom-btns">
-        <button id="auto-play-toggle" class="shorts-ctrl-btn${autoPlayPronunciation ? ' active' : ''}">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
-        <button id="shuffle-swipe-btn" class="shorts-ctrl-btn">🔀</button>
-      </div>
-    </div>
   `;
 
   // No longer wiring up inline hide-toggle buttons as we use global hide-toggle-bar
