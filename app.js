@@ -152,6 +152,7 @@ function showPrompt(message, defaultVal = '') {
     const cancelBtn = $('custom-prompt-cancel');
     msgEl.textContent = message;
     input.value = defaultVal;
+    okBtn.disabled = !defaultVal.trim();
     modal.classList.remove('hidden');
     setTimeout(() => input.focus(), 50);
     const cleanup = (val) => {
@@ -159,14 +160,17 @@ function showPrompt(message, defaultVal = '') {
       okBtn.removeEventListener('click', onOk);
       cancelBtn.removeEventListener('click', onCancel);
       input.removeEventListener('keydown', onKey);
+      input.removeEventListener('input', onInput);
       resolve(val);
     };
-    const onOk = () => cleanup(input.value.trim() || null);
+    const onOk = () => { if (!okBtn.disabled) cleanup(input.value.trim() || null); };
     const onCancel = () => cleanup(null);
     const onKey = (e) => { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); };
+    const onInput = () => { okBtn.disabled = !input.value.trim(); };
     okBtn.addEventListener('click', onOk);
     cancelBtn.addEventListener('click', onCancel);
     input.addEventListener('keydown', onKey);
+    input.addEventListener('input', onInput);
   });
 }
 
@@ -1803,8 +1807,8 @@ setupToggleGroup('[data-order]', val => { selectedTestOrder = val; });
 // Open test setup
 if (startTestBtn) {
   startTestBtn.addEventListener('click', () => {
-    if (currentLoadedWords.length < 2) {
-      alert('테스트를 위해 최소 2개 이상의 단어가 필요합니다.');
+    if (currentLoadedWords.length < 1) {
+      showToast('테스트를 진행할 단어가 없습니다.');
       return;
     }
     $('test-word-count-info').textContent = `총 ${currentLoadedWords.length}개 단어로 테스트합니다.`;
@@ -2699,3 +2703,17 @@ loadBooks();
 fetchLatestVersion();
 
 
+
+function showToast(msg) {
+  let toast = document.getElementById('custom-toast-el');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'custom-toast-el';
+    toast.className = 'custom-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if (toast.timer) clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => toast.classList.remove('show'), 2500);
+}

@@ -492,7 +492,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   flex: 1;
   background: rgba(0,0,0,0.3);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.9rem;
@@ -659,7 +659,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   gap: 8px;
   background: var(--primary);
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   color: white;
   font-family: var(--font-sans);
   font-size: 17px;
@@ -1214,7 +1214,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-screen-content {
   background: var(--bg-secondary, #1c1c1e);
   border: none;
-  border-radius: 24px 24px 0 0;
+  border-radius: 20px 20px 0 0;
   width: 100%;
   max-width: 100%;
   max-height: 92vh;
@@ -1263,7 +1263,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-box {
   background: var(--bg-secondary, #1c1c1e);
   border: 0.5px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 24px;
   max-width: 320px;
   width: 90%;
@@ -1321,7 +1321,21 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 }
 /* Deprecated, use .generate-btn instead */
 .modal-save-btn {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.modal-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(100%);
 }
 
 /* ---- Key status & change button ---- */
@@ -1629,7 +1643,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
   font-size: 20px;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   line-height: 1.3;
   font-style: normal;
 }
@@ -2650,7 +2664,7 @@ button:active:not(:disabled) {
 .circle-action-btn {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: 10px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--text);
@@ -2785,4 +2799,31 @@ body.hide-related-state .word-section-related {
   user-select: none;
   pointer-events: none;
   transform: scale(0.98);
+}
+
+.custom-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px) scale(0.95);
+  background: rgba(40,40,45,0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 10000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+}
+.custom-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+body[data-theme="light"] .custom-toast {
+  background: rgba(255,255,255,0.95);
+  color: #111;
 }
