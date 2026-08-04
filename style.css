@@ -1838,7 +1838,7 @@ body[data-theme="light"] .word-card-pos {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  touch-action: pan-y;
+  touch-action: none;
   transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
   will-change: transform, opacity;
 }
@@ -1990,6 +1990,9 @@ body.shorts-mode-active {
   overflow: hidden;
   min-height: 0;
   height: 100svh;
+  position: fixed;
+  width: 100%;
+  touch-action: none;
 }
 body.shorts-mode-active .app-footer {
   display: none;
