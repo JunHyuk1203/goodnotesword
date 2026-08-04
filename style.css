@@ -1794,6 +1794,7 @@ body[data-theme="light"] .word-card-pos {
   flex-direction: column;
   min-height: 200px;
   overflow: hidden;
+  padding-bottom: 64px; /* Space for hide-toggle-bar */
 }
 
 /* Card fills all space above the bottom bar */
@@ -2628,10 +2629,14 @@ button:active:not(:disabled) {
 }
 
 /* ??? Circle Action Buttons (Header) ??? */
+/* 🔘 Circle Action Buttons (Header) 🔘 */
 .circle-action-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2655,8 +2660,8 @@ button:active:not(:disabled) {
   font-size: 0.5rem;
   font-weight: 700;
   line-height: 1;
-  opacity: 0.85;
   letter-spacing: -0.05em;
+  margin-top: 2px;
 }
 
 .related-item-pos {
