@@ -728,7 +728,7 @@ function loadWords(bookId, chapterId, chapterName) {
 
   // Show hide bar and reset to card mode
   hideToggleBar.classList.remove('hidden');
-  if (currentViewMode !== 'card') setViewMode('card');
+  setViewMode('card');
 
   if (!unsubWords) {
     wordsCardView.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:2rem;">로딩 중...</p>';
