@@ -30,58 +30,65 @@
     <div id="library-content">
 
 
-      <!-- Sticky Header Area -->
-      <div class="sticky-top-bar">
-        <!-- Breadcrumb -->
-        <div id="breadcrumb" style="font-size:0.75rem; display:flex; align-items:center; flex-wrap:wrap; gap: 8px;">
-          <div>
-            <span id="crumb-home" style="cursor:pointer; color:var(--primary); font-weight:600;">🏠 단어장 목록</span>
-            <span id="crumb-book" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-book-name" style="cursor:pointer; color:var(--primary); font-weight:600;"></span></span>
-            <span id="crumb-chapter" class="hidden" style="color:var(--text-secondary);"> &gt; <span id="crumb-chapter-name" style="color:var(--text); font-weight:600;"></span></span>
-          </div>
-          <div style="margin-left:auto; display:flex; gap: 8px; align-items:center;">
-            <span id="word-count-badge" class="badge badge-ai hidden">0 단어</span>
-            <button id="settings-btn" class="circle-action-btn" title="설정" style="width:28px; height:28px; background:transparent; border:none;">
-              <span class="icon" style="font-size:1.2rem;">⚙️</span>
+      <!-- ── Apple Navigation Bar ── -->
+      <div class="ios-nav-bar">
+        <div class="ios-nav-bar-inner">
+          
+          <!-- Top Row (Inline Title & Actions) -->
+          <div class="ios-nav-inline">
+            <button id="ios-back-btn" class="ios-nav-back" style="visibility: hidden;">
+              <span class="ios-nav-back-chevron">‹</span>
+              <span id="ios-back-text">목록</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Top action bar (Moved here) -->
-        <div id="words-action-wrapper" class="hidden">
-          <div class="words-action-bar">
-            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; width: 100%;">
-              <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:0.8rem; margin-right:auto;">🗑 삭제</button>
-              <!-- View mode: card vs edit -->
-              <div class="view-toggle-group">
-                <button id="view-card-btn" class="view-toggle-btn active" title="카드 모드">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
-                </button>
-                <button id="view-table-btn" class="view-toggle-btn" title="수정 모드">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
-                </button>
-                <button id="view-swipe-btn" class="view-toggle-btn" title="쇼츠 모드">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" width="14" height="14"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 9l4-3v6l-4-3z" fill="currentColor"/></svg>
-                </button>
-              </div>
-              <button id="start-test-btn" class="circle-action-btn" title="테스트" style="background: rgba(108, 99, 255, 0.15); border: 1px solid rgba(108, 99, 255, 0.4); color: var(--primary-light);">
-                <span class="icon">🧪</span>
-                <span class="label">테스트</span>
-              </button>
-              <button id="view-history-btn" class="circle-action-btn" title="학습 기록" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);">
-                <span class="icon">📊</span>
-                <span class="label">기록</span>
-              </button>
-              <button id="open-extract-btn" class="circle-action-btn" title="추출" style="background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%); border: none; color: white; box-shadow: var(--shadow-glow);">
-                <span class="icon">✨</span>
-                <span class="label">추출</span>
-              </button>
-              <button id="export-csv-btn" class="circle-action-btn" title="CSV 내보내기" style="background: transparent; border: 1px solid var(--primary); color: var(--primary-light);">
-                <span class="icon">📤</span>
-                <span class="label">내보내기</span>
+            <div id="ios-nav-title-inline" class="ios-nav-title-inline">단어장 스터디</div>
+            <div class="ios-nav-actions">
+              <span id="word-count-badge" class="badge badge-ai hidden" style="font-size:12px; padding:2px 6px;">0 단어</span>
+              <button id="settings-btn" class="ios-nav-action-btn" title="설정">
+                <span style="font-size: 20px;">⚙️</span>
               </button>
             </div>
           </div>
+
+          <!-- Large Title Row -->
+          <div class="ios-large-title">
+            <div id="ios-large-title-text" class="ios-large-title-text">단어장 스터디</div>
+            <div id="ios-large-title-sub" class="ios-large-title-sub hidden">서브타이틀</div>
+          </div>
+
+          <!-- Action Bar Row (Hidden by default, shown in words view) -->
+          <div id="words-action-wrapper" class="hidden">
+            <div class="words-action-bar">
+              <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:14px;">삭제</button>
+              
+              <!-- Apple Segmented Control -->
+              <div class="view-toggle-group" id="view-toggle-group">
+                <button id="view-card-btn" class="view-toggle-btn active" title="카드 모드">
+                  카드
+                </button>
+                <button id="view-table-btn" class="view-toggle-btn" title="수정 모드">
+                  목록
+                </button>
+                <button id="view-swipe-btn" class="view-toggle-btn" title="쇼츠 모드">
+                  쇼츠
+                </button>
+              </div>
+
+              <!-- Action Buttons -->
+              <button id="start-test-btn" class="sample-btn" title="테스트" style="border-color: var(--warning); color: var(--warning);">
+                🧪 테스트
+              </button>
+              <button id="view-history-btn" class="sample-btn" title="학습 기록" style="border-color: var(--text-secondary); color: var(--text-secondary);">
+                📊 기록
+              </button>
+              <button id="open-extract-btn" class="sample-btn" title="추출" style="border-color: #8b5cf6; color: #8b5cf6;">
+                ✨ 추출
+              </button>
+              <button id="export-csv-btn" class="sample-btn" title="CSV 내보내기">
+                📤 내보내기
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -491,39 +498,61 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
+  <!-- Settings Modal (Apple iOS Sheet) -->
   <div id="settings-modal" class="modal-screen hidden" style="z-index: 9999;">
-    <div class="modal-screen-content" style="max-width:400px;">
-      <h3 style="margin-top:0;">⚙️ 앱 설정</h3>
+    <div class="modal-screen-content" style="max-width:500px;">
       
-      <!-- Theme Toggle -->
-      <div style="margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px 16px;">
-        <div>
-          <div style="font-weight:600; font-size:0.95rem;">🌓 화면 모드</div>
-          <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">라이트 / 다크 모드 선택</div>
-        </div>
-        <div style="display:flex; gap:4px; background:var(--bg-tertiary,#2c2c2e); border-radius:10px; padding:3px;">
-          <button id="theme-btn-dark" onclick="window.setTheme('dark')" style="padding:5px 12px; border:none; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;">🌙 다크</button>
-          <button id="theme-btn-light" onclick="window.setTheme('light')" style="padding:5px 12px; border:none; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;">☀️ 라이트</button>
-        </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 20px 8px;">
+        <h3 style="margin:0; font-family:var(--font-sf); font-size:20px; font-weight:700;">설정</h3>
+        <button id="settings-close-btn" class="sample-btn" style="border:none; padding:4px 8px; min-height:auto; font-weight:600;">완료</button>
       </div>
 
-      <div style="margin-bottom:1rem;">
-        <label for="gemini-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Google Gemini API 키</label>
-        <input type="password" id="gemini-api-key" class="text-input" placeholder="AIzaSy..." style="width:100%;">
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">주관식 이의제기 기능(AI 채점)을 사용하려면 무료 Gemini API 키가 필요합니다. 키는 브라우저에만 안전하게 저장됩니다.</p>
-      </div>
-      
-      <div style="margin-bottom:1rem;">
-        <label for="together-api-key" style="display:block; margin-bottom:0.5rem; font-size:0.9rem;">Together AI (초고속 이미지 생성) API 키</label>
-        <input type="password" id="together-api-key" class="text-input" placeholder="API Key 입력..." style="width:100%;">
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem;">together.ai 가입 시 제공되는 무료 크레딧으로 0.3초만에 생성되는 FLUX 모델을 사용합니다.</p>
+      <!-- Settings Form Content -->
+      <div style="padding: 0 20px 20px; display:flex; flex-direction:column; gap:16px;">
+        
+        <!-- Theme Section -->
+        <div class="word-card-related-group" style="padding:0; background:transparent;">
+          <div class="word-card-section-label" style="padding: 0 12px;">화면 모드</div>
+          <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:24px;">🌓</span>
+              <div>
+                <div style="font-family:var(--font-sf); font-size:17px; font-weight:500;">테마 전환</div>
+                <div style="font-size:13px; color:var(--text-secondary);">라이트 / 다크 모드</div>
+              </div>
+            </div>
+            
+            <div class="view-toggle-group" style="width:130px; padding:3px;">
+              <button id="theme-btn-dark" onclick="window.setTheme('dark')" class="view-toggle-btn active" style="flex:1; justify-content:center;">다크</button>
+              <button id="theme-btn-light" onclick="window.setTheme('light')" class="view-toggle-btn" style="flex:1; justify-content:center;">라이트</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Keys Section -->
+        <div class="word-card-related-group" style="padding:0; background:transparent;">
+          <div class="word-card-section-label" style="padding: 0 12px;">API 키 (로컬 저장)</div>
+          <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; display:flex; flex-direction:column;">
+            
+            <div style="padding:12px 16px; border-bottom:0.5px solid var(--border);">
+              <label for="gemini-api-key" style="display:block; font-family:var(--font-sf); font-size:15px; font-weight:500; margin-bottom:6px;">Google Gemini</label>
+              <input type="password" id="gemini-api-key" class="text-input" placeholder="AIzaSy..." style="border:none; background:transparent; padding:0; font-size:17px; box-shadow:none;">
+            </div>
+            
+            <div style="padding:12px 16px;">
+              <label for="together-api-key" style="display:block; font-family:var(--font-sf); font-size:15px; font-weight:500; margin-bottom:6px;">Together AI</label>
+              <input type="password" id="together-api-key" class="text-input" placeholder="API Key 입력..." style="border:none; background:transparent; padding:0; font-size:17px; box-shadow:none;">
+            </div>
+
+          </div>
+          <p style="font-size:13px; color:var(--text-muted); margin: 6px 12px 0; line-height:1.4;">
+            Gemini API는 주관식 이의제기(AI 채점)에, Together AI는 초고속 이미지 생성에 사용됩니다. 설정은 기기에만 저장됩니다.
+          </p>
+        </div>
+
+        <button id="settings-save-btn" class="generate-btn" style="width:100%; margin-top:8px;">변경사항 저장</button>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
-        <button id="settings-close-btn" class="sample-btn">닫기</button>
-        <button id="settings-save-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem;">저장</button>
-      </div>
     </div>
   </div>
 

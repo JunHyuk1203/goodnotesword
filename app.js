@@ -16,11 +16,14 @@ window.setTheme = function(theme) {
   const darkBtn  = document.getElementById('theme-btn-dark');
   const lightBtn = document.getElementById('theme-btn-light');
   if (!darkBtn || !lightBtn) return;
-  const isDark = theme === 'dark';
-  const activeStyle  = 'background:#0a84ff; color:#fff;';
-  const inactiveStyle = 'background:transparent; color:inherit;';
-  darkBtn.style.cssText  = isDark  ? activeStyle : inactiveStyle;
-  lightBtn.style.cssText = !isDark ? activeStyle : inactiveStyle;
+  
+  if (theme === 'dark') {
+    darkBtn.classList.add('active');
+    lightBtn.classList.remove('active');
+  } else {
+    lightBtn.classList.add('active');
+    darkBtn.classList.remove('active');
+  }
 };
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -95,6 +98,49 @@ function closeModal(modalEl) {
     }
   }, 400);
 }
+
+// ── Apple Bottom Sheet Dismissal Logic ──
+document.querySelectorAll('.modal-screen').forEach(modal => {
+  // Tap outside to dismiss
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal(modal);
+  });
+  
+  // Swipe down to dismiss
+  let sheetStartY = null;
+  let sheetCurrentY = null;
+  const content = modal.querySelector('.modal-screen-content');
+  
+  if (content) {
+    content.addEventListener('touchstart', (e) => {
+      if (content.scrollTop === 0) {
+        sheetStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    
+    content.addEventListener('touchmove', (e) => {
+      if (sheetStartY === null) return;
+      sheetCurrentY = e.touches[0].clientY;
+      const deltaY = sheetCurrentY - sheetStartY;
+      if (deltaY > 0) {
+        content.style.transform = `translateY(${deltaY}px)`;
+        content.style.transition = 'none';
+      }
+    }, { passive: true });
+    
+    content.addEventListener('touchend', (e) => {
+      if (sheetStartY === null) return;
+      const deltaY = sheetCurrentY - sheetStartY;
+      content.style.transform = '';
+      content.style.transition = '';
+      if (deltaY > 100) {
+        closeModal(modal);
+      }
+      sheetStartY = null;
+      sheetCurrentY = null;
+    });
+  }
+});
 
 // ─── Custom Modals ────────────────────────────────────────────────────────────
 function showPrompt(message, defaultVal = '') {
@@ -173,11 +219,21 @@ function setLibraryLevel(newIndex) {
     }
   });
 }
-const crumbHome = $('crumb-home');
-const crumbBook = $('crumb-book');
-const crumbBookName = $('crumb-book-name');
-const crumbChapter = $('crumb-chapter');
-const crumbChapterName = $('crumb-chapter-name');
+const iosBackBtn = $('ios-back-btn');
+const iosBackText = $('ios-back-text');
+const iosNavTitleInline = $('ios-nav-title-inline');
+const iosLargeTitleText = $('ios-large-title-text');
+const iosLargeTitleSub = $('ios-large-title-sub');
+
+// Scroll behavior for Apple Large Title
+document.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  if (scrollY > 44) {
+    if (iosNavTitleInline) iosNavTitleInline.classList.add('visible');
+  } else {
+    if (iosNavTitleInline) iosNavTitleInline.classList.remove('visible');
+  }
+}, { passive: true });
 const addBookBtn = $('add-book-btn');
 const addBookWrap = $('add-book-wrap');
 const addChapterBtn = $('add-chapter-btn');
@@ -481,10 +537,17 @@ const editWordCancel = $('edit-word-cancel');
 // LIBRARY: Books → Chapters → Words
 // ═══════════════════════════════════════════════════════════════════════════════
 
-crumbHome.addEventListener('click', () => loadBooks());
-crumbBookName.addEventListener('click', () => {
-  if (selectedBookId) loadChapters(selectedBookId, crumbBookName.textContent);
-});
+let currentBookNameStore = ''; // To preserve for back button
+
+if (iosBackBtn) {
+  iosBackBtn.addEventListener('click', () => {
+    if (currentLibraryLevel === 2 && selectedBookId) {
+      loadChapters(selectedBookId, currentBookNameStore);
+    } else if (currentLibraryLevel === 1) {
+      loadBooks();
+    }
+  });
+}
 
 // --- Swipe to Go Back (iOS style edge swipe) ---
 let backSwipeStartX = null;
@@ -513,7 +576,7 @@ document.addEventListener('touchend', (e) => {
   const deltaX = e.changedTouches[0].clientX - backSwipeStartX;
   if (deltaX > 80) {
     if (currentLibraryLevel === 2 && selectedBookId) {
-      loadChapters(selectedBookId, crumbBookName.textContent);
+      loadChapters(selectedBookId, currentBookNameStore);
     } else if (currentLibraryLevel === 1) {
       loadBooks();
     }
@@ -531,8 +594,12 @@ function loadBooks() {
   setLibraryLevel(0);
 
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
-  crumbBook.classList.add('hidden');
-  crumbChapter.classList.add('hidden');
+  
+  if (iosBackBtn) iosBackBtn.style.visibility = 'hidden';
+  if (iosNavTitleInline) iosNavTitleInline.textContent = '단어장 목록';
+  if (iosLargeTitleText) iosLargeTitleText.textContent = '단어장 목록';
+  if (iosLargeTitleSub) iosLargeTitleSub.classList.add('hidden');
+  
   hideToggleBar.classList.add('hidden');
 
   if (!unsubBooks) {
@@ -577,13 +644,19 @@ function loadChapters(bookId, bookName) {
   }
   selectedBookId = bookId;
   selectedChapterId = null;
+  currentBookNameStore = bookName;
 
   setLibraryLevel(1);
 
   document.getElementById('words-action-wrapper')?.classList.add('hidden');
-  crumbBook.classList.remove('hidden');
-  crumbBookName.textContent = bookName;
-  crumbChapter.classList.add('hidden');
+  
+  if (iosBackBtn) {
+    iosBackBtn.style.visibility = 'visible';
+    iosBackText.textContent = '목록';
+  }
+  if (iosNavTitleInline) iosNavTitleInline.textContent = bookName;
+  if (iosLargeTitleText) iosLargeTitleText.textContent = bookName;
+  if (iosLargeTitleSub) iosLargeTitleSub.classList.add('hidden');
 
   if (!unsubChapters) {
     viewChapters.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
@@ -630,8 +703,18 @@ function loadWords(bookId, chapterId, chapterName) {
   setLibraryLevel(2);
 
   document.getElementById('words-action-wrapper')?.classList.remove('hidden');
-  crumbChapter.classList.remove('hidden');
-  crumbChapterName.textContent = chapterName;
+  
+  if (iosBackBtn) {
+    iosBackBtn.style.visibility = 'visible';
+    iosBackText.textContent = currentBookNameStore || '단원';
+  }
+  if (iosNavTitleInline) iosNavTitleInline.textContent = chapterName;
+  if (iosLargeTitleText) iosLargeTitleText.textContent = chapterName;
+  if (iosLargeTitleSub) {
+    iosLargeTitleSub.textContent = currentBookNameStore;
+    iosLargeTitleSub.classList.remove('hidden');
+  }
+
   // Show hide bar and reset to card mode
   hideToggleBar.classList.remove('hidden');
   if (currentViewMode !== 'card') setViewMode('card');
