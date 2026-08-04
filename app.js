@@ -1112,13 +1112,12 @@ function setViewMode(mode) {
     }
   });
 
-  // Apply CSS transition classes for hideToggleBar (synchronized with card mode, index 0)
+  // Apply CSS transition classes for hideToggleBar
   hideToggleBar.classList.remove('active-view', 'idle-left', 'idle-right');
-  if (0 < newIndex) {
+  if (mode === 'edit') {
     hideToggleBar.classList.add('idle-left');
-  } else if (0 > newIndex) {
-    hideToggleBar.classList.add('idle-right');
   } else {
+    // Show in both card and swipe modes
     hideToggleBar.classList.add('active-view');
   }
 }
@@ -1239,25 +1238,11 @@ function renderSwipeView() {
       <div class="shorts-bottom-btns">
         <button id="auto-play-toggle" class="shorts-ctrl-btn${autoPlayPronunciation ? ' active' : ''}">${autoPlayPronunciation ? '🔊' : '🔇'}</button>
         <button id="shuffle-swipe-btn" class="shorts-ctrl-btn">🔀</button>
-        <span class="shorts-divider">|</span>
-        <button class="shorts-hide-btn${hideState.word ? ' active' : ''}" data-target="word">단어</button>
-        <button class="shorts-hide-btn${hideState.meaning ? ' active' : ''}" data-target="meaning">뜻</button>
-        <button class="shorts-hide-btn${hideState.example ? ' active' : ''}" data-target="example">예문</button>
-        <button class="shorts-hide-btn${hideState.related ? ' active' : ''}" data-target="related">유의어</button>
       </div>
     </div>
   `;
 
-  // Wire up inline hide-toggle buttons
-  wordsSwipeView.querySelectorAll('.shorts-hide-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const target = btn.dataset.target;
-      hideState[target] = !hideState[target];
-      btn.classList.toggle('active', hideState[target]);
-      applyHideState();
-    });
-  });
+  // No longer wiring up inline hide-toggle buttons as we use global hide-toggle-bar
 
   renderSwipeCard(0);
   setupSwipeGestures();

@@ -1499,6 +1499,8 @@ body[data-theme="light"] .view-toggle-group::before {
   left: 50%;
   transform: translateX(-50%);
   width: auto;
+  min-width: 320px;
+  white-space: nowrap;
   max-width: calc(100vw - 32px);
   box-sizing: border-box;
   z-index: 1000;
@@ -1576,7 +1578,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
   display: flex;
   flex-direction: column;
   gap: 8px; /* gap between grouped sections */
-  padding: 0 16px;
+  padding: 0;
 }
 
 /* Each word-card = one row in the inset grouped list */
