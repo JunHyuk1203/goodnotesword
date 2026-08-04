@@ -923,9 +923,9 @@ function renderCardView(docs) {
           <div class="word-card-example">${parsed.examples.map(e => {
             const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
             if (match) {
-              return `<div class="ex-en">${escapeHTML(match[1])}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
+              return `<div class="ex-en">${highlightExample(match[1], parsed.word)}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
             }
-            return `<div class="ex-en">${escapeHTML(e)}</div>`;
+            return `<div class="ex-en">${highlightExample(e, parsed.word)}</div>`;
           }).join('')}</div>
         </div>
       ` : ''}
@@ -1214,9 +1214,9 @@ function buildSwipeCardHTML(parsed, originalIdx) {
         <div class="word-card-example">${parsed.examples.map(e => {
             const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
             if (match) {
-              return `<div class="ex-en">${escapeHTML(match[1])}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
+              return `<div class="ex-en">${highlightExample(match[1], parsed.word)}</div><div class="ex-ko">${escapeHTML(match[2])}</div>`;
             }
-            return `<div class="ex-en">${escapeHTML(e)}</div>`;
+            return `<div class="ex-en">${highlightExample(e, parsed.word)}</div>`;
           }).join('')}</div>
       </div>` : ''}
       ${hasRelated ? `<div class="word-card-related-group">${synSection}${antSection}${relSection}</div>` : ''}

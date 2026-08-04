@@ -35,8 +35,12 @@
 
   /* Labels */
   --text:            #ffffff;
-  --text-secondary:  rgba(60, 60, 67, 0.6);
+  --text-primary:    #ffffff;
+  --text-secondary:  rgba(255, 255, 255, 0.85);
+  --text-tertiary:   rgba(255, 255, 255, 0.60);
   --text-muted:      rgba(235, 235, 245, 0.3);
+  --text-accent:     #0A84FF;
+  --text-accent-bright: #64D2FF;
 
   /* Radii — HIG standard */
   --radius-sm: 8px;
@@ -87,8 +91,12 @@ body[data-theme="light"] {
   --success:         #34c759;
 
   --text:            #000000;
+  --text-primary:    #000000;
   --text-secondary:  rgba(60, 60, 67, 0.6);
+  --text-tertiary:   rgba(60, 60, 67, 0.4);
   --text-muted:      rgba(60, 60, 67, 0.3);
+  --text-accent:     #007AFF;
+  --text-accent-bright: #007AFF;
 
   --shadow-card:     0 2px 16px rgba(0,0,0,0.1);
   --shadow-glow:     0 0 24px var(--primary-glow);
@@ -384,9 +392,9 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 }
 .ety-result {
   font-family: var(--font-rounded);
-  font-weight: 900;
+  font-weight: 700;
   font-size: 1.3rem;
-  color: var(--primary-light);
+  color: var(--text-accent-bright);
   background: rgba(108, 99, 255, 0.15);
   padding: 6px 14px;
   border-radius: 8px;
@@ -1593,8 +1601,9 @@ body[data-theme="light"] .hide-toggle-bar {
   font-weight: 600;
 }
 body[data-theme="light"] .hide-toggle-btn.active {
-  color: var(--primary);
-  background: rgba(0, 122, 255, 0.12);
+  color: #FFFFFF;
+  background: #007AFF;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
 }
 .hide-toggle-btn:hover { background: var(--bg-card-hover); }
 .hide-toggle-btn:active { transform: scale(0.93); 
@@ -1729,8 +1738,13 @@ body[data-theme="light"] .word-card-pos {
 }
 .ex-en {
   color: var(--text-secondary);
-  font-style: italic;
+  font-style: normal;
+  line-height: 1.5;
   font-size: 15px;
+}
+.ex-en strong {
+  color: var(--text-accent-bright);
+  font-weight: 700;
 }
 .ex-ko {
   color: var(--text-muted);
@@ -2856,4 +2870,22 @@ body[data-theme="light"] .custom-toast {
   font-size: 14px;
   margin: 0;
   line-height: 1.47;
+}
+
+.hide-toggle-btn:active,
+.lib-card:active,
+.chapter-card:active,
+.circle-action-btn:active,
+.test-mode-btn:active,
+.generate-btn:active,
+.modal-save-btn:active,
+.word-card-edit-btn:active,
+.word-card-delete-btn:active,
+.quiz-choice-btn:active,
+.flash-correct-btn:active,
+.flash-wrong-btn:active,
+.lib-delete-btn:active,
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
 }
