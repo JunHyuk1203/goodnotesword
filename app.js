@@ -223,7 +223,6 @@ const iosBackBtn = $('ios-back-btn');
 const iosBackText = $('ios-back-text');
 const iosNavTitleInline = $('ios-nav-title-inline');
 const iosLargeTitleText = $('ios-large-title-text');
-const iosLargeTitleSub = $('ios-large-title-sub');
 
 // Scroll behavior for Apple Large Title
 document.addEventListener('scroll', () => {
@@ -598,7 +597,7 @@ function loadBooks() {
   if (iosBackBtn) iosBackBtn.style.visibility = 'hidden';
   if (iosNavTitleInline) iosNavTitleInline.textContent = '단어장 목록';
   if (iosLargeTitleText) iosLargeTitleText.textContent = '단어장 목록';
-  if (iosLargeTitleSub) iosLargeTitleSub.classList.add('hidden');
+
   
   hideToggleBar.classList.add('hidden');
 
@@ -656,7 +655,7 @@ function loadChapters(bookId, bookName) {
   }
   if (iosNavTitleInline) iosNavTitleInline.textContent = bookName;
   if (iosLargeTitleText) iosLargeTitleText.textContent = bookName;
-  if (iosLargeTitleSub) iosLargeTitleSub.classList.add('hidden');
+
 
   if (!unsubChapters) {
     viewChapters.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">로딩 중...</p>';
@@ -710,10 +709,7 @@ function loadWords(bookId, chapterId, chapterName) {
   }
   if (iosNavTitleInline) iosNavTitleInline.textContent = chapterName;
   if (iosLargeTitleText) iosLargeTitleText.textContent = chapterName;
-  if (iosLargeTitleSub) {
-    iosLargeTitleSub.textContent = currentBookNameStore;
-    iosLargeTitleSub.classList.remove('hidden');
-  }
+
 
   // Show hide bar and reset to card mode
   hideToggleBar.classList.remove('hidden');
