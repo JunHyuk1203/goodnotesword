@@ -1,7 +1,28 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GoodNotes 단어장 앱 - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
-console.log("GoodNotes Vocab App Loaded - v10.24 (Example Translation & Jua Font)");
+console.log("GoodNotes Vocab App Loaded - v11.0 (Apple HIG Design System)");
+
+// ── Apple HIG Theme System ──
+(function initTheme() {
+  const saved = localStorage.getItem('app_theme') || 'dark';
+  document.body.setAttribute('data-theme', saved);
+})();
+
+window.setTheme = function(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('app_theme', theme);
+  // Update button active states
+  const darkBtn  = document.getElementById('theme-btn-dark');
+  const lightBtn = document.getElementById('theme-btn-light');
+  if (!darkBtn || !lightBtn) return;
+  const isDark = theme === 'dark';
+  const activeStyle  = 'background:#0a84ff; color:#fff;';
+  const inactiveStyle = 'background:transparent; color:inherit;';
+  darkBtn.style.cssText  = isDark  ? activeStyle : inactiveStyle;
+  lightBtn.style.cssText = !isDark ? activeStyle : inactiveStyle;
+};
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, getDocs, addDoc,
@@ -206,7 +227,10 @@ let togetherApiKey = localStorage.getItem('together_api_key') || 'key_CdHCVwRn6z
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
     geminiApiKeyInput.value = geminiApiKey;
-      if (togetherApiKeyInput) togetherApiKeyInput.value = togetherApiKey;
+    if (togetherApiKeyInput) togetherApiKeyInput.value = togetherApiKey;
+    // Sync theme buttons
+    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+    window.setTheme(currentTheme);
     openModal(settingsModal);
   });
   settingsCloseBtn.addEventListener('click', () => closeModal(settingsModal));
