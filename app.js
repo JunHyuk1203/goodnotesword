@@ -730,6 +730,7 @@ function loadWords(bookId, chapterId, chapterName) {
 
       renderCardView(allDocs);
       renderTableView(allDocs);
+      updateHideToggleAvailability(allDocs);
     }, (e) => {
       console.error(e);
       wordsCardView.innerHTML = `<p style="text-align:center;color:var(--danger);padding:2rem;">오류: ${e.message}</p>`;
@@ -1328,28 +1329,49 @@ function navigateSwipe(dir) { // dir: 1 = next (swipe up), -1 = prev (swipe down
   }, 280);
 }
 
+let swipeDidOccur = false;
+
 function setupSwipeGestures() {
   const el = wordsSwipeView;
   let startY = 0, isDragging = false;
 
-  el.addEventListener('touchstart', e => {
-    startY = e.touches[0].clientY;
+  const onDragStart = (y) => {
+    startY = y;
     isDragging = true;
-  }, { passive: true });
-
-  el.addEventListener('touchend', e => {
+    swipeDidOccur = false;
+  };
+  const onDragEnd = (y) => {
     if (!isDragging) return;
     isDragging = false;
-    const dy = e.changedTouches[0].clientY - startY;
+    const dy = y - startY;
     if (Math.abs(dy) < 40) return;
+    swipeDidOccur = true;
     navigateSwipe(dy < 0 ? 1 : -1);
-  }, { passive: true });
+  };
+
+  // Touch Events
+  el.addEventListener('touchstart', e => onDragStart(e.touches[0].clientY), { passive: true });
+  el.addEventListener('touchend', e => onDragEnd(e.changedTouches[0].clientY), { passive: true });
+
+  // Mouse Events
+  el.addEventListener('mousedown', e => onDragStart(e.clientY));
+  el.addEventListener('mouseup', e => onDragEnd(e.clientY));
+  el.addEventListener('mouseleave', e => onDragEnd(e.clientY));
+  el.addEventListener('mousemove', e => { if(isDragging) e.preventDefault(); });
 
   el.addEventListener('wheel', e => {
     if (Math.abs(e.deltaY) < 30) return;
     navigateSwipe(e.deltaY > 0 ? 1 : -1);
   }, { passive: true });
 }
+
+// Swallow clicks that occur immediately after dragging
+wordsSwipeView.addEventListener('click', e => {
+  if (swipeDidOccur) {
+    e.stopPropagation();
+    swipeDidOccur = false;
+  }
+}, { capture: true });
 
 const exportModal = $('export-modal');
 const closeExportBtn = $('close-export-btn');
@@ -1436,6 +1458,40 @@ if (autoPlayBtn) {
 }
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
+function updateHideToggleAvailability(words) {
+  let hasExample = false;
+  let hasRelated = false;
+  
+  for (const w of words) {
+    const parsed = parseBackContent(w.back);
+    if (parsed.examples && parsed.examples.length > 0) hasExample = true;
+    if (parsed.related && parsed.related.length > 0) hasRelated = true;
+    if (hasExample && hasRelated) break;
+  }
+  
+  document.querySelectorAll('.hide-toggle-btn[data-target]').forEach(btn => {
+    const target = btn.dataset.target;
+    let available = true;
+    if (target === 'example') available = hasExample;
+    else if (target === 'related') available = hasRelated;
+    
+    if (!available) {
+      btn.disabled = true;
+      btn.style.opacity = '0.3';
+      btn.title = '해당 데이터가 없습니다';
+      if (hideState[target]) {
+        hideState[target] = false;
+        btn.classList.add('active');
+        applyHideState();
+      }
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.title = '';
+    }
+  });
+}
+
 function applyHideState() {
   document.body.classList.toggle('hide-word-state', !hideState.word);
   document.body.classList.toggle('hide-meaning-state', !hideState.meaning);
