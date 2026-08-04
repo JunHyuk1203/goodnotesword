@@ -1080,6 +1080,10 @@ function setViewMode(mode) {
     viewCardBtn.classList.add('active');
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'edit') {
+    // Clear all hide states when entering edit mode
+    hideState = { word: true, meaning: true, example: true, related: true };
+    document.querySelectorAll('.hide-toggle-btn[data-target]').forEach(b => b.classList.add('active'));
+    applyHideState();
     document.body.classList.remove('shorts-mode-active');
   } else if (mode === 'swipe') {
     viewSwipeBtn.classList.add('active');

@@ -1632,11 +1632,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
   position: relative;
   transition: background 0.12s;
 }
-.word-card:active {
-  background: var(--bg-card-hover);
-  transform: scale(0.97);
-  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), background 0.1s;
-}
+
 
 /* Cell row header (word + pos + pron) */
 .word-card-header {
@@ -2721,7 +2717,7 @@ button:active:not(:disabled) {
 }
 
 .view-layer.active-view, .lib-layer.active-lib {
-  transform: translateX(0);
+  transform: none;
   opacity: 1;
   pointer-events: auto;
   z-index: 2;
@@ -2802,11 +2798,12 @@ body.hide-word-state .word-section-etymology,
 body.hide-meaning-state .word-section-meaning,
 body.hide-example-state .word-section-example,
 body.hide-related-state .word-section-related {
-  filter: blur(8px) grayscale(100%);
-  opacity: 0.15;
+  filter: blur(5px) grayscale(50%);
+  opacity: 0.35;
   user-select: none;
   cursor: pointer;
-  transform: scale(0.98);
+  transform: scale(0.98) translate3d(0, 0, 0);
+  will-change: filter, opacity, transform;
 }
 
 body.hide-word-state .word-section-word.peeking,
