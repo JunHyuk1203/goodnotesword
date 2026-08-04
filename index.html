@@ -180,10 +180,11 @@
 
   <!-- ========== EXTRACT MODAL ========== -->
   <div id="extract-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
-    <div class="modal-screen-content extract-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h3 class="step-title" style="margin:0; font-size:1.1rem;">단어 추출기</h3>
-        <button id="close-extract-btn" class="sample-btn">✕ 닫기</button>
+    <div class="modal-screen-content extract-modal-box sheet-modal">
+      <div class="sheet-drag-bar"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">단어 추출기</h2>
+        <button id="close-extract-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
 
       <!-- Step 1: Copy Prompt -->
@@ -210,7 +211,7 @@
       </div>
 
       <!-- Convert Button -->
-      <button id="convert-btn" class="generate-btn" style="width:100%; padding: 0.8rem; font-size: 1rem; background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);">
+      <button id="convert-btn" class="primary-action-btn">
         <span class="btn-icon">✨</span> 변환 및 단어장 저장
       </button>
     </div>
@@ -218,10 +219,11 @@
 
   <!-- ========== EXPORT MODAL ========== -->
   <div id="export-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
-    <div class="modal-screen-content export-modal-box" style="padding:1.5rem; max-height:85vh; overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h2 class="test-title" style="margin:0; font-size:1.3rem;">📤 CSV 내보내기</h2>
-        <button id="close-export-btn" class="circle-action-btn" style="width:36px; height:36px; font-size:1.5rem; border:none; background:transparent;">×</button>
+    <div class="modal-screen-content export-modal-box sheet-modal">
+      <div class="sheet-drag-bar"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">📤 CSV 내보내기</h2>
+        <button id="close-export-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
       
       <p class="modal-desc" style="margin-bottom:1.5rem; color:var(--text-secondary);">굿노트(GoodNotes) 단어장에 최적화된 형식으로 단어를 내보냅니다. 앞면과 뒷면에 표시할 데이터를 선택하세요.</p>
@@ -249,11 +251,11 @@
     "examples": ["This is significant! 이것은 중요하다!"],
     "synonyms": ["important [ⓐ]: 중요한", "crucial [ⓐ]: 중대한"]
   }
-]' rows="8" spellcheck="false"></textarea>
+]</textarea>
         </div>
         <div style="margin-top:1.5rem; text-align:center;">
-          <button id="convert-btn" class="generate-btn" style="font-size: 1rem; padding: 0.8rem 2rem;">
-            <span class="btn-icon">⚡</span> 단어장으로 변환하기
+          <button id="download-csv-btn" class="primary-action-btn">
+            <span class="btn-icon">⚡</span> CSV 변환하기
           </button>
         </div>
       </div>
@@ -262,10 +264,14 @@
 
   <!-- ========== TEST MODE MODAL ========== -->
   <div id="test-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
-    <div class="modal-screen-content test-modal-box">
+    <div class="modal-screen-content test-modal-box sheet-modal">
+      <div class="sheet-drag-bar"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">🧪 테스트 설정</h2>
+        <button id="test-close-btn-header" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
+      </div>
       <!-- Test setup screen -->
       <div id="test-setup" class="test-screen">
-        <h2 class="test-title">🧪 테스트 설정</h2>
         <p id="test-word-count-info" style="color:var(--text-secondary); margin-bottom:1.5rem;"></p>
         <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:2rem;">
           <div class="option-card">
@@ -293,7 +299,7 @@
         </div>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button id="test-cancel-btn" class="sample-btn">취소</button>
-          <button id="test-start-confirm-btn" class="generate-btn" style="width:auto; padding:0.7rem 1.8rem;">시작하기 →</button>
+          <button id="test-start-confirm-btn" class="primary-action-btn">시작하기</button>
         </div>
       </div>
 
@@ -470,14 +476,19 @@
 
   <!-- Test History Modal -->
   <div id="history-modal" class="modal-screen hidden" role="dialog" aria-modal="true">
-    <div class="modal-screen-content" style="max-width:500px; height:80vh;">
-      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">내 테스트 기록</h2>
+    <div class="modal-screen-content sheet-modal">
+      <div class="sheet-drag-bar"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">내 테스트 기록</h2>
+        <button id="history-close-btn-header" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
+      </div>
       <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
         <!-- Items injected by JS -->
       </div>
-      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button id="history-close-btn" class="sample-btn">닫기</button>
-      </div>
+      <!-- Bottom close button kept as requested but pushed to bottom -->
+        <div style="margin-top:20px; padding-bottom: env(safe-area-inset-bottom);">
+          <button id="history-close-btn" class="primary-action-btn" style="background: var(--bg-tertiary); color: var(--text);">닫기</button>
+        </div>
     </div>
   </div>
 

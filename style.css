@@ -2892,3 +2892,92 @@ button:active {
   transform: scale(0.97);
   transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
+/* Unified Modal Sheet Styles (Apple HIG) */
+.sheet-modal {
+  margin: 0 auto;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: var(--bg-surface);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-drag-bar {
+  width: 36px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  margin: -4px auto 16px; /* -4px to pull it up slightly closer to the top edge */
+}
+
+body[data-theme='light'] .sheet-drag-bar {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.sheet-close-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.sheet-close-btn:hover {
+  opacity: 1;
+}
+
+.sheet-close-btn svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+/* Primary Action Button Unified */
+.primary-action-btn {
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 17px;
+  background: #007AFF;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.primary-action-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
