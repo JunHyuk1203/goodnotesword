@@ -277,7 +277,6 @@ const geminiApiKeyInput = $('gemini-api-key');
   }
 })();
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let togetherApiKey = localStorage.getItem('together_api_key') || 'key_CdHCVwRn6zwYhxxGm8kvQ';
 
 if (settingsBtn) {
   settingsBtn.addEventListener('click', () => {
@@ -860,7 +859,7 @@ function renderCardView(docs) {
         return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
       }).join('');
       return `
-        <div class="word-card-section word-section-related${hideState.related ? '' : ' toggled-hidden'}">
+        <div class="word-card-section word-section-related">
           <div class="word-card-section-label">${emoji} ${label}</div>
           <div class="word-card-related-list">${lines}</div>
         </div>`;
@@ -896,21 +895,21 @@ function renderCardView(docs) {
 
     card.innerHTML = `
       <div class="word-card-header">
-        <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
+        <span class="word-card-word word-section-word">${escapeHTML(parsed.word)}</span>
         <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;font-size:1.1rem;margin-left:4px;vertical-align:middle;padding:2px;opacity:0.8;transition:opacity 0.2s;">🔊</button>
-        ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
-        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+        ${parsed.pos ? `<span class="word-card-pos word-section-meaning">${escapeHTML(parsed.pos)}</span>` : ''}
+        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word">${escapeHTML(parsed.pronunciation)}</span>` : ''}
         <span class="word-card-num">${idx + 1}</span>
       </div>
       ${parsed.meaning ? `
-        <div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
+        <div class="word-card-section word-section-meaning">
           <div class="word-card-section-label">📌 뜻</div>
           <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
         </div>
       ` : ''}
       ${etySection}
       ${parsed.examples.length ? `
-        <div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
+        <div class="word-card-section word-section-example">
           <div class="word-card-section-label">📖 예문</div>
           <div class="word-card-example">${parsed.examples.map(e => {
             const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
@@ -1150,7 +1149,7 @@ function buildSwipeCardHTML(parsed, originalIdx) {
       }
       return `<div class="related-item"><span class="related-item-meaning">${escapeHTML(s)}</span></div>`;
     }).join('');
-    return `<div class="word-card-section word-section-related${hideState.related ? '' : ' toggled-hidden'}">
+    return `<div class="word-card-section word-section-related">
       <div class="word-card-section-label">${emoji} ${label}</div>
       <div class="word-card-related-list">${lines}</div>
     </div>`;
@@ -1186,18 +1185,18 @@ function buildSwipeCardHTML(parsed, originalIdx) {
   return `
     <div class="swipe-card-content">
       <div class="word-card-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
-        <span class="word-card-word word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.word)}</span>
+        <span class="word-card-word word-section-word">${escapeHTML(parsed.word)}</span>
         <button class="pronounce-btn" data-word="${escapeHTML(parsed.word)}" title="발음 듣기" style="background:none;border:none;cursor:pointer;margin-left:2px;vertical-align:middle;padding:4px;opacity:0.8;">🔊</button>
-        ${parsed.pos ? `<span class="word-card-pos word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pos)}</span>` : ''}
-        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word${hideState.word ? '' : ' toggled-hidden'}">${escapeHTML(parsed.pronunciation)}</span>` : ''}
+        ${parsed.pos ? `<span class="word-card-pos word-section-meaning">${escapeHTML(parsed.pos)}</span>` : ''}
+        ${parsed.pronunciation ? `<span class="word-card-pron word-section-word">${escapeHTML(parsed.pronunciation)}</span>` : ''}
         <span class="word-card-num">${originalIdx + 1}</span>
       </div>
-      ${parsed.meaning ? `<div class="word-card-section word-section-meaning${hideState.meaning ? '' : ' toggled-hidden'}">
+      ${parsed.meaning ? `<div class="word-card-section word-section-meaning">
         <div class="word-card-section-label">📌 뜻</div>
         <div class="word-card-meaning">${escapeHTML(parsed.meaning)}</div>
       </div>` : ''}
       ${etySection}
-      ${parsed.examples.length ? `<div class="word-card-section word-section-example${hideState.example ? '' : ' toggled-hidden'}">
+      ${parsed.examples.length ? `<div class="word-card-section word-section-example">
         <div class="word-card-section-label">📖 예문</div>
         <div class="word-card-example">${parsed.examples.map(e => {
             const match = e.match(/^(.*?)\s*\(([^)]+)\)$/);
@@ -1277,14 +1276,21 @@ function fitSwipeCard() {
 // ─── Peek Mode: Click on hidden element to reveal for 2s ────────────────────────────────────
 // Shared peek handler via event delegation
 function handlePeekClick(e) {
-  const hidden = e.target.closest('.toggled-hidden');
-  if (!hidden) return;
+  const target = e.target;
+  let section = null;
+  
+  if (target.closest('.word-section-word') && document.body.classList.contains('hide-word-state')) section = target.closest('.word-section-word');
+  else if (target.closest('.word-section-meaning') && document.body.classList.contains('hide-meaning-state')) section = target.closest('.word-section-meaning');
+  else if (target.closest('.word-section-example') && document.body.classList.contains('hide-example-state')) section = target.closest('.word-section-example');
+  else if (target.closest('.word-section-related') && document.body.classList.contains('hide-related-state')) section = target.closest('.word-section-related');
+
+  if (!section) return;
   e.stopPropagation();
-  hidden.classList.remove('peeking');
-  void hidden.offsetWidth;  // force reflow to restart animation
-  hidden.classList.add('peeking');
-  hidden.addEventListener('animationend', () => {
-    hidden.classList.remove('peeking');
+  section.classList.remove('peeking');
+  void section.offsetWidth;  // force reflow to restart animation
+  section.classList.add('peeking');
+  section.addEventListener('animationend', () => {
+    section.classList.remove('peeking');
   }, { once: true });
 }
 
@@ -1431,22 +1437,10 @@ if (autoPlayBtn) {
 
 // ─── Hide Toggles ─────────────────────────────────────────────────────────────
 function applyHideState() {
-  // word
-  document.querySelectorAll('.word-section-word').forEach(el => {
-    el.classList.toggle('toggled-hidden', !hideState.word);
-  });
-  // meaning
-  document.querySelectorAll('.word-section-meaning').forEach(el => {
-    el.classList.toggle('toggled-hidden', !hideState.meaning);
-  });
-  // example
-  document.querySelectorAll('.word-section-example').forEach(el => {
-    el.classList.toggle('toggled-hidden', !hideState.example);
-  });
-  // related
-  document.querySelectorAll('.word-section-related').forEach(el => {
-    el.classList.toggle('toggled-hidden', !hideState.related);
-  });
+  document.body.classList.toggle('hide-word-state', !hideState.word);
+  document.body.classList.toggle('hide-meaning-state', !hideState.meaning);
+  document.body.classList.toggle('hide-example-state', !hideState.example);
+  document.body.classList.toggle('hide-related-state', !hideState.related);
 }
 
 document.querySelectorAll('.hide-toggle-btn[data-target]').forEach(btn => {
