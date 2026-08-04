@@ -1309,6 +1309,7 @@ function handlePeekClick(e) {
   let section = null;
   
   if (target.closest('.word-section-word') && document.body.classList.contains('hide-word-state')) section = target.closest('.word-section-word');
+  else if (target.closest('.word-section-etymology') && document.body.classList.contains('hide-word-state')) section = target.closest('.word-section-etymology');
   else if (target.closest('.word-section-meaning') && document.body.classList.contains('hide-meaning-state')) section = target.closest('.word-section-meaning');
   else if (target.closest('.word-section-example') && document.body.classList.contains('hide-example-state')) section = target.closest('.word-section-example');
   else if (target.closest('.word-section-related') && document.body.classList.contains('hide-related-state')) section = target.closest('.word-section-related');

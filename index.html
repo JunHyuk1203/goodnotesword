@@ -513,16 +513,16 @@
   </div>
 
   <!-- Settings Modal (Apple iOS Sheet) -->
-  <div id="settings-modal" class="modal-screen hidden" style="z-index: 9999;">
-    <div class="modal-screen-content" style="max-width:500px;">
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 20px 8px;">
-        <h3 style="margin:0; font-family:var(--font-sf); font-size:20px; font-weight:700;">설정</h3>
-        <button id="settings-close-btn" class="sample-btn" style="border:none; padding:4px 8px; min-height:auto; font-weight:600;">완료</button>
+  <div id="settings-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 9999;">
+    <div class="modal-screen-content sheet-modal">
+      <div class="sheet-drag-bar"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">설정</h2>
+        <button id="settings-close-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
 
       <!-- Settings Form Content -->
-      <div style="padding: 0 20px 20px; display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; flex-direction:column; gap:16px;">
         
         <!-- Theme Section -->
         <div class="word-card-related-group" style="padding:0; background:transparent;">

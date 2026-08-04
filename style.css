@@ -1856,9 +1856,9 @@ body[data-theme="light"] .word-card-pos {
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
 }
@@ -2810,13 +2810,14 @@ button:active:not(:disabled) {
   transition: filter 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 body.hide-word-state .word-section-word,
+body.hide-word-state .word-section-etymology,
 body.hide-meaning-state .word-section-meaning,
 body.hide-example-state .word-section-example,
 body.hide-related-state .word-section-related {
   filter: blur(8px) grayscale(100%);
   opacity: 0.15;
   user-select: none;
-  pointer-events: none;
+  cursor: pointer;
   transform: scale(0.98);
 }
 
