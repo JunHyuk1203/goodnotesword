@@ -2812,7 +2812,7 @@ document.addEventListener('keydown', (e) => {
 
 
 // --- History API Routing ---
-let isPopState = false;
+var isPopState = false;
 
 window.addEventListener('popstate', (e) => {
   // Check if any modals are open. If so, close them.
