@@ -35,7 +35,7 @@
 
   /* Labels */
   --text:            #ffffff;
-  --text-secondary:  rgba(235, 235, 245, 0.6);
+  --text-secondary:  rgba(60, 60, 67, 0.6);
   --text-muted:      rgba(235, 235, 245, 0.3);
 
   /* Radii — HIG standard */
@@ -253,6 +253,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   justify-content: flex-end;
 }
 .ios-nav-action-btn {
+  transform-origin: center;
   background: none;
   border: none;
   color: var(--primary);
@@ -266,7 +267,10 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   justify-content: center;
   transition: background 0.15s;
 }
-.ios-nav-action-btn:active { background: rgba(128,128,128,0.2); }
+.ios-nav-action-btn:active { background: rgba(128,128,128,0.2); 
+  transform: scale(0.94);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
 /* Large Title area */
 .ios-large-title {
@@ -1210,7 +1214,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-screen-content {
   background: var(--bg-secondary, #1c1c1e);
   border: none;
-  border-radius: 20px 20px 0 0;
+  border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 100%;
   max-height: 92vh;
@@ -1259,8 +1263,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-box {
   background: var(--bg-secondary, #1c1c1e);
   border: 0.5px solid var(--border);
-  border-radius: 14px;
-  padding: 24px 20px;
+  border-radius: 24px;
+  padding: 24px;
   max-width: 320px;
   width: 90%;
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
@@ -1552,6 +1556,7 @@ body[data-theme="light"] .hide-toggle-bar {
 }
 .hide-toggle-btn {
   background: transparent;
+  flex: 1;
   border: none;
   border-radius: 12px;
   color: var(--text-secondary);
@@ -1576,7 +1581,10 @@ body[data-theme="light"] .hide-toggle-btn.active {
   background: rgba(0, 122, 255, 0.12);
 }
 .hide-toggle-btn:hover { background: var(--bg-card-hover); }
-.hide-toggle-btn:active { transform: scale(0.93); }
+.hide-toggle-btn:active { transform: scale(0.93); 
+  transform: scale(0.94);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
 /* ─── Apple Inset Grouped List (Word Cards) ─── */
 .words-card-grid {
@@ -1589,9 +1597,9 @@ body[data-theme="light"] .hide-toggle-btn.active {
 /* Each word-card = one individual card */
 .word-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -1599,7 +1607,11 @@ body[data-theme="light"] .hide-toggle-btn.active {
   position: relative;
   transition: background 0.12s;
 }
-.word-card:active { background: var(--bg-card-hover); }
+.word-card:active {
+  background: var(--bg-card-hover);
+  transform: scale(0.97);
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), background 0.1s;
+}
 
 /* Cell row header (word + pos + pron) */
 .word-card-header {
@@ -1617,7 +1629,7 @@ body[data-theme="light"] .hide-toggle-btn.active {
   font-size: 20px;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
   line-height: 1.3;
   font-style: normal;
 }
@@ -1635,11 +1647,11 @@ body[data-theme="light"] .hide-toggle-btn.active {
 /* POS badge — Footnote (13pt) */
 .word-card-pos {
   font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--primary);
   background: rgba(10, 132, 255, 0.12);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 6px;
   letter-spacing: 0;
 }
@@ -1691,6 +1703,7 @@ body[data-theme="light"] .word-card-pos {
 
 /* Example */
 .word-card-example {
+  line-height: 1.5;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1753,6 +1766,7 @@ body[data-theme="light"] .word-card-pos {
   padding-top: 0.7rem;
 }
 .word-card-edit-btn, .word-card-delete-btn {
+  transform-origin: center;
   font-family: var(--font-sans);
   font-size: 0.78em;
   padding: 4px 12px;
@@ -2756,4 +2770,19 @@ button:active:not(:disabled) {
   font-size: 0.9rem;
   color: var(--text-primary);
   line-height: 1.4;
+}
+
+/* Hide state animations */
+.word-section-word, .word-section-meaning, .word-section-example, .word-section-related {
+  transition: filter 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+body.hide-word-state .word-section-word,
+body.hide-meaning-state .word-section-meaning,
+body.hide-example-state .word-section-example,
+body.hide-related-state .word-section-related {
+  filter: blur(8px) grayscale(100%);
+  opacity: 0.15;
+  user-select: none;
+  pointer-events: none;
+  transform: scale(0.98);
 }
