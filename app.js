@@ -47,8 +47,8 @@ const firebaseApp = initializeApp({
   projectId: "goodnotesword-454fa",
   storageBucket: "goodnotesword-454fa.firebasestorage.app",
   messagingSenderId: "509235514160",
-  appId: "1:509235514160:web:cd710bfa87fd69971696f5",
-  measurementId: "G-87JDYFLD85"
+  appId: "1:509235514160:web:87282a03a70ec2041696f5",
+  measurementId: "G-Z0C9CQT4T7"
 });
 const db = initializeFirestore(firebaseApp, {
   localCache: persistentLocalCache()
