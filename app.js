@@ -3166,8 +3166,9 @@ if (landingStartBtn) {
   });
 }
 
+
 // -----------------------------------------------------------------------------
-// Trace (���󾲱�) Test Implementation
+// Trace (따라쓰기) Test Implementation
 // -----------------------------------------------------------------------------
 let traceFailCount = 0;
 let currentTraceData = null;
@@ -3187,8 +3188,8 @@ function initTraceCanvas(canvas, ctx) {
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
-    canvas.style.width = \\px\;
-    canvas.style.height = \\px\;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
   }
   
   // Setup drawing state
@@ -3284,11 +3285,11 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   
   let fontSize = isKo ? 40 : 50;
   // Scale down if text is too long
-  ctx.font = \800 \px var(--font-main)\;
+  ctx.font = `800 ${fontSize}px var(--font-main)`;
   let textWidth = ctx.measureText(text).width;
   while (textWidth > w - 40 && fontSize > 20) {
     fontSize -= 2;
-    ctx.font = \800 \px var(--font-main)\;
+    ctx.font = `800 ${fontSize}px var(--font-main)`;
     textWidth = ctx.measureText(text).width;
   }
   
@@ -3318,21 +3319,21 @@ function showTraceCard() {
   }
   
   traceFailCount = 0;
-  trace-skip-btn.classList.add('hidden');
-  trace-feedback.textContent = '';
-  trace-feedback.className = 'short-feedback';
-  trace-en-acc-bar.style.width = '0%';
-  trace-ko-acc-bar.style.width = '0%';
-  trace-en-acc-text.textContent = '0%';
-  trace-ko-acc-text.textContent = '0%';
+  $('trace-skip-btn').classList.add('hidden');
+  $('trace-feedback').textContent = '';
+  $('trace-feedback').className = 'short-feedback';
+  $('trace-en-acc-bar').style.width = '0%';
+  $('trace-ko-acc-bar').style.width = '0%';
+  $('trace-en-acc-text').textContent = '0%';
+  $('trace-ko-acc-text').textContent = '0%';
   
   const data = parseWordData(testWords[testIndex]);
   currentTraceData = data;
   const total = testWords.length;
   const pct = (testIndex / total) * 100;
 
-  trace-progress-fill.style.width = pct + '%';
-  trace-progress-text.textContent = \\ / \\;
+  $('trace-progress-fill').style.width = pct + '%';
+  $('trace-progress-text').textContent = `${testIndex + 1} / ${total}`;
   
   // Re-init canvases
   const enRes = initTraceCanvas(document.getElementById('trace-en-canvas'), traceEnCtx);
@@ -3352,7 +3353,7 @@ function showTraceCard() {
   targetMaskKo = koMaskData;
   
   // Animate in
-  const traceScreen = test-trace;
+  const traceScreen = $('test-trace');
   traceScreen.classList.remove('card-slide-in');
   void traceScreen.offsetWidth;
   traceScreen.classList.add('card-slide-in');
@@ -3438,12 +3439,12 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
   
   const fb = document.getElementById('trace-feedback');
   if (enAcc >= 80 && koAcc >= 80) {
-    fb.textContent = '? ��Ȯ�ϰ� �� ���� ����ϴ�!';
+    fb.textContent = '✅ 정확하게 잘 따라 썼습니다!';
     fb.className = 'short-feedback show-feedback correct-fb';
     testCorrect++;
     
     setTimeout(() => {
-      const traceScreen = test-trace;
+      const traceScreen = $('test-trace');
       traceScreen.classList.add('card-slide-out');
       setTimeout(() => {
         traceScreen.classList.remove('card-slide-out');
@@ -3453,7 +3454,7 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
     }, 1000);
   } else {
     traceFailCount++;
-    fb.textContent = \? ��Ȯ�� �̴� (����: \%, �ѱ�: \%)\;
+    fb.textContent = `❌ 정확도 미달 (영어: ${enAcc}%, 한글: ${koAcc}%)`;
     fb.className = 'short-feedback show-feedback wrong-fb';
     
     if (traceFailCount >= 3) {
@@ -3464,7 +3465,7 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
 
 document.getElementById('trace-skip-btn')?.addEventListener('click', () => {
   testWrong.push(currentTraceData.word);
-  const traceScreen = test-trace;
+  const traceScreen = $('test-trace');
   traceScreen.classList.add('card-slide-out');
   setTimeout(() => {
     traceScreen.classList.remove('card-slide-out');
@@ -3475,5 +3476,3 @@ document.getElementById('trace-skip-btn')?.addEventListener('click', () => {
 
 document.getElementById('trace-close-btn')?.addEventListener('click', closeTest);
 
-// Add listener to result screen so tracing gets correctly categorized in Firestore
-// Wait, we need to add 'trace' to the history records logic
