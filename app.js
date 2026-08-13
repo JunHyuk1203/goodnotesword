@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 // superword - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log("GoodNotes Vocab App Loaded - v11.0 (Apple HIG Design System)");
@@ -3245,8 +3245,8 @@ function initTraceCanvas(canvas, ctx) {
   // Remove old listeners if re-initializing
   const clone = canvas.cloneNode(true);
   canvas.parentNode.replaceChild(clone, canvas);
-  const newCtx = clone.getContext('2d', { willReadFrequently: true });
-  newCtx.scale(dpr, dpr);
+  ctx = clone.getContext('2d', { willReadFrequently: true });
+  ctx.scale(dpr, dpr);
   
   // Add pointer events (works for mouse, touch, and pen)
   clone.addEventListener('pointerdown', startDrawing);
@@ -3259,7 +3259,7 @@ function initTraceCanvas(canvas, ctx) {
   clone.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
   clone.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
   
-  return { canvas: clone, ctx: newCtx };
+  return { canvas: clone, ctx: ctx };
 }
 
 let activeEnCtx = null;
@@ -3279,17 +3279,17 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.clearRect(0, 0, w, h);
   
   // Draw guide text
-  ctx.fillStyle = 'rgba(150, 150, 150, 0.25)'; // Light gray guide
+  ctx.fillStyle = 'rgba(180, 180, 180, 0.4)'; // Light gray guide (thicker)
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  let fontSize = isKo ? 40 : 50;
+  let fontSize = 120;
   // Scale down if text is too long
-  ctx.font = `800 ${fontSize}px var(--font-main)`;
+  ctx.font = `900 ${fontSize}px var(--font-main)`;
   let textWidth = ctx.measureText(text).width;
   while (textWidth > w - 40 && fontSize > 20) {
     fontSize -= 2;
-    ctx.font = `800 ${fontSize}px var(--font-main)`;
+    ctx.font = `900 ${fontSize}px var(--font-main)`;
     textWidth = ctx.measureText(text).width;
   }
   
