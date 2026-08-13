@@ -1,4 +1,4 @@
-﻿package com.goodnotes.vocab
+package com.goodnotes.vocab
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
         webSettings.mediaPlaybackRequiresUserGesture = false  // Allow auto TTS/audio
         webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW  // Allow http audio in https page
         
+        // Fix Google Login 403 disallowed_useragent error
+        webSettings.userAgentString = webSettings.userAgentString.replace("; wv", "")
+        
         // Allow audio permission requests from web page
         webView.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
@@ -37,8 +40,11 @@ class MainActivity : AppCompatActivity() {
         
         webView.webViewClient = WebViewClient()
 
+        // Enable DOM Storage
+        webView.settings.domStorageEnabled = true
+        
         // Load the GitHub Pages URL
-        webView.loadUrl("https://junhyuk1203.github.io/goodnotesword/")
+        webView.loadUrl("https://junhyuk1203.github.io/superword/")
     }
 
     @Deprecated("Deprecated in Java")

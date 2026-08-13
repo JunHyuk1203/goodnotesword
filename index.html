@@ -340,6 +340,7 @@
               <button class="test-mode-btn active" id="mode-flash" data-mode="flash">🃏 플래시카드</button>
               <button class="test-mode-btn" id="mode-quiz" data-mode="quiz">✏️ 4지선다</button>
               <button class="test-mode-btn" id="mode-short" data-mode="short">✍️ 주관식</button>
+              <button class="test-mode-btn" id="mode-trace" data-mode="trace">✏️ 따라쓰기</button>
             </div>
           </div>
           <div class="option-card">
@@ -430,6 +431,45 @@
         
         <div id="virtual-keyboard-container" class="vk-container">
           <!-- Keyboard rows injected by JS -->
+        </div>
+      </div>
+
+      <!-- Tracing (따라쓰기) screen -->
+      <div id="test-trace" class="test-screen hidden">
+        <div class="test-progress-wrap">
+          <div class="test-progress-bar"><div class="test-progress-fill" id="trace-progress-fill"></div></div>
+          <span id="trace-progress-text" class="test-progress-label">1 / 20</span>
+        </div>
+        
+        <div class="trace-canvas-container">
+          <div class="trace-header">
+            <span>영어 따라쓰기</span>
+            <button id="trace-en-clear-btn" class="trace-clear-btn">지우기</button>
+          </div>
+          <canvas id="trace-en-canvas" class="trace-canvas" width="400" height="150"></canvas>
+          <div class="trace-accuracy-bar-container"><div id="trace-en-acc-bar" class="trace-accuracy-bar"></div></div>
+          <div id="trace-en-acc-text" class="trace-accuracy-text">0%</div>
+        </div>
+
+        <div class="trace-canvas-container" style="margin-top:1.5rem;">
+          <div class="trace-header">
+            <span>한글 뜻 따라쓰기</span>
+            <button id="trace-ko-clear-btn" class="trace-clear-btn">지우기</button>
+          </div>
+          <canvas id="trace-ko-canvas" class="trace-canvas" width="400" height="150"></canvas>
+          <div class="trace-accuracy-bar-container"><div id="trace-ko-acc-bar" class="trace-accuracy-bar"></div></div>
+          <div id="trace-ko-acc-text" class="trace-accuracy-text">0%</div>
+        </div>
+
+        <div id="trace-feedback" class="short-feedback" style="margin-top:1rem;"></div>
+
+        <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-top:1rem;">
+          <button id="trace-skip-btn" class="sample-btn hidden" style="border-color:#fbbf24; color:#fbbf24;">건너뛰기</button>
+          <button id="trace-submit-btn" class="generate-btn" style="width:auto;padding:0.7rem 1.8rem;">확인 →</button>
+        </div>
+        
+        <div style="display:flex; justify-content:center; align-items:center; margin-top:0.5rem; gap:10px;">
+          <button id="trace-close-btn" class="sample-btn">✕ 테스트 종료</button>
         </div>
       </div>
 

@@ -3218,3 +3218,71 @@ body[data-theme='light'] .sheet-drag-bar {
 #settings-modal .modal-screen-content > h3 {
   padding: 0 8px !important;
 }
+/* Tracing Test Styles */
+.trace-canvas-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.trace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.trace-clear-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.trace-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+.trace-canvas {
+  width: 100%;
+  height: 150px;
+  background: var(--bg);
+  touch-action: none; /* Prevent scrolling when drawing */
+  cursor: crosshair;
+}
+.trace-accuracy-bar-container {
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+}
+.trace-accuracy-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+.trace-accuracy-text {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.5);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+.disabled-option {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
