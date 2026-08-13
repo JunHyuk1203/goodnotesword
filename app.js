@@ -3179,18 +3179,25 @@ const traceEnCtx = traceEnCanvas?.getContext('2d', { willReadFrequently: true })
 const traceKoCtx = traceKoCanvas?.getContext('2d', { willReadFrequently: true });
 
 function initTraceCanvas(canvas, ctx) {
-  if (!canvas || !ctx) return;
+  if (!canvas) return null;
+  
+  // Clone to remove old event listeners
+  const clone = canvas.cloneNode(true);
+  canvas.parentNode.replaceChild(clone, canvas);
+  ctx = clone.getContext('2d', { willReadFrequently: true });
+  
   // Handle high DPI displays for crisp drawing
-  const rect = canvas.getBoundingClientRect();
+  const rect = clone.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  // If we haven't already scaled
-  if (canvas.width !== rect.width * dpr) {
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-  }
+  const cssWidth = rect.width || 400;
+  const cssHeight = rect.height || 150;
+  
+  // Always set physical width/height and apply scale on the NEW context
+  clone.width = cssWidth * dpr;
+  clone.height = cssHeight * dpr;
+  clone.style.width = `${cssWidth}px`;
+  clone.style.height = `${cssHeight}px`;
+  ctx.scale(dpr, dpr);
   
   // Setup drawing state
   let isDrawing = false;
@@ -3198,12 +3205,12 @@ function initTraceCanvas(canvas, ctx) {
   let lastY = 0;
 
   function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
+    const r = clone.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: clientX - r.left,
+      y: clientY - r.top
     };
   }
 
@@ -3217,8 +3224,8 @@ function initTraceCanvas(canvas, ctx) {
     ctx.lineTo(lastX, lastY); // dot
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#e2e8f0'; // draw color (lightish so user sees what they drew over guide)
+    ctx.lineWidth = 6; // Make user stroke thicker
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
     ctx.stroke();
   }
 
@@ -3230,7 +3237,7 @@ function initTraceCanvas(canvas, ctx) {
     ctx.lineTo(pos.x, pos.y);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 6;
     ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
     ctx.stroke();
     lastX = pos.x;
@@ -3242,12 +3249,6 @@ function initTraceCanvas(canvas, ctx) {
     ctx.beginPath();
   }
 
-  // Remove old listeners if re-initializing
-  const clone = canvas.cloneNode(true);
-  canvas.parentNode.replaceChild(clone, canvas);
-  ctx = clone.getContext('2d', { willReadFrequently: true });
-  ctx.scale(dpr, dpr);
-  
   // Add pointer events (works for mouse, touch, and pen)
   clone.addEventListener('pointerdown', startDrawing);
   clone.addEventListener('pointermove', draw);
