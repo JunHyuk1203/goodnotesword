@@ -1834,7 +1834,6 @@ const testSetup = $('test-setup');
 const testFlash = $('test-flash');
 const testQuiz = $('test-quiz');
 const testShort = $('test-short');
-const testTrace = $('test-trace');
 const testResult = $('test-result');
 
 // Setup options state
@@ -1846,23 +1845,9 @@ let selectedTestOrder = 'sequential';
 function setupToggleGroup(selector, onSelect) {
   document.querySelectorAll(selector).forEach(btn => {
     btn.addEventListener('click', () => {
-      // If it's the direction selector and we're in trace mode, ignore it
-      if (selector === '[data-dir]' && btn.classList.contains('disabled-option')) return;
-      
       document.querySelectorAll(selector).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       onSelect(btn.dataset.mode || btn.dataset.dir || btn.dataset.order);
-      
-      // Handle Trace mode special UI state
-      if (selector === '[data-mode]') {
-        const mode = btn.dataset.mode;
-        const dirBtns = document.querySelectorAll('[data-dir]');
-        if (mode === 'trace') {
-          dirBtns.forEach(b => b.classList.add('disabled-option'));
-        } else {
-          dirBtns.forEach(b => b.classList.remove('disabled-option'));
-        }
-      }
     });
   });
 }
@@ -1905,15 +1890,12 @@ $('test-start-confirm-btn').addEventListener('click', () => {
 });
 
 function showScreen(name) {
-  [testSetup, testFlash, testQuiz, testShort, testTrace, testResult].forEach(s => {
-    if (s) s.classList.add('hidden');
-  });
+  [testSetup, testFlash, testQuiz, testShort, testTrace, testResult].forEach(s => s.classList.add('hidden'));
   let activeScreen;
   if (name === 'setup') activeScreen = testSetup;
   else if (name === 'flash') activeScreen = testFlash;
   else if (name === 'quiz') activeScreen = testQuiz;
   else if (name === 'short') activeScreen = testShort;
-  else if (name === 'trace') activeScreen = testTrace;
   else if (name === 'result') activeScreen = testResult;
   
   if (activeScreen) {
@@ -2694,7 +2676,7 @@ if (viewHistoryBtn) {
         const data = doc.data();
         chapterHistoryRecords.push(data);
         const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : '방금 전';
-        const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : data.mode === 'trace' ? '✏️ 따라쓰기' : '✍️ 주관식';
+        const modeLabel = data.mode === 'flash' ? '🃏 플래시카드' : data.mode === 'quiz' ? '✏️ 4지선다' : '✍️ 주관식';
         const pct = Math.round((data.correct / data.total) * 100) || 0;
         
         const item = document.createElement('div');
@@ -3166,7 +3148,6 @@ if (landingStartBtn) {
   });
 }
 
-
 // -----------------------------------------------------------------------------
 // Trace (따라쓰기) Test Implementation
 // -----------------------------------------------------------------------------
@@ -3320,21 +3301,21 @@ function showTraceCard() {
   }
   
   traceFailCount = 0;
-  $('trace-skip-btn').classList.add('hidden');
-  $('trace-feedback').textContent = '';
-  $('trace-feedback').className = 'short-feedback';
-  $('trace-en-acc-bar').style.width = '0%';
-  $('trace-ko-acc-bar').style.width = '0%';
-  $('trace-en-acc-text').textContent = '0%';
-  $('trace-ko-acc-text').textContent = '0%';
+  document.getElementById('trace-skip-btn').classList.add('hidden');
+  document.getElementById('trace-feedback').textContent = '';
+  document.getElementById('trace-feedback').className = 'short-feedback';
+  document.getElementById('trace-en-acc-bar').style.width = '0%';
+  document.getElementById('trace-ko-acc-bar').style.width = '0%';
+  document.getElementById('trace-en-acc-text').textContent = '0%';
+  document.getElementById('trace-ko-acc-text').textContent = '0%';
   
   const data = parseWordData(testWords[testIndex]);
   currentTraceData = data;
   const total = testWords.length;
   const pct = (testIndex / total) * 100;
 
-  $('trace-progress-fill').style.width = pct + '%';
-  $('trace-progress-text').textContent = `${testIndex + 1} / ${total}`;
+  document.getElementById('trace-progress-fill').style.width = pct + '%';
+  document.getElementById('trace-progress-text').textContent = `${testIndex + 1} / ${total}`;
   
   // Re-init canvases
   const enRes = initTraceCanvas(document.getElementById('trace-en-canvas'), traceEnCtx);
@@ -3354,7 +3335,7 @@ function showTraceCard() {
   targetMaskKo = koMaskData;
   
   // Animate in
-  const traceScreen = $('test-trace');
+  const traceScreen = document.getElementById('test-trace');
   traceScreen.classList.remove('card-slide-in');
   void traceScreen.offsetWidth;
   traceScreen.classList.add('card-slide-in');
@@ -3445,7 +3426,7 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
     testCorrect++;
     
     setTimeout(() => {
-      const traceScreen = $('test-trace');
+      const traceScreen = document.getElementById('test-trace');
       traceScreen.classList.add('card-slide-out');
       setTimeout(() => {
         traceScreen.classList.remove('card-slide-out');
@@ -3466,7 +3447,7 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
 
 document.getElementById('trace-skip-btn')?.addEventListener('click', () => {
   testWrong.push(currentTraceData.word);
-  const traceScreen = $('test-trace');
+  const traceScreen = document.getElementById('test-trace');
   traceScreen.classList.add('card-slide-out');
   setTimeout(() => {
     traceScreen.classList.remove('card-slide-out');
@@ -3477,3 +3458,4 @@ document.getElementById('trace-skip-btn')?.addEventListener('click', () => {
 
 document.getElementById('trace-close-btn')?.addEventListener('click', closeTest);
 
+// End Trace

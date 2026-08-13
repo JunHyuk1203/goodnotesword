@@ -11,10 +11,10 @@
   <title>superword</title>
   <link rel="icon" type="image/png" href="logo.png" />
   <link rel="apple-touch-icon" href="logo.png" />
-  <meta name="description" content="?�어?�을 관리하�?AI�??�어�?추출?�여 ?�습?�는 ?�마???�어???�입?�다." />
+  <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@700;800;900&family=Jua&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=232b535b" />
+  <link rel="stylesheet" href="style.css?v=63b6c8e2" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
   <style>
     /* Hard override: no scrollbars ever, but keep scrollability */
@@ -33,14 +33,14 @@
     <div class="landing-content">
       <img src="logo.png" alt="superword logo" class="landing-logo">
       <h1 class="landing-title">superword</h1>
-      <p class="landing-subtitle">가???�마?�한 ?�만???�어???�비??<br>?�제 ?�디?�나 ?�어�??�습?�고 ?�라?�드???�전?�게 보�??�세??</p>
+      <p class="landing-subtitle">가장 스마트한 나만의 단어장 서비스.<br>언제 어디서나 단어를 학습하고 클라우드에 안전하게 보관하세요.</p>
       
-      <button id="landing-start-btn" class="primary-action-btn" style="margin-top: 40px;">지�??�작?�기</button>
+      <button id="landing-start-btn" class="primary-action-btn" style="margin-top: 40px;">지금 시작하기</button>
       
       <div class="landing-footer">
-        <a href="privacy.html" target="_blank">개인?�보처리방침</a>
+        <a href="privacy.html" target="_blank">개인정보처리방침</a>
         <span class="divider">|</span>
-        <a href="terms.html" target="_blank">?�용?��?</a>
+        <a href="terms.html" target="_blank">이용약관</a>
       </div>
     </div>
   </div>
@@ -52,65 +52,65 @@
         <div class="auth-header">
           <div class="bg-orb orb-1" style="width: 150px; height: 150px; top: -50px; left: -50px;"></div>
           <h1 class="auth-title">superword</h1>
-          <p class="auth-subtitle">?�습???�작?�려�?로그?�하?�요</p>
+          <p class="auth-subtitle">학습을 시작하려면 로그인하세요</p>
         </div>
         
         <div class="auth-tabs">
-          <button class="auth-tab-btn active" id="tab-login">로그??/button>
-          <button class="auth-tab-btn" id="tab-signup">?�원가??/button>
+          <button class="auth-tab-btn active" id="tab-login">로그인</button>
+          <button class="auth-tab-btn" id="tab-signup">회원가입</button>
         </div>
 
         <form id="auth-form" class="auth-form" onsubmit="return false;">
           <div class="input-group">
-            <input type="email" id="auth-email" class="auth-input" placeholder="?�메?? required />
+            <input type="email" id="auth-email" class="auth-input" placeholder="이메일" required />
           </div>
           <div class="input-group">
-            <input type="password" id="auth-password" class="auth-input" placeholder="비�?번호" required />
+            <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" required />
           </div>
           
           <div id="privacy-checkbox-container" class="hidden" style="margin-bottom: 15px; font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 8px;">
             <input type="checkbox" id="privacy-agree" style="width: 16px; height: 16px; accent-color: var(--primary);">
-            <label for="privacy-agree" style="cursor: pointer;">[?�수] 개인?�보 ?�집 �??�용 ?�의</label>
+            <label for="privacy-agree" style="cursor: pointer;">[필수] 개인정보 수집 및 이용 동의</label>
             <span id="privacy-view-btn" style="color: var(--primary); cursor: pointer; text-decoration: underline;">(보기)</span>
           </div>
           
           <div class="auth-actions">
-            <button type="submit" id="auth-submit-btn" class="auth-btn primary-btn">로그??/button>
+            <button type="submit" id="auth-submit-btn" class="auth-btn primary-btn">로그인</button>
           </div>
 
-          <div class="auth-divider"><span>?�는</span></div>
+          <div class="auth-divider"><span>또는</span></div>
           
           <button type="button" id="auth-google-btn" class="auth-btn google-btn">
             <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
-            Google�?계속?�기
+            Google로 계속하기
           </button>
           
-          <button type="button" id="auth-reset-btn" class="auth-text-btn">비�?번호�??�으?�나??</button>
+          <button type="button" id="auth-reset-btn" class="auth-text-btn">비밀번호를 잊으셨나요?</button>
         </form>
         
         <div id="auth-error" class="auth-error hidden"></div>
       </div>
     </div>
 
-    <!-- ========== LIBRARY (?�어?? ========== -->
+    <!-- ========== LIBRARY (단어장) ========== -->
     <div id="library-content" class="hidden">
 
 
-      <!-- ?�?� Apple Navigation Bar ?�?� -->
+      <!-- ── Apple Navigation Bar ── -->
       <div class="ios-nav-bar">
         <div class="ios-nav-bar-inner">
           
           <!-- Top Row (Inline Title & Actions) -->
           <div class="ios-nav-inline">
             <button id="ios-back-btn" class="ios-nav-back" style="visibility: hidden;">
-              <span class="ios-nav-back-chevron">??/span>
+              <span class="ios-nav-back-chevron">‹</span>
               <span id="ios-back-text">목록</span>
             </button>
             <div id="ios-nav-title-inline" class="ios-nav-title-inline">superword</div>
             <div class="ios-nav-actions">
-              <span id="word-count-badge" class="badge badge-ai hidden" style="font-size:12px; padding:2px 6px;">0 ?�어</span>
-              <button id="settings-btn" class="ios-nav-action-btn" title="?�정">
-                <span style="font-size: 20px;">?�️</span>
+              <span id="word-count-badge" class="badge badge-ai hidden" style="font-size:12px; padding:2px 6px;">0 단어</span>
+              <button id="settings-btn" class="ios-nav-action-btn" title="설정">
+                <span style="font-size: 20px;">⚙️</span>
               </button>
             </div>
           </div>
@@ -118,44 +118,44 @@
           <!-- Large Title Row -->
           <div class="ios-large-title" style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: 100%;">
             <div style="display: flex; flex-direction: column;">
-              <div id="ios-large-title-text" class="ios-large-title-text">?�어???�?��?</div>
+              <div id="ios-large-title-text" class="ios-large-title-text">단어장 타이틀</div>
             </div>
 
             <!-- Action Bar Row (Hidden by default, shown in words view) -->
             <div id="words-action-wrapper" class="hidden">
               <div class="words-action-bar" style="padding: 0; margin-bottom: 2px;">
-              <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:14px;">??��</button>
+              <button id="delete-selected-btn" class="sample-btn danger-btn hidden" style="padding:0.4rem 0.8rem; font-size:14px;">삭제</button>
               
               <!-- Apple Segmented Control -->
               <div class="view-toggle-group" id="view-toggle-group">
-                <button id="view-card-btn" class="view-toggle-btn active" title="카드 �?>
+                <button id="view-card-btn" class="view-toggle-btn active" title="카드 뷰">
                   카드
                 </button>
-                <button id="view-swipe-btn" class="view-toggle-btn" title="?�츠 �?>
-                  ?�츠
+                <button id="view-swipe-btn" class="view-toggle-btn" title="쇼츠 뷰">
+                  쇼츠
                 </button>
               </div>
 
               <!-- Action Buttons -->
-              <button id="view-table-btn" class="circle-action-btn" title="?�정 �?>
-                <span class="icon">?�️</span>
-                <span class="label">?�정</span>
+              <button id="view-table-btn" class="circle-action-btn" title="수정 뷰">
+                <span class="icon">✏️</span>
+                <span class="label">수정</span>
               </button>
-              <button id="start-test-btn" class="circle-action-btn" title="?�스??>
-                <span class="icon">?��</span>
-                <span class="label">?�스??/span>
+              <button id="start-test-btn" class="circle-action-btn" title="테스트">
+                <span class="icon">📝</span>
+                <span class="label">테스트</span>
               </button>
-              <button id="view-history-btn" class="circle-action-btn" title="?�습 기록">
-                <span class="icon">?��</span>
+              <button id="view-history-btn" class="circle-action-btn" title="학습 기록">
+                <span class="icon">📈</span>
                 <span class="label">기록</span>
               </button>
               <button id="open-extract-btn" class="circle-action-btn" title="추출">
-                <span class="icon">??/span>
+                <span class="icon">✨</span>
                 <span class="label">추출</span>
               </button>
-              <button id="export-csv-btn" class="circle-action-btn" title="CSV ?�보?�기">
-                <span class="icon">?��</span>
-                <span class="label">?�보?�기</span>
+              <button id="export-csv-btn" class="circle-action-btn" title="CSV 내보내기">
+                <span class="icon">📤</span>
+                <span class="label">내보내기</span>
               </button>
             </div>
           </div>
@@ -170,7 +170,7 @@
         <div id="layer-books" class="lib-layer active-lib" style="grid-area: 1 / 1;">
           <!-- Add Book Button -->
           <div id="add-book-wrap" style="margin-bottom:1rem; text-align:right;">
-            <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ ???�어??/button>
+            <button id="add-book-btn" class="generate-btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; border-radius:8px;">+ 새 단어장</button>
           </div>
           <!-- Books Grid -->
           <div id="view-books" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
@@ -180,7 +180,7 @@
         <div id="layer-chapters" class="lib-layer idle-right" style="grid-area: 1 / 1;">
           <!-- Add Chapter Button (hidden until inside a book) -->
           <div id="add-chapter-wrap" style="margin-bottom:1rem; text-align:right;">
-            <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ ???�원 추�?</button>
+            <button id="add-chapter-btn" class="generate-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem;">+ 새 단원 추가</button>
           </div>
           <!-- Chapters Grid -->
           <div id="view-chapters" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem;"></div>
@@ -204,7 +204,7 @@
           <!-- Table View (hidden by default) -->
           <div id="words-table-view" class="view-layer idle-right">
             <table class="preview-table">
-              <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>?�어 (?�어)</th><th>?�면 (???�문)</th><th style="width: 120px;">관�?/th></tr></thead>
+              <thead><tr><th style="width: 40px;"><input type="checkbox" id="select-all-words" /></th><th>#</th><th>단어 (영어)</th><th>뒷면 (뜻/예문)</th><th style="width: 120px;">관리</th></tr></thead>
               <tbody id="words-tbody"></tbody>
             </table>
           </div>
@@ -216,28 +216,28 @@
 
     <!-- Error -->
     <div id="error-section" class="error-section hidden" role="alert">
-      <div class="error-icon">??/div>
+      <div class="error-icon">⚠</div>
       <div>
-        <p class="error-title" id="error-title">?�류 발생</p>
+        <p class="error-title" id="error-title">오류 발생</p>
         <p class="error-msg" id="error-msg"></p>
       </div>
     </div>
 
     <footer class="app-footer">
-      <p>superword ??GoodNotes ?�환 CSV ?�보?�기</p>
+      <p>superword ✦ GoodNotes 호환 CSV 내보내기</p>
       <p id="build-time" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;"></p>
     </footer>
   </div>
 
   <!-- Floating Hide Toggle Bar (fixed bottom) -->
   <div class="hide-toggle-bar hidden" id="hide-toggle-bar">
-    <button class="hide-toggle-btn active" id="toggle-word" data-target="word">?�어</button>
-    <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">??/button>
-    <button class="hide-toggle-btn active" id="toggle-example" data-target="example">?�문</button>
-    <button class="hide-toggle-btn active" id="toggle-related" data-target="related">?�의??/button>
+    <button class="hide-toggle-btn active" id="toggle-word" data-target="word">단어</button>
+    <button class="hide-toggle-btn active" id="toggle-meaning" data-target="meaning">뜻</button>
+    <button class="hide-toggle-btn active" id="toggle-example" data-target="example">예문</button>
+    <button class="hide-toggle-btn active" id="toggle-related" data-target="related">유의어</button>
     <span class="shorts-divider shorts-only" style="color:var(--text-muted); opacity:0.3; margin:0 4px;">|</span>
-    <button id="auto-play-toggle" class="hide-toggle-btn shorts-only" title="?�동 ?�생">?��</button>
-    <button id="shuffle-swipe-btn" class="hide-toggle-btn shorts-only" title="?�플">??</button>
+    <button id="auto-play-toggle" class="hide-toggle-btn shorts-only" title="자동 재생">🔇</button>
+    <button id="shuffle-swipe-btn" class="hide-toggle-btn shorts-only" title="셔플">🔀</button>
     <span class="shorts-divider" style="color:var(--text-muted); opacity:0.3; margin:0 4px;">|</span>
     <span id="swipe-counter" class="swipe-counter" style="font-size:0.75rem; color:var(--text-secondary); font-weight: 500; font-family: var(--font-mono);"></span>
   </div>
@@ -249,36 +249,36 @@
     <div class="modal-screen-content extract-modal-box sheet-modal">
       <div class="sheet-drag-bar"></div>
       <div class="sheet-header">
-        <h2 class="sheet-title">?�어 추출�?/h2>
+        <h2 class="sheet-title">단어 추출기</h2>
         <button id="close-extract-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
 
       <!-- Step 1: Copy Prompt -->
       <div class="step-card" style="margin-bottom:1rem; border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card);">
-        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1?�계: ?�롬?�트 복사?�기</h4>
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">1단계: 프롬프트 복사하기</h4>
         <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-          ?�어�??�진?�나 ?�스?��? ?��? AI(ChatGPT ?????�달?????�용??지?�문(?�롬?�트)??복사?�니??
+          단어책 사진이나 텍스트를 외부 AI(ChatGPT 등)에 전달할 때 사용할 지시문(프롬프트)을 복사합니다.
         </p>
         <div style="text-align: center;">
           <textarea id="prompt-output" style="display:none;"></textarea>
-          <button id="copy-prompt-btn" class="generate-btn" style="width: 100%; padding: 0.8rem; font-size: 1rem;">?�� ?�롬?�트 복사</button>
+          <button id="copy-prompt-btn" class="generate-btn" style="width: 100%; padding: 0.8rem; font-size: 1rem;">📋 프롬프트 복사</button>
         </div>
       </div>
 
       <!-- Step 2: Paste JSON -->
       <div class="step-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: 12px; background: var(--bg-card); margin-bottom: 1rem;">
-        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2?�계: AI 결과 붙여?�기</h4>
+        <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">2단계: AI 결과 붙여넣기</h4>
         <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 15px;">
-          ?��? AI가 ?��??��? 결과 ?�스???�체�??�래??붙여?�으?�요.
+          외부 AI가 답변해준 결과 텍스트 전체를 아래에 붙여넣으세요.
         </p>
         <div class="textarea-wrap">
-          <textarea id="ai-json-input" class="vocab-textarea" rows="3" placeholder="AI가 만들?��? ?�이?��? ?�기??붙여?�으?�요..." style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 12px; color: var(--text); border: 1px solid var(--border); resize: vertical;"></textarea>
+          <textarea id="ai-json-input" class="vocab-textarea" rows="3" placeholder="AI가 만들어준 데이터를 여기에 붙여넣으세요..." style="background-color: var(--bg-body); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 12px; color: var(--text); border: 1px solid var(--border); resize: vertical;"></textarea>
         </div>
       </div>
 
       <!-- Convert Button -->
       <button id="convert-btn" class="primary-action-btn">
-        <span class="btn-icon">??/span> 변??�??�어???�??
+        <span class="btn-icon">✨</span> 변환 및 단어장 저장
       </button>
     </div>
   </div>
@@ -288,34 +288,34 @@
     <div class="modal-screen-content export-modal-box sheet-modal">
       <div class="sheet-drag-bar"></div>
       <div class="sheet-header">
-        <h2 class="sheet-title">?�� CSV ?�보?�기</h2>
+        <h2 class="sheet-title">📤 CSV 내보내기</h2>
         <button id="close-export-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
       
-      <p class="modal-desc" style="margin-bottom:1.5rem; color:var(--text-secondary);">굿노??GoodNotes) ?�어?�에 최적?�된 ?�식?�로 ?�어�??�보?�니?? ?�면�??�면???�시???�이?��? ?�택?�세??</p>
+      <p class="modal-desc" style="margin-bottom:1.5rem; color:var(--text-secondary);">굿노트(GoodNotes) 단어장에 최적화된 형식으로 단어를 내보냅니다. 앞면과 뒷면에 표시할 데이터를 선택하세요.</p>
 
       <div class="options-grid" style="margin-bottom: 1.5rem;">
         <div class="option-card">
-          <label class="option-label" for="card-front-sel">?�� ?�면</label>
+          <label class="option-label" for="card-front-sel">📌 앞면</label>
           <select id="card-front-sel" class="select-input">
-            <option value="word">?�어�?/option>
-            <option value="word_pos">?�어+?�사</option>
-            <option value="word_pron">?�어+발음</option>
+            <option value="word">단어만</option>
+            <option value="word_pos">단어+품사</option>
+            <option value="word_pron">단어+발음</option>
           </select>
         </div>
         <div class="option-card">
-          <label class="option-label" for="card-back-sel">?�� ?�면</label>
+          <label class="option-label" for="card-back-sel">📝 뒷면</label>
           <select id="card-back-sel" class="select-input">
-            <option value="full" selected>???�문+?�의??/option>
-            <option value="meaning_example">???�문</option>
-            <option value="meaning_only">?�만</option>
+            <option value="full" selected>뜻+예문+유의어</option>
+            <option value="meaning_example">뜻+예문</option>
+            <option value="meaning_only">뜻만</option>
           </select>
         </div>
       </div>
 
         <div style="margin-top:1.5rem; text-align:center;">
           <button id="download-csv-btn" class="primary-action-btn">
-            <span class="btn-icon">??/span> CSV 변?�하�?
+            <span class="btn-icon">⚡</span> CSV 변환하기
           </button>
         </div>
       </div>
@@ -327,7 +327,7 @@
     <div class="modal-screen-content test-modal-box sheet-modal">
       <div class="sheet-drag-bar"></div>
       <div class="sheet-header">
-        <h2 class="sheet-title">?�� ?�스???�정</h2>
+        <h2 class="sheet-title">🧪 테스트 설정</h2>
         <button id="test-close-btn-header" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
       <!-- Test setup screen -->
@@ -335,32 +335,31 @@
         <p id="test-word-count-info" style="color:var(--text-secondary); margin-bottom:1.5rem;"></p>
         <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:2rem;">
           <div class="option-card">
-            <label class="option-label">?�� ?�스??방식</label>
+            <label class="option-label">📋 테스트 방식</label>
             <div style="display:flex; gap:10px; margin-top:8px;">
-              <button class="test-mode-btn active" id="mode-flash" data-mode="flash">?�� ?�래?�카??/button>
-              <button class="test-mode-btn" id="mode-quiz" data-mode="quiz">?�️ 4지?�다</button>
-              <button class="test-mode-btn" id="mode-short" data-mode="short">?�️ 주�???/button>
-              <button class="test-mode-btn" id="mode-trace" data-mode="trace">?�️ ?�라?�기</button>
+              <button class="test-mode-btn active" id="mode-flash" data-mode="flash">🃏 플래시카드</button>
+              <button class="test-mode-btn" id="mode-quiz" data-mode="quiz">✏️ 4지선다</button>
+              <button class="test-mode-btn" id="mode-short" data-mode="short">✍️ 주관식</button>
             </div>
           </div>
           <div class="option-card">
-            <label class="option-label">?�� 방향</label>
+            <label class="option-label">🔄 방향</label>
             <div style="display:flex; gap:10px; margin-top:8px;">
-              <button class="test-mode-btn active" id="dir-w2m" data-dir="word2meaning">?�어 ????/button>
-              <button class="test-mode-btn" id="dir-m2w" data-dir="meaning2word">?????�어</button>
+              <button class="test-mode-btn active" id="dir-w2m" data-dir="word2meaning">단어 → 뜻</button>
+              <button class="test-mode-btn" id="dir-m2w" data-dir="meaning2word">뜻 → 단어</button>
             </div>
           </div>
           <div class="option-card">
-            <label class="option-label">?? ?�서</label>
+            <label class="option-label">🔀 순서</label>
             <div style="display:flex; gap:10px; margin-top:8px;">
-              <button class="test-mode-btn active" id="order-seq" data-order="sequential">?�서?��?/button>
-              <button class="test-mode-btn" id="order-rand" data-order="random">?�덤</button>
+              <button class="test-mode-btn active" id="order-seq" data-order="sequential">순서대로</button>
+              <button class="test-mode-btn" id="order-rand" data-order="random">랜덤</button>
             </div>
           </div>
         </div>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button id="test-cancel-btn" class="sample-btn">취소</button>
-          <button id="test-start-confirm-btn" class="primary-action-btn">?�작?�기</button>
+          <button id="test-start-confirm-btn" class="primary-action-btn">시작하기</button>
         </div>
       </div>
 
@@ -375,13 +374,13 @@
             <div class="flashcard-front" id="flashcard-front"></div>
             <div class="flashcard-back" id="flashcard-back"></div>
           </div>
-          <p class="flip-hint" id="flip-hint">??��???�집�?/p>
+          <p class="flip-hint" id="flip-hint">탭하여 뒤집기</p>
         </div>
         <div class="flash-actions" id="flash-actions">
-          <button class="flash-wrong-btn" id="flash-wrong-btn">??몰랐?�요</button>
-          <button class="flash-correct-btn" id="flash-correct-btn">???�았?�요</button>
+          <button class="flash-wrong-btn" id="flash-wrong-btn">❌ 몰랐어요</button>
+          <button class="flash-correct-btn" id="flash-correct-btn">✅ 알았어요</button>
         </div>
-        <button id="flash-close-btn" class="sample-btn" style="margin-top:1rem;">???�스??종료</button>
+        <button id="flash-close-btn" class="sample-btn" style="margin-top:1rem;">✕ 테스트 종료</button>
       </div>
 
       <!-- Quiz screen -->
@@ -391,13 +390,13 @@
           <span id="quiz-progress-text" class="test-progress-label">1 / 20</span>
         </div>
         <div class="quiz-question-box">
-          <p class="quiz-question-label">?�음 ?�어???��??</p>
+          <p class="quiz-question-label">다음 단어의 뜻은?</p>
           <p class="quiz-question-word" id="quiz-question-word"></p>
         </div>
         <div class="quiz-choices" id="quiz-choices"></div>
         <div id="quiz-feedback" class="short-feedback"></div>
         <div style="display:flex; gap:0.5rem; justify-content:center; margin-top:0.8rem;">
-          <button id="quiz-close-btn" class="sample-btn">???�스??종료</button>
+          <button id="quiz-close-btn" class="sample-btn">✕ 테스트 종료</button>
         </div>
       </div>
 
@@ -408,24 +407,24 @@
           <span id="short-progress-text" class="test-progress-label">1 / 20</span>
         </div>
         <div class="quiz-question-box">
-          <p class="quiz-question-label" id="short-question-label">?�음 ?�어???�을 ?�력?�세??/p>
+          <p class="quiz-question-label" id="short-question-label">다음 단어의 뜻을 입력하세요</p>
           <p class="quiz-question-word" id="short-question-word"></p>
         </div>
         <div class="short-answer-wrap">
-          <input type="text" id="short-answer-input" class="short-answer-input" placeholder="?�답???�력?�세??.." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-          <button id="short-submit-btn" class="short-submit-btn">?�인 ??/button>
+          <input type="text" id="short-answer-input" class="short-answer-input" placeholder="정답을 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <button id="short-submit-btn" class="short-submit-btn">확인 →</button>
         </div>
         <div id="short-feedback" class="short-feedback"></div>
         <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-top:0.5rem;">
-          <button id="short-dontknow-btn" class="sample-btn" style="border-color:#fbbf24; color:#fbbf24;">?�� 모름</button>
-          <button id="short-appeal-btn" class="sample-btn hidden" style="border-color:var(--primary); color:var(--primary-light);">?�� AI ?�의?�기</button>
-          <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;">?�음</button>
+          <button id="short-dontknow-btn" class="sample-btn" style="border-color:#fbbf24; color:#fbbf24;">🤔 모름</button>
+          <button id="short-appeal-btn" class="sample-btn hidden" style="border-color:var(--primary); color:var(--primary-light);">🤖 AI 이의제기</button>
+          <button id="short-next-btn" class="generate-btn hidden" style="width:auto;padding:0.7rem 1.8rem;">다음</button>
         </div>
         <div style="display:flex; justify-content:center; align-items:center; margin-top:0.5rem; gap:10px;">
-          <button id="short-close-btn" class="sample-btn">???�스??종료</button>
+          <button id="short-close-btn" class="sample-btn">✕ 테스트 종료</button>
           <label class="vk-toggle-label">
             <input type="checkbox" id="native-kbd-switch">
-            <span class="vk-toggle-text">기본 ?�보???�용</span>
+            <span class="vk-toggle-text">기본 키보드 사용</span>
           </label>
         </div>
         
@@ -434,47 +433,55 @@
         </div>
       </div>
 
-      <!-- Tracing (?�라?�기) screen -->
-      <div id="test-trace" class="test-screen hidden">
-        <div class="test-progress-wrap">
-          <div class="test-progress-bar"><div class="test-progress-fill" id="trace-progress-fill"></div></div>
-          <span id="trace-progress-text" class="test-progress-label">1 / 20</span>
-        </div>
-        
-        <div class="trace-canvas-container">
-          <div class="trace-header">
-            <span>?�어 ?�라?�기</span>
-            <button id="trace-en-clear-btn" class="trace-clear-btn">지?�기</button>
+      <!-- Result screen -->
+          <div id="test-trace" class="hidden">
+      <div class="test-progress-bar">
+        <div id="trace-progress-fill" class="test-progress-fill"></div>
+      </div>
+      <div id="trace-progress-text" class="test-progress-text">1 / 10</div>
+      
+      <!-- English trace -->
+      <div class="trace-canvas-container">
+        <span class="trace-label">English</span>
+        <button id="trace-en-clear-btn" class="trace-clear-btn">지우기</button>
+        <canvas id="trace-en-canvas" class="trace-canvas"></canvas>
+      </div>
+      
+      <!-- Korean trace -->
+      <div class="trace-canvas-container">
+        <span class="trace-label">한국어</span>
+        <button id="trace-ko-clear-btn" class="trace-clear-btn">지우기</button>
+        <canvas id="trace-ko-canvas" class="trace-canvas"></canvas>
+      </div>
+      
+      <!-- Accuracy Feedback -->
+      <div class="trace-acc-container">
+        <div class="trace-acc-item">
+          <span class="trace-acc-label">영어 정확도</span>
+          <div class="trace-acc-bar-bg">
+            <div id="trace-en-acc-bar" class="trace-acc-bar-fill"></div>
           </div>
-          <canvas id="trace-en-canvas" class="trace-canvas" width="400" height="150"></canvas>
-          <div class="trace-accuracy-bar-container"><div id="trace-en-acc-bar" class="trace-accuracy-bar"></div></div>
-          <div id="trace-en-acc-text" class="trace-accuracy-text">0%</div>
+          <span id="trace-en-acc-text" style="font-size: 11px; text-align:right;">0%</span>
         </div>
-
-        <div class="trace-canvas-container" style="margin-top:1.5rem;">
-          <div class="trace-header">
-            <span>?��? ???�라?�기</span>
-            <button id="trace-ko-clear-btn" class="trace-clear-btn">지?�기</button>
+        <div class="trace-acc-item">
+          <span class="trace-acc-label">한글 정확도</span>
+          <div class="trace-acc-bar-bg">
+            <div id="trace-ko-acc-bar" class="trace-acc-bar-fill"></div>
           </div>
-          <canvas id="trace-ko-canvas" class="trace-canvas" width="400" height="150"></canvas>
-          <div class="trace-accuracy-bar-container"><div id="trace-ko-acc-bar" class="trace-accuracy-bar"></div></div>
-          <div id="trace-ko-acc-text" class="trace-accuracy-text">0%</div>
-        </div>
-
-        <div id="trace-feedback" class="short-feedback" style="margin-top:1rem;"></div>
-
-        <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-top:1rem;">
-          <button id="trace-skip-btn" class="sample-btn hidden" style="border-color:#fbbf24; color:#fbbf24;">건너?�기</button>
-          <button id="trace-submit-btn" class="generate-btn" style="width:auto;padding:0.7rem 1.8rem;">?�인 ??/button>
-        </div>
-        
-        <div style="display:flex; justify-content:center; align-items:center; margin-top:0.5rem; gap:10px;">
-          <button id="trace-close-btn" class="sample-btn">???�스??종료</button>
+          <span id="trace-ko-acc-text" style="font-size: 11px; text-align:right;">0%</span>
         </div>
       </div>
+      
+      <div id="trace-feedback" class="short-feedback"></div>
+      
+      <div class="test-card-actions" style="margin-top:auto;">
+        <button id="trace-close-btn" class="test-btn secondary-btn">그만하기</button>
+        <button id="trace-skip-btn" class="test-btn secondary-btn hidden">넘어가기</button>
+        <button id="trace-submit-btn" class="test-btn primary-btn">채점하기</button>
+      </div>
+    </div>
 
-      <!-- Result screen -->
-      <div id="test-result" class="test-screen hidden">
+    <div id="test-result" class="test-screen hidden">
         <div class="result-circle-wrap">
           <svg class="result-circle" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" stroke-width="10"/>
@@ -486,13 +493,13 @@
             <span id="result-pct">0%</span>
           </div>
         </div>
-        <h2 class="test-title" id="result-title">?�스???�료!</h2>
+        <h2 class="test-title" id="result-title">테스트 완료!</h2>
         <p id="result-desc" style="color:var(--text-secondary); margin-bottom:1.5rem;"></p>
         <div id="result-wrong-list" class="result-wrong-list"></div>
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
-          <button id="result-retry-wrong-btn" class="sample-btn hidden">?�� ?��??�어�??�시</button>
-          <button id="result-retry-btn" class="generate-btn" style="width:auto; padding:0.7rem 1.5rem;">??처음부??/button>
-          <button id="result-close-btn" class="sample-btn">???�기</button>
+          <button id="result-retry-wrong-btn" class="sample-btn hidden">🔁 틀린 단어만 다시</button>
+          <button id="result-retry-btn" class="generate-btn" style="width:auto; padding:0.7rem 1.5rem;">↩ 처음부터</button>
+          <button id="result-close-btn" class="sample-btn">✕ 닫기</button>
         </div>
       </div>
     </div>
@@ -501,50 +508,50 @@
   <!-- Edit Word Modal -->
   <div id="edit-word-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
     <div class="test-modal-box" style="max-width:500px; padding:2rem;">
-      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">?�️ ?�어 ?�집</h2>
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">✏️ 단어 편집</h2>
       <div style="display:flex; flex-direction:column; gap:12px; max-height:65vh; overflow-y:auto; padding-right:10px;">
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">?�어 (Word)</label>
+          <label class="option-label">단어 (Word)</label>
           <input type="text" id="edit-word" class="text-input" />
         </div>
         <div style="display:flex; gap:10px;">
           <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
-            <label class="option-label">?�사 (POS)</label>
-            <input type="text" id="edit-pos" class="text-input" placeholder="ex) ?? />
+            <label class="option-label">품사 (POS)</label>
+            <input type="text" id="edit-pos" class="text-input" placeholder="ex) ⓝ" />
           </div>
           <div class="input-group" style="flex-direction:column;gap:4px;flex:1;">
             <label class="option-label">발음 (Pronunciation)</label>
-            <input type="text" id="edit-pron" class="text-input" placeholder="ex) [sɪɡ?nɪfɪk?nt]" />
+            <input type="text" id="edit-pron" class="text-input" placeholder="ex) [sɪɡˈnɪfɪkənt]" />
           </div>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">??(Meaning)</label>
+          <label class="option-label">뜻 (Meaning)</label>
           <textarea id="edit-meaning" class="text-input" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">?�문 (Examples - 줄바꿈으�?구분)</label>
+          <label class="option-label">예문 (Examples - 줄바꿈으로 구분)</label>
           <textarea id="edit-examples" class="text-input" rows="3" style="resize:vertical;"></textarea>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">?�원 분석 (?�터�?구분, ?? re(?�시)+view(보다))</label>
+          <label class="option-label">어원 분석 (엔터로 구분, 예: re(다시)+view(보다))</label>
           <textarea id="edit-etymology" class="text-input" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">?�의??(Synonyms - 줄바꿈으�?구분)</label>
+          <label class="option-label">유의어 (Synonyms - 줄바꿈으로 구분)</label>
           <textarea id="edit-synonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">반의??(Antonyms - 줄바꿈으�?구분)</label>
+          <label class="option-label">반의어 (Antonyms - 줄바꿈으로 구분)</label>
           <textarea id="edit-antonyms" class="text-input" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="input-group" style="flex-direction:column;gap:4px;">
-          <label class="option-label">관?�어 (Related - 줄바꿈으�?구분)</label>
+          <label class="option-label">관련어 (Related - 줄바꿈으로 구분)</label>
           <textarea id="edit-related" class="text-input" rows="2" style="resize:vertical;"></textarea>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
         <button id="edit-word-cancel" class="sample-btn">취소</button>
-        <button id="edit-word-save" class="generate-btn" style="width:auto; padding:0.6rem 1.5rem;">?�??/button>
+        <button id="edit-word-save" class="generate-btn" style="width:auto; padding:0.6rem 1.5rem;">저장</button>
       </div>
     </div>
   </div>
@@ -558,7 +565,7 @@
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
         <button id="custom-prompt-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
-        <button id="custom-prompt-ok" class="modal-save-btn" style="margin-top:0;">?�인</button>
+        <button id="custom-prompt-ok" class="modal-save-btn" style="margin-top:0;">확인</button>
       </div>
     </div>
   </div>
@@ -569,7 +576,7 @@
       <p id="custom-confirm-message" class="modal-desc" style="margin-bottom:20px;font-size:1rem;"></p>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button id="custom-confirm-cancel" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;">취소</button>
-        <button id="custom-confirm-ok" style="padding:8px 20px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-weight:600;">??��</button>
+        <button id="custom-confirm-ok" style="padding:8px 20px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-weight:600;">삭제</button>
       </div>
     </div>
   </div>
@@ -579,7 +586,7 @@
     <div class="modal-screen-content sheet-modal">
       <div class="sheet-drag-bar"></div>
       <div class="sheet-header">
-        <h2 class="sheet-title">???�스??기록</h2>
+        <h2 class="sheet-title">내 테스트 기록</h2>
         <button id="history-close-btn-header" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
       <div id="history-list" style="display:flex; flex-direction:column; gap:10px; max-height:65vh; overflow-y:auto; padding-right:10px;">
@@ -587,7 +594,7 @@
       </div>
       <!-- Bottom close button kept as requested but pushed to bottom -->
         <div style="margin-top:20px; padding-bottom: env(safe-area-inset-bottom);">
-          <button id="history-close-btn" class="primary-action-btn" style="background: var(--bg-tertiary); color: var(--text);">?�기</button>
+          <button id="history-close-btn" class="primary-action-btn" style="background: var(--bg-tertiary); color: var(--text);">닫기</button>
         </div>
     </div>
   </div>
@@ -595,7 +602,7 @@
   <!-- History Detail Modal -->
   <div id="history-detail-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 10001;">
     <div class="modal-screen-content" style="max-width:500px;">
-      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">?�스???�세 결과</h2>
+      <h2 class="test-title" style="margin-bottom:1rem;font-size:1.3rem;">테스트 상세 결과</h2>
       <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; background:var(--bg-surface); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
         <div style="display:flex; flex-direction:column; gap:0.3rem;">
           <span id="history-detail-title" style="font-weight:600; font-size:1.05rem;"></span>
@@ -606,14 +613,14 @@
       <div id="history-detail-wrong" class="history-wrong hidden"></div>
       
       <div style="margin-top:1.5rem; border-top:1px dashed var(--border-color); padding-top:1rem;">
-        <button id="generate-ai-report-btn" class="generate-btn" style="width:100%; margin-bottom:1rem;">?�� AI ?�습 리포???�성</button>
+        <button id="generate-ai-report-btn" class="generate-btn" style="width:100%; margin-bottom:1rem;">🤖 AI 학습 리포트 생성</button>
         <div id="history-ai-report-container" class="hidden" style="background:rgba(108, 99, 255, 0.05); padding:1rem; border-radius:12px; border:1px solid rgba(108, 99, 255, 0.2); font-size:0.95rem; line-height:1.5; color:var(--text-primary);">
           <!-- AI report rendered here -->
         </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button id="history-detail-close-btn" class="sample-btn">?�인</button>
+        <button id="history-detail-close-btn" class="sample-btn">확인</button>
       </div>
     </div>
   </div>
@@ -623,7 +630,7 @@
     <div class="modal-screen-content sheet-modal">
       <div class="sheet-drag-bar"></div>
       <div class="sheet-header">
-        <h2 class="sheet-title">?�정</h2>
+        <h2 class="sheet-title">설정</h2>
         <button id="settings-close-btn" class="sheet-close-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.3 12.89l-1.41 1.41L12 13.41l-2.89 2.89-1.41-1.41L10.59 12 7.7 9.11l1.41-1.41L12 10.59l2.89-2.89 1.41 1.41L13.41 12l2.89 2.89z"/></svg></button>
       </div>
 
@@ -636,7 +643,7 @@
           <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; overflow:hidden;">
             <div style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 0.5px solid var(--border);">
               <div style="display:flex; align-items:center; gap:12px;">
-                <span style="font-size: 20px;">?��</span>
+                <span style="font-size: 20px;">👤</span>
                 <div style="display:flex; flex-direction:column;">
                   <div style="display:flex; align-items:center;">
                     <span id="settings-user-email" style="font-weight: 500; font-size: 15px;">user@example.com</span>
@@ -645,49 +652,49 @@
                   <div id="settings-user-providers" style="display:flex; gap:6px; margin-top:4px;"></div>
                 </div>
               </div>
-              <button id="settings-logout-btn" style="background:var(--danger); color:#fff; border:none; padding:6px 12px; border-radius:16px; font-weight:600; font-size:13px; cursor:pointer;">로그?�웃</button>
+              <button id="settings-logout-btn" style="background:var(--danger); color:#fff; border:none; padding:6px 12px; border-radius:16px; font-weight:600; font-size:13px; cursor:pointer;">로그아웃</button>
             </div>
             
             <div id="settings-add-password-container" class="hidden" style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 0.5px solid var(--border);">
               <div style="display:flex; align-items:center; gap:12px;">
-                <span style="font-size: 20px;">?��</span>
-                <span style="font-weight: 500; font-size: 14px;">?�반 로그??비�?번호 추�?</span>
+                <span style="font-size: 20px;">🔑</span>
+                <span style="font-weight: 500; font-size: 14px;">일반 로그인 비밀번호 추가</span>
               </div>
-              <button id="settings-add-password-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">?�정?�기</button>
+              <button id="settings-add-password-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">설정하기</button>
             </div>
             
             <div id="settings-link-google-container" class="hidden" style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between;">
               <div style="display:flex; align-items:center; gap:12px;">
                 <span style="font-size: 20px;"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:20px;height:20px;"></span>
-                <span style="font-weight: 500; font-size: 14px;">Google 계정 ?�동</span>
+                <span style="font-weight: 500; font-size: 14px;">Google 계정 연동</span>
               </div>
-              <button id="settings-link-google-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">?�동?�기</button>
+              <button id="settings-link-google-btn" class="primary-action-btn" style="font-size:12px; padding:6px 12px; width:auto;">연동하기</button>
             </div>
           </div>
         </div>
 
         <!-- Theme Section -->
         <div class="word-card-related-group" style="padding:0; background:transparent;">
-          <div class="word-card-section-label" style="padding: 0 12px;">?�면 모드</div>
+          <div class="word-card-section-label" style="padding: 0 12px;">화면 모드</div>
           <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:12px;">
-              <span style="font-size:24px;">?��</span>
+              <span style="font-size:24px;">🌓</span>
               <div>
-                <div style="font-family:var(--font-sf); font-size:17px; font-weight:500;">?�마 ?�환</div>
-                <div style="font-size:13px; color:var(--text-secondary);">?�이??/ ?�크 모드</div>
+                <div style="font-family:var(--font-sf); font-size:17px; font-weight:500;">테마 전환</div>
+                <div style="font-size:13px; color:var(--text-secondary);">라이트 / 다크 모드</div>
               </div>
             </div>
             
             <div class="view-toggle-group" style="width:130px; padding:3px;">
-              <button id="theme-btn-dark" onclick="window.setTheme('dark')" class="view-toggle-btn active" style="flex:1; justify-content:center;">?�크</button>
-              <button id="theme-btn-light" onclick="window.setTheme('light')" class="view-toggle-btn" style="flex:1; justify-content:center;">?�이??/button>
+              <button id="theme-btn-dark" onclick="window.setTheme('dark')" class="view-toggle-btn active" style="flex:1; justify-content:center;">다크</button>
+              <button id="theme-btn-light" onclick="window.setTheme('light')" class="view-toggle-btn" style="flex:1; justify-content:center;">라이트</button>
             </div>
           </div>
         </div>
 
         <!-- API Keys Section -->
         <div class="word-card-related-group" style="padding:0; background:transparent;">
-          <div class="word-card-section-label" style="padding: 0 12px;">API ??(로컬 ?�??</div>
+          <div class="word-card-section-label" style="padding: 0 12px;">API 키 (로컬 저장)</div>
           <div style="background:var(--bg-card); border:0.5px solid var(--border); border-radius:12px; display:flex; flex-direction:column;">
             
             <div style="padding:12px 16px;">
@@ -696,11 +703,11 @@
             </div>
           </div>
           <p style="font-size:13px; color:var(--text-muted); margin: 6px 12px 0; line-height:1.4;">
-            Gemini API??주�????�의?�기(AI 채점)???�용?�니?? ?�정?� 기기?�만 ?�전?�게 ?�?�됩?�다.
+            Gemini API는 주관식 이의제기(AI 채점)에 사용됩니다. 설정은 기기에만 안전하게 저장됩니다.
           </p>
         </div>
 
-        <button id="settings-save-btn" class="generate-btn" style="width:100%; margin-top:8px;">변경사???�??/button>
+        <button id="settings-save-btn" class="generate-btn" style="width:100%; margin-top:8px;">변경사항 저장</button>
       </div>
 
     </div>
@@ -710,29 +717,29 @@
   <!-- Privacy Policy Modal -->
   <div id="privacy-modal" class="modal-screen hidden" role="dialog" aria-modal="true" style="z-index: 10002;">
     <div class="modal-screen-content" style="max-width:500px;">
-      <h2 style="margin-bottom:1rem; font-size:1.3rem;">개인?�보 처리방침</h2>
+      <h2 style="margin-bottom:1rem; font-size:1.3rem;">개인정보 처리방침</h2>
       <div style="background:var(--bg-surface); border:1px solid var(--border-color); border-radius:12px; padding:16px; font-size:13px; line-height:1.6; color:var(--text-secondary); max-height:400px; overflow-y:auto; text-align:left; word-break:keep-all;">
-        <strong>1. ?�집?�는 개인?�보 ??��</strong><br>
-        - ?�수??��: ?�메??주소, 비�?번호(?�호?�되???�?�됨), ?�름/?�로?�사�?Google ?�동 ??<br>
+        <strong>1. 수집하는 개인정보 항목</strong><br>
+        - 필수항목: 이메일 주소, 비밀번호(암호화되어 저장됨), 이름/프로필사진(Google 연동 시)<br>
         <br>
-        <strong>2. 개인?�보???�집 �??�용 목적</strong><br>
-        - ?�원 ?�별 �?본인 ?�인<br>
-        - ?�어???�이???�?? ?�기??�?백업 ?�비???�공<br>
-        - 불량 ?�원??부???�용 방�??� 비인가 ?�용 방�?<br>
+        <strong>2. 개인정보의 수집 및 이용 목적</strong><br>
+        - 회원 식별 및 본인 확인<br>
+        - 단어장 데이터 저장, 동기화 및 백업 서비스 제공<br>
+        - 불량 회원의 부정 이용 방지와 비인가 사용 방지<br>
         <br>
-        <strong>3. 개인?�보??보유 �??�용 기간</strong><br>
-        - ?�칙?�으�?개인?�보 ?�집 �??�용 목적???�성?????�원 ?�퇴 ???�는 ?�당 ?�보�?지�??�이 ?�기?�니??<br>
-        - ?? 관계법?�의 규정???�하??보존???�요가 ?�는 경우 관??법령?�서 ?�한 ?�정??기간 ?�안 ?�원?�보�?보�??�니??<br>
+        <strong>3. 개인정보의 보유 및 이용 기간</strong><br>
+        - 원칙적으로 개인정보 수집 및 이용 목적이 달성된 후(회원 탈퇴 시)에는 해당 정보를 지체 없이 파기합니다.<br>
+        - 단, 관계법령의 규정에 의하여 보존할 필요가 있는 경우 관련 법령에서 정한 일정한 기간 동안 회원정보를 보관합니다.<br>
         <br>
-        <strong>4. ?�의�?거�???권리</strong><br>
-        - ?�용?�는 개인?�보 ?�집 �??�용???�???�의�?거�??????�습?�다. ?? ?�수??�� ?�집 ?�의 거�? ???�비??가??�??�용???�한?�니??
+        <strong>4. 동의를 거부할 권리</strong><br>
+        - 사용자는 개인정보 수집 및 이용에 대해 동의를 거부할 수 있습니다. 단, 필수항목 수집 동의 거부 시 서비스 가입 및 이용이 제한됩니다.
       </div>
       <div style="margin-top:20px;">
-        <button id="privacy-close-btn" class="primary-action-btn">?�인</button>
+        <button id="privacy-close-btn" class="primary-action-btn">확인</button>
       </div>
     </div>
   </div>
 
-  <script type="module" src="app.js?v=42e85403"></script>
+  <script type="module" src="app.js?v=63b6c8e2"></script>
 </body>
 </html>
