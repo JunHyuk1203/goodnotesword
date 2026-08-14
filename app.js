@@ -3268,7 +3268,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.textBaseline = 'middle';
   
   // Calculate maximum font size to fill the canvas bounds exactly
-  ctx.font = '900 100px var(--font-main)';
+  ctx.font = '900 100px sans-serif';
   const baseWidth = ctx.measureText(text).width;
   
   const maxFontSizeWidth = ((w - 20) / baseWidth) * 100;
@@ -3277,7 +3277,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   let fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
   fontSize = Math.max(10, Math.min(fontSize, 600)); // clamp between 10px and 600px
   
-  ctx.font = `900 ${fontSize}px var(--font-main)`;
+  ctx.font = `900 ${fontSize}px sans-serif`;
   ctx.fillText(text, w / 2, h / 2);
   
   // Create a mask of the guide pixels for accuracy calculation
@@ -3298,6 +3298,11 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
 }
 
 function showTraceCard() {
+  const traceScreen = document.getElementById('test-trace');
+  traceScreen.classList.remove('card-slide-in');
+  void traceScreen.offsetWidth;
+  traceScreen.classList.add('card-slide-in');
+  
   if (testIndex >= testWords.length) {
     showTestResult();
     return;
@@ -3337,11 +3342,7 @@ function showTraceCard() {
   const koMaskData = renderTraceGuide(activeKoCanvas, activeKoCtx, meaningText, true);
   targetMaskKo = koMaskData;
   
-  // Animate in
-  const traceScreen = document.getElementById('test-trace');
-  traceScreen.classList.remove('card-slide-in');
-  void traceScreen.offsetWidth;
-  traceScreen.classList.add('card-slide-in');
+
 }
 
 function clearTraceCanvas(canvas, ctx, targetMaskData, text, isKo) {
