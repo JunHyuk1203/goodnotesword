@@ -1834,6 +1834,7 @@ const testSetup = $('test-setup');
 const testFlash = $('test-flash');
 const testQuiz = $('test-quiz');
 const testShort = $('test-short');
+const testTrace = $('test-trace');
 const testResult = $('test-result');
 
 // Setup options state
@@ -1896,6 +1897,7 @@ function showScreen(name) {
   else if (name === 'flash') activeScreen = testFlash;
   else if (name === 'quiz') activeScreen = testQuiz;
   else if (name === 'short') activeScreen = testShort;
+  else if (name === 'trace') activeScreen = testTrace;
   else if (name === 'result') activeScreen = testResult;
   
   if (activeScreen) {
