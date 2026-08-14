@@ -3207,7 +3207,7 @@ function initTraceCanvas(canvas, ctx) {
     ctx.lineTo(lastX, lastY); // dot
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 6; // Make user stroke thicker
+    ctx.lineWidth = 15; // Make user stroke thicker
     ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
     ctx.stroke();
   }
@@ -3220,7 +3220,7 @@ function initTraceCanvas(canvas, ctx) {
     ctx.lineTo(pos.x, pos.y);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 15;
     ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
     ctx.stroke();
     lastX = pos.x;
@@ -3256,68 +3256,29 @@ let targetMaskEn = [];
 let targetMaskKo = [];
 
 function renderTraceGuide(canvas, ctx, text, isKo) {
-  const rect = canvas.getBoundingClientRect();
-  const w = rect.width;
-  const h = rect.height;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.width / dpr;
+  const h = canvas.height / dpr;
   
   ctx.clearRect(0, 0, w, h);
   
   // Draw guide text
-  ctx.fillStyle = 'rgba(180, 180, 180, 0.4)'; // Light gray guide (thicker)
+  ctx.fillStyle = 'rgba(180, 180, 180, 0.4)'; // Light gray guide
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  let fontSize = 200;
+  // Calculate maximum font size to fill the canvas bounds exactly
+  ctx.font = '900 100px var(--font-main)';
+  const baseWidth = ctx.measureText(text).width;
   
-  function wrap(ctx, text, maxWidth) {
-      let lines = [];
-      let currentLine = '';
-      const words = text.split(' ');
-      for (let word of words) {
-          let testLine = currentLine + (currentLine ? ' ' : '') + word;
-          if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-          } else {
-              currentLine = testLine;
-          }
-      }
-      lines.push(currentLine);
-      
-      // If a single word is still too long, break it by character (basic)
-      let finalLines = [];
-      for (let line of lines) {
-          if (ctx.measureText(line).width > maxWidth && line.length > 3) {
-              let cl = '';
-              for (let char of line) {
-                  if (ctx.measureText(cl + char).width > maxWidth && cl) {
-                      finalLines.push(cl);
-                      cl = char;
-                  } else {
-                      cl += char;
-                  }
-              }
-              finalLines.push(cl);
-          } else {
-              finalLines.push(line);
-          }
-      }
-      return finalLines;
-  }
-
+  const maxFontSizeWidth = ((w - 20) / baseWidth) * 100;
+  const maxFontSizeHeight = h - 20; // 10px padding top/bottom
+  
+  let fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
+  fontSize = Math.max(10, Math.min(fontSize, 600)); // clamp between 10px and 600px
+  
   ctx.font = `900 ${fontSize}px var(--font-main)`;
-  let lines = wrap(ctx, text, w - 40);
-
-  while ((lines.length * fontSize > h - 40 || lines.some(l => ctx.measureText(l).width > w - 40)) && fontSize > 20) {
-    fontSize -= 2;
-    ctx.font = `900 ${fontSize}px var(--font-main)`;
-    lines = wrap(ctx, text, w - 40);
-  }
-  
-  let startY = h / 2 - ((lines.length - 1) * fontSize) / 2;
-  for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], w / 2, startY + i * fontSize);
-  }
+  ctx.fillText(text, w / 2, h / 2);
   
   // Create a mask of the guide pixels for accuracy calculation
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -3333,7 +3294,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
     }
   }
   
-  return { mask, targetPixelCount, w, h };
+  return { mask, targetPixelCount, w, h, fontSize };
 }
 
 function showTraceCard() {
