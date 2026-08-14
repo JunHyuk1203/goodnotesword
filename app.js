@@ -3267,17 +3267,57 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  let fontSize = 120;
-  // Scale down if text is too long
+  let fontSize = 200;
+  
+  function wrap(ctx, text, maxWidth) {
+      let lines = [];
+      let currentLine = '';
+      const words = text.split(' ');
+      for (let word of words) {
+          let testLine = currentLine + (currentLine ? ' ' : '') + word;
+          if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+          } else {
+              currentLine = testLine;
+          }
+      }
+      lines.push(currentLine);
+      
+      // If a single word is still too long, break it by character (basic)
+      let finalLines = [];
+      for (let line of lines) {
+          if (ctx.measureText(line).width > maxWidth && line.length > 3) {
+              let cl = '';
+              for (let char of line) {
+                  if (ctx.measureText(cl + char).width > maxWidth && cl) {
+                      finalLines.push(cl);
+                      cl = char;
+                  } else {
+                      cl += char;
+                  }
+              }
+              finalLines.push(cl);
+          } else {
+              finalLines.push(line);
+          }
+      }
+      return finalLines;
+  }
+
   ctx.font = `900 ${fontSize}px var(--font-main)`;
-  let textWidth = ctx.measureText(text).width;
-  while (textWidth > w - 40 && fontSize > 20) {
+  let lines = wrap(ctx, text, w - 40);
+
+  while ((lines.length * fontSize > h - 40 || lines.some(l => ctx.measureText(l).width > w - 40)) && fontSize > 20) {
     fontSize -= 2;
     ctx.font = `900 ${fontSize}px var(--font-main)`;
-    textWidth = ctx.measureText(text).width;
+    lines = wrap(ctx, text, w - 40);
   }
   
-  ctx.fillText(text, w / 2, h / 2);
+  let startY = h / 2 - ((lines.length - 1) * fontSize) / 2;
+  for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], w / 2, startY + i * fontSize);
+  }
   
   // Create a mask of the guide pixels for accuracy calculation
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
