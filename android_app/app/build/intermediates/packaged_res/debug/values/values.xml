@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">굿노트 단어장</string>
+    <string name="app_name">superword</string>
     <style name="Base.Theme.GoodNotesVocab" parent="Theme.Material3.DayNight.NoActionBar">
         
     </style>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html><body>
+<div id="container" style="display: none; width: 300px; height: 150px;">
+  <canvas id="c"></canvas>
+</div>
+<script>
+const container = document.getElementById('container');
+container.style.display = 'block';
+const canvas = document.getElementById('c');
+console.log("Width after display block:", canvas.getBoundingClientRect().width);
+</script>
+</body></html>

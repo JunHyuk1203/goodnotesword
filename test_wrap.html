@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><body>
+<canvas id="c" width="400" height="200" style="border:1px solid black; width: 400px; height: 200px;"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const text = "apple tree monkey";
+const w = 400;
+const h = 200;
+
+function wrap(ctx, text, maxWidth) {
+    let lines = [];
+    let currentLine = '';
+    const words = text.split(' ');
+    for (let word of words) {
+        let testLine = currentLine + (currentLine ? ' ' : '') + word;
+        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = testLine;
+        }
+    }
+    lines.push(currentLine);
+    return lines;
+}
+
+let fontSize = 100;
+ctx.font = `900 ${fontSize}px sans-serif`;
+let lines = wrap(ctx, text, w - 20);
+
+while (lines.length * fontSize > h - 20 && fontSize > 20) {
+    fontSize -= 2;
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    lines = wrap(ctx, text, w - 20);
+}
+
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+let startY = h / 2 - ((lines.length - 1) * fontSize) / 2;
+for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], w / 2, startY + i * fontSize);
+}
+</script>
+</body></html>

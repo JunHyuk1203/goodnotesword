@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html><body>
+<canvas id="c"></canvas>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+ctx.font = '900 100px sans-serif';
+console.log("Valid font:", ctx.font);
+ctx.font = '900 100px var(--font-main)';
+console.log("CSS var font:", ctx.font);
+</script>
+</body></html>

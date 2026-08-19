@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const cssWidth = 300;
+const cssHeight = 150;
+const dpr = 3;
+
+canvas.width = cssWidth * dpr;
+canvas.height = cssHeight * dpr;
+canvas.style.width = `${cssWidth}px`;
+canvas.style.height = `${cssHeight}px`;
+
+const ctx = canvas.getContext('2d');
+ctx.scale(dpr, dpr);
+
+let fontSize = 200;
+ctx.font = `900 ${fontSize}px sans-serif`;
+
+console.log("Font size:", fontSize);
+console.log("Measured width for 'Apple':", ctx.measureText("Apple").width);
+
+// let's simulate the loop
+let textWidth = ctx.measureText("Apple").width;
+while (textWidth > cssWidth - 40 && fontSize > 20) {
+    fontSize -= 2;
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    textWidth = ctx.measureText("Apple").width;
+}
+
+console.log("Final Font size for Apple:", fontSize);
+console.log("Final Measured width:", textWidth);
+</script>
+</body></html>

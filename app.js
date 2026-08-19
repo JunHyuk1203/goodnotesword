@@ -3196,13 +3196,13 @@ const traceKoCanvas = document.getElementById('trace-ko-canvas');
 const traceEnCtx = traceEnCanvas?.getContext('2d', { willReadFrequently: true });
 const traceKoCtx = traceKoCanvas?.getContext('2d', { willReadFrequently: true });
 
-function initTraceCanvas(canvas, ctx) {
+function initTraceCanvas(canvas) {
   if (!canvas) return null;
   
   // Clone to remove old event listeners
   const clone = canvas.cloneNode(true);
   canvas.parentNode.replaceChild(clone, canvas);
-  ctx = clone.getContext('2d', { willReadFrequently: true });
+  const ctx = clone.getContext('2d', { willReadFrequently: true });
   
   // Handle high DPI displays for crisp drawing
   const rect = clone.getBoundingClientRect();
@@ -3213,70 +3213,70 @@ function initTraceCanvas(canvas, ctx) {
   // Always set physical width/height and apply scale on the NEW context
   clone.width = cssWidth * dpr;
   clone.height = cssHeight * dpr;
-  clone.style.width = `${cssWidth}px`;
-  clone.style.height = `${cssHeight}px`;
   ctx.scale(dpr, dpr);
   
-  // Setup drawing state
-  let isDrawing = false;
-  let lastX = 0;
-  let lastY = 0;
+  // Only the draw layer needs touch events
+  if (clone.classList.contains('trace-draw-layer')) {
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
 
-  function getPos(e) {
-    const r = clone.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: clientX - r.left,
-      y: clientY - r.top
-    };
+    function getPos(e) {
+      const r = clone.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: clientX - r.left,
+        y: clientY - r.top
+      };
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(lastX, lastY); // dot
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 15; // Make user stroke thicker
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
+      ctx.stroke();
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 15;
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
+      ctx.stroke();
+      lastX = pos.x;
+      lastY = pos.y;
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+      ctx.beginPath();
+    }
+
+    // Add pointer events (works for mouse, touch, and pen)
+    clone.addEventListener('pointerdown', startDrawing);
+    clone.addEventListener('pointermove', draw);
+    clone.addEventListener('pointerup', stopDrawing);
+    clone.addEventListener('pointerout', stopDrawing);
+    clone.addEventListener('pointercancel', stopDrawing);
+    
+    // Prevent scrolling on touch
+    clone.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    clone.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
   }
-
-  function startDrawing(e) {
-    isDrawing = true;
-    const pos = getPos(e);
-    lastX = pos.x;
-    lastY = pos.y;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(lastX, lastY); // dot
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = 15; // Make user stroke thicker
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
-    ctx.stroke();
-  }
-
-  function draw(e) {
-    if (!isDrawing) return;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#ffffff';
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
-  }
-
-  function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-  }
-
-  // Add pointer events (works for mouse, touch, and pen)
-  clone.addEventListener('pointerdown', startDrawing);
-  clone.addEventListener('pointermove', draw);
-  clone.addEventListener('pointerup', stopDrawing);
-  clone.addEventListener('pointerout', stopDrawing);
-  clone.addEventListener('pointercancel', stopDrawing);
-  
-  // Prevent scrolling on touch
-  clone.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-  clone.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
   
   return { canvas: clone, ctx: ctx };
 }
@@ -3298,21 +3298,20 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.clearRect(0, 0, w, h);
   
   // Draw guide text
-  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide — alpha ~38, well below user-pixel threshold
+  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Calculate maximum font size to fill the canvas bounds exactly
   ctx.font = '900 100px sans-serif';
   const baseWidth = ctx.measureText(text).width;
   
   const maxFontSizeWidth = ((w - 20) / baseWidth) * 100;
-  const maxFontSizeHeight = h - 20; // 10px padding top/bottom
+  const maxFontSizeHeight = h - 20;
   
   let fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
-  fontSize = Math.max(10, Math.min(fontSize, 600)); // clamp between 10px and 600px
+  fontSize = Math.max(10, Math.min(fontSize, 600));
   
-  ctx.font = `900 ${fontSize}px sans-serif`;
+  ctx.font = 900 px sans-serif;
   ctx.fillText(text, w / 2, h / 2);
   
   // Create a mask of the guide pixels for accuracy calculation
@@ -3323,7 +3322,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
-    if (a > 20) { // If pixel is somewhat opaque
+    if (a > 20) {
       mask[i / 4] = 1;
       targetPixelCount++;
     }
@@ -3360,37 +3359,49 @@ function showTraceCard() {
   document.getElementById('trace-progress-fill').style.width = pct + '%';
   document.getElementById('trace-progress-text').textContent = `${testIndex + 1} / ${total}`;
   
-  // Re-init canvases
-  const enRes = initTraceCanvas(document.getElementById('trace-en-canvas'), traceEnCtx);
+  // Re-init guide canvases (no events)
+  const enGuideRes = initTraceCanvas(document.getElementById('trace-en-guide'));
+  const koGuideRes = initTraceCanvas(document.getElementById('trace-ko-guide'));
+  
+  // Re-init draw canvases (has events)
+  const enRes = initTraceCanvas(document.getElementById('trace-en-draw'));
   activeEnCanvas = enRes.canvas;
   activeEnCtx = enRes.ctx;
   
-  const koRes = initTraceCanvas(document.getElementById('trace-ko-canvas'), traceKoCtx);
+  const koRes = initTraceCanvas(document.getElementById('trace-ko-draw'));
   activeKoCanvas = koRes.canvas;
   activeKoCtx = koRes.ctx;
   
   const meaningText = data.meaning ? data.meaning.split(',')[0].trim() : data.back || '';
   
-  const enMaskData = renderTraceGuide(activeEnCanvas, activeEnCtx, data.word, false);
-  targetMaskEn = enMaskData;
+  // Render guides and save masks
+  targetMaskEn = renderTraceGuide(enGuideRes.canvas, enGuideRes.ctx, data.word, false);
+  if (data.meaning) {
+    document.getElementById('trace-ko-draw').parentNode.style.display = 'flex';
+    targetMaskKo = renderTraceGuide(koGuideRes.canvas, koGuideRes.ctx, meaningText, true);
+  } else {
+    document.getElementById('trace-ko-draw').parentNode.style.display = 'none';
+    targetMaskKo = null;
+  }
   
-  const koMaskData = renderTraceGuide(activeKoCanvas, activeKoCtx, meaningText, true);
-  targetMaskKo = koMaskData;
+  // Clear the drawing layers for the new word
+  clearTraceCanvas(activeEnCanvas, activeEnCtx);
+  clearTraceCanvas(activeKoCanvas, activeKoCtx);
   
 
 }
 
-function clearTraceCanvas(canvas, ctx, targetMaskData, text, isKo) {
-  renderTraceGuide(canvas, ctx, text, isKo);
+function clearTraceCanvas(canvas, ctx) {
+  const dpr = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 }
 
 document.getElementById('trace-en-clear-btn')?.addEventListener('click', () => {
-  clearTraceCanvas(activeEnCanvas, activeEnCtx, targetMaskEn, currentTraceData.word, false);
+  clearTraceCanvas(activeEnCanvas, activeEnCtx);
 });
 
 document.getElementById('trace-ko-clear-btn')?.addEventListener('click', () => {
-  const meaningText = currentTraceData.meaning ? currentTraceData.meaning.split(',')[0].trim() : currentTraceData.back || '';
-  clearTraceCanvas(activeKoCanvas, activeKoCtx, targetMaskKo, meaningText, true);
+  clearTraceCanvas(activeKoCanvas, activeKoCtx);
 });
 
 function calculateTraceAccuracy(canvas, ctx, maskData) {
@@ -3398,19 +3409,15 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   const data = imgData.data;
   
   let hitCount = 0;
-  let falsePositiveCount = 0;
   let userPixelCount = 0;
   
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
-    // We look for pixels that are drawn by user.
-    // User draws with near-full opacity (alpha ~255). Guide is ~38. Threshold = 200 keeps them distinct.
-    if (a > 200) {
+    // User draws with near-full opacity (alpha ~255)
+    if (a > 100) {
       userPixelCount++;
       if (maskData.mask[i / 4] === 1) {
         hitCount++; // User drew on the guide
-      } else {
-        falsePositiveCount++; // User drew outside the guide
       }
     }
   }
@@ -3418,23 +3425,18 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   if (maskData.targetPixelCount === 0) return 100;
   if (userPixelCount === 0) return 0;
   
-  // Coverage: how much of the guide did they cover?
-  // We cap coverage at 1.0 (sometimes they can't cover 100% due to stroke width differences)
-  // We will assume 60% coverage of pixels is practically "fully covered" for tracing
-  let coverage = hitCount / (maskData.targetPixelCount * 0.6); 
-  if (coverage > 1) coverage = 1;
+  // F1-Score calculation
+  // Recall: how much of the guide did they cover?
+  const recall = hitCount / maskData.targetPixelCount;
   
-  // Precision penalty: drawing too much outside the guide reduces accuracy
-  // We allow some false positives because the stroke is thick.
-  // If false positives exceed 2x the target pixel count, it's scribbling.
-  let penalty = 0;
-  const allowedOverflow = maskData.targetPixelCount * 1.5;
-  if (falsePositiveCount > allowedOverflow) {
-    penalty = ((falsePositiveCount - allowedOverflow) / maskData.targetPixelCount) * 0.5;
-  }
+  // Precision: how much of their stroke was on the guide?
+  const precision = hitCount / userPixelCount;
   
-  let finalAcc = (coverage - penalty) * 100;
-  return Math.max(0, Math.min(100, Math.round(finalAcc)));
+  if (precision + recall === 0) return 0;
+  
+  const f1 = 2 * (precision * recall) / (precision + recall);
+  
+  return Math.max(0, Math.min(100, Math.round(f1 * 100)));
 }
 
 function updateTraceBar(barId, textId, acc) {
@@ -3458,7 +3460,8 @@ document.getElementById('trace-submit-btn')?.addEventListener('click', () => {
   updateTraceBar('trace-ko-acc-bar', 'trace-ko-acc-text', koAcc);
   
   const fb = document.getElementById('trace-feedback');
-  if (enAcc >= 80 && koAcc >= 80) {
+  // Lowered threshold to 60 because F1-Score is much stricter than simple coverage
+  if (enAcc >= 60 && koAcc >= 60) {
     fb.textContent = '✅ 정확하게 잘 따라 썼습니다!';
     fb.className = 'short-feedback show-feedback correct-fb';
     testCorrect++;
