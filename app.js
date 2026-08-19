@@ -3311,7 +3311,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   let fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
   fontSize = Math.max(10, Math.min(fontSize, 600));
   
-  ctx.font = 900 px sans-serif;
+  ctx.font = `900 ${fontSize}px sans-serif`;
   ctx.fillText(text, w / 2, h / 2);
   
   // Create a mask of the guide pixels for accuracy calculation
