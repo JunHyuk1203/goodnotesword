@@ -136,6 +136,11 @@ document.querySelectorAll('.modal-screen').forEach(modal => {
   
   if (content) {
     content.addEventListener('touchstart', (e) => {
+      // If the touch starts on a canvas (trace drawing area), never trigger swipe-to-dismiss
+      if (e.target.tagName === 'CANVAS') {
+        sheetStartY = null;
+        return;
+      }
       if (content.scrollTop === 0) {
         sheetStartY = e.touches[0].clientY;
         sheetStartX = e.touches[0].clientX;
