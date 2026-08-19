@@ -129,13 +129,18 @@ document.querySelectorAll('.modal-screen').forEach(modal => {
   
   // Swipe down to dismiss
   let sheetStartY = null;
+  let sheetStartX = null;
   let sheetCurrentY = null;
+  let isSwipeIntent = false; // true only once we're sure it's a downward swipe, not a tap
   const content = modal.querySelector('.modal-screen-content');
   
   if (content) {
     content.addEventListener('touchstart', (e) => {
       if (content.scrollTop === 0) {
         sheetStartY = e.touches[0].clientY;
+        sheetStartX = e.touches[0].clientX;
+        sheetCurrentY = sheetStartY;
+        isSwipeIntent = false;
       }
     }, { passive: true });
     
@@ -143,7 +148,20 @@ document.querySelectorAll('.modal-screen').forEach(modal => {
       if (sheetStartY === null) return;
       sheetCurrentY = e.touches[0].clientY;
       const deltaY = sheetCurrentY - sheetStartY;
-      if (deltaY > 0) {
+      const deltaX = Math.abs(e.touches[0].clientX - sheetStartX);
+      
+      // Only commit to swipe intent if: moving down, clearly vertical, and moved at least 10px
+      if (!isSwipeIntent) {
+        if (deltaY > 10 && deltaY > deltaX * 3) {
+          isSwipeIntent = true;
+        } else if (deltaX > 10 || (deltaY < 0 && Math.abs(deltaY) > 5)) {
+          // Horizontal or upward movement → cancel, treat as tap
+          sheetStartY = null;
+          return;
+        }
+      }
+      
+      if (isSwipeIntent && deltaY > 0) {
         content.style.transform = `translateY(${deltaY}px)`;
         content.style.transition = 'none';
       }
@@ -154,11 +172,14 @@ document.querySelectorAll('.modal-screen').forEach(modal => {
       const deltaY = sheetCurrentY - sheetStartY;
       content.style.transform = '';
       content.style.transition = '';
-      if (deltaY > 100) {
+      // Only close if we clearly swiped down with intent (not just a tap)
+      if (isSwipeIntent && deltaY > 100) {
         closeModal(modal);
       }
       sheetStartY = null;
+      sheetStartX = null;
       sheetCurrentY = null;
+      isSwipeIntent = false;
     });
   }
 });
@@ -573,6 +594,9 @@ let backSwipeStartX = null;
 let backSwipeStartY = null;
 
 document.addEventListener('touchstart', (e) => {
+  // Block back-swipe when a modal or test is open
+  if (document.body.classList.contains('modal-open')) return;
+  if (document.body.classList.contains('test-open')) return;
   // Only trigger from left half (up to 45% of screen width)
   if (e.touches.length === 1 && e.touches[0].clientX <= window.innerWidth * 0.45) {
     backSwipeStartX = e.touches[0].clientX;
@@ -582,6 +606,8 @@ document.addEventListener('touchstart', (e) => {
 
 document.addEventListener('touchmove', (e) => {
   if (backSwipeStartX === null) return;
+  if (document.body.classList.contains('modal-open')) { backSwipeStartX = null; return; }
+  if (document.body.classList.contains('test-open')) { backSwipeStartX = null; return; }
   const deltaX = e.touches[0].clientX - backSwipeStartX;
   const deltaY = Math.abs(e.touches[0].clientY - backSwipeStartY);
   // Cancel if vertical scroll is dominant
@@ -592,6 +618,8 @@ document.addEventListener('touchmove', (e) => {
 
 document.addEventListener('touchend', (e) => {
   if (backSwipeStartX === null) return;
+  if (document.body.classList.contains('modal-open')) { backSwipeStartX = null; return; }
+  if (document.body.classList.contains('test-open')) { backSwipeStartX = null; return; }
   const deltaX = e.changedTouches[0].clientX - backSwipeStartX;
   if (deltaX > 80) {
     if (currentLibraryLevel === 2 && selectedBookId) {
@@ -1908,6 +1936,7 @@ function showScreen(name) {
 }
 
 function closeTest() {
+  document.body.classList.remove('test-open');
   closeModal(testModal);
 }
 
@@ -1916,6 +1945,7 @@ function startTest(words) {
   testIndex = 0;
   testCorrect = 0;
   testWrong = [];
+  document.body.classList.add('test-open');
 
   if (testMode === 'flash') {
     showScreen('flash');
@@ -3263,7 +3293,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.clearRect(0, 0, w, h);
   
   // Draw guide text
-  ctx.fillStyle = 'rgba(180, 180, 180, 0.4)'; // Light gray guide
+  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide — alpha ~38, well below user-pixel threshold
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
@@ -3369,9 +3399,8 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
     // We look for pixels that are drawn by user.
-    // The guide is rgba(150,150,150,0.25) which has alpha ~63. User draws with alpha 255.
-    // So if alpha > 100, it's a user pixel.
-    if (a > 100) {
+    // User draws with near-full opacity (alpha ~255). Guide is ~38. Threshold = 200 keeps them distinct.
+    if (a > 200) {
       userPixelCount++;
       if (maskData.mask[i / 4] === 1) {
         hitCount++; // User drew on the guide

@@ -2935,21 +2935,27 @@ body[data-theme='light'] .sheet-drag-bar {
 }
 
 .sheet-close-btn {
-  width: 28px;
-  height: 28px;
+  /* Visible icon is 28px but tap area is 44x44 for reliable touch */
+  width: 44px;
+  height: 44px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
   opacity: 0.6;
   cursor: pointer;
-  padding: 0;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s;
+  touch-action: manipulation; /* remove 300ms double-tap delay */
+  position: relative;
+  z-index: 20; /* sit above swipe handler layer */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sheet-close-btn:hover {
+.sheet-close-btn:hover,
+.sheet-close-btn:active {
   opacity: 1;
 }
 
@@ -2957,6 +2963,7 @@ body[data-theme='light'] .sheet-drag-bar {
   width: 28px;
   height: 28px;
   fill: currentColor;
+  pointer-events: none;
 }
 
 /* Primary Action Button Unified */
