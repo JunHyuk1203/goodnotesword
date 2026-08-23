@@ -14,7 +14,7 @@
   <meta name="description" content="단어장을 관리하고 AI로 단어를 추출하여 학습하는 스마트 단어장 앱입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@700;800;900&family=Jua&family=Comic+Neue:wght@700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=9c59602d" />
+  <link rel="stylesheet" href="style.css?v=tracefont1" />
   <script src="https://cdn.jsdelivr.net/npm/hangul-js@0.2.6/hangul.min.js"></script>
   <style>
     /* Hard override: no scrollbars ever, but keep scrollability */
@@ -23,6 +23,11 @@
   </style>
 </head>
 <body>
+<!-- Preload trace fonts -->
+<div style="position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0;">
+  <span style="font-family: 'Comic Neue'; font-weight: 700;">.</span>
+  <span style="font-family: 'Nanum Pen Script'; font-weight: 400;">.</span>
+</div>
 <div id="page-wrapper" style="overflow-x: hidden; position: relative; min-height: 100vh; width: 100%;">
   <div class="bg-orb orb-1"></div>
   <div class="bg-orb orb-2"></div>
@@ -743,6 +748,8 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=9c59602d"></script>
+  <span style="font-family:'Pretendard'; opacity:0; pointer-events:none;">.</span>
+  <span style="font-family:'Pretendard'; font-weight:700; opacity:0; pointer-events:none;">.</span>
+  <script type="module" src="app.js?v=tracefont1"></script>
 </body>
 </html>
