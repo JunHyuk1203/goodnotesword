@@ -3302,7 +3302,10 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  ctx.font = '900 100px sans-serif';
+  const fontFamily = isKo ? "'Nanum Pen Script', cursive, sans-serif" : "'Comic Neue', cursive, sans-serif";
+  const fontWeight = isKo ? "400" : "700";
+  
+  ctx.font = `${fontWeight} 100px ${fontFamily}`;
   const baseWidth = ctx.measureText(text).width;
   
   const maxFontSizeWidth = ((w - 20) / baseWidth) * 100;
@@ -3311,7 +3314,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   let fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
   fontSize = Math.max(10, Math.min(fontSize, 600));
   
-  ctx.font = `900 ${fontSize}px sans-serif`;
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.fillText(text, w / 2, h / 2);
   
   // Create a mask of the guide pixels for accuracy calculation
