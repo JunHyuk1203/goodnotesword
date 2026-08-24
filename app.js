@@ -3325,25 +3325,24 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
-  // === MASK 1: Narrow mask (15px) - measures how much of the stroke was covered ===
+  // === 1. Target Area (15px brush) ===
+  // Represents the ideal area if traced perfectly with the user's 15px brush
   ctx.clearRect(0, 0, w, h);
   ctx.lineWidth = 15;
   ctx.fillText(text, w / 2, h / 2);
   ctx.strokeText(text, w / 2, h / 2);
   
   let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const narrowMask = new Uint8Array(canvas.width * canvas.height);
-  let narrowPixelCount = 0;
+  let targetArea = 0;
   for (let i = 0; i < imgData.data.length; i += 4) {
     if (imgData.data[i + 3] > 20) {
-      narrowMask[i / 4] = 1;
-      narrowPixelCount++;
+      targetArea++;
     }
   }
   
-  // === MASK 2: Allow mask (25px) - generous boundary for overflow detection ===
-  // Build by expanding narrowMask with extra strokeText at 25px
-  ctx.lineWidth = 25;
+  // === 2. Allow Mask (35px brush) ===
+  // Generous boundary to prevent penalizing natural hand jitter
+  ctx.lineWidth = 35;
   ctx.strokeText(text, w / 2, h / 2);
   
   imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -3354,12 +3353,12 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
     }
   }
   
-  // === VISUAL: Draw the visible guide (thin, semi-transparent) ===
+  // === 3. Draw the VISUAL guide (thin, semi-transparent) ===
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(150, 150, 150, 0.6)';
+  ctx.fillStyle = 'rgba(150, 150, 150, 0.6)'; // Much more visible for thin fonts
   ctx.fillText(text, w / 2, h / 2);
   
-  return { narrowMask, allowMask, narrowPixelCount, w, h, fontSize };
+  return { allowMask, targetArea, w, h, fontSize };
 }
 
 // Global auto-grading function
@@ -3494,35 +3493,39 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imgData.data;
   
-  let hitNarrow = 0;     // User pixels inside the narrow (15px) mask
-  let hitAllow = 0;      // User pixels inside the allow (25px) mask
-  let userPixelCount = 0;
+  let validUserArea = 0;
+  let overflowArea = 0;
   
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
     if (a > 100) {
-      userPixelCount++;
-      const pixIdx = i / 4;
-      if (maskData.narrowMask[pixIdx] === 1) hitNarrow++;
-      if (maskData.allowMask[pixIdx] === 1)  hitAllow++;
+      if (maskData.allowMask[i / 4] === 1) {
+        validUserArea++;
+      } else {
+        overflowArea++;
+      }
     }
   }
   
-  if (maskData.narrowPixelCount === 0) return 100;
-  if (userPixelCount === 0) return 0;
+  if (maskData.targetArea === 0) return 100;
+  if (validUserArea + overflowArea === 0) return 0;
   
-  // === Recall: how much of the narrow stroke path did they cover? ===
-  const recall = hitNarrow / maskData.narrowPixelCount;
+  // 1. Completion: How much of the target area did they cover?
+  // Because they can draw messily inside the allowMask, validUserArea roughly matches targetArea for a full trace.
+  const completion = validUserArea / maskData.targetArea;
   
-  // === Overflow penalty: fraction of user's pixels that fell OUTSIDE the allow mask ===
-  const overflowRatio = (userPixelCount - hitAllow) / userPixelCount;
-  const penalty = overflowRatio * 1.5; // Amplify: even small overflow = big penalty
+  // 2. Overflow penalty: Deduct points for drawing outside the allowMask.
+  const overflowPenalty = (overflowArea / maskData.targetArea) * 1.5;
   
-  // === Final score ===
-  const raw = recall * (1 - penalty);
+  // 3. Excess ink penalty (Anti-coloring): Deduct points heavily if they scribble inside the allowMask to fill it up.
+  // 1.3x targetArea is a normal margin for overlapping strokes. Beyond that is coloring.
+  const excessPenalty = Math.max(0, (validUserArea - maskData.targetArea * 1.3) / maskData.targetArea) * 2.5;
   
-  // Boost score 1.2x to compensate for natural imprecision of hand-drawing
-  const calibrated = raw * 1.2;
+  // Final calculation
+  let rawScore = completion - overflowPenalty - excessPenalty;
+  
+  // Mild gamification boost (1.15x) so a decent 70-80% trace visually reaches 90-100%.
+  const calibrated = rawScore * 1.15;
   
   return Math.max(0, Math.min(100, Math.round(calibrated * 100)));
 }
