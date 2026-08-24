@@ -3362,25 +3362,19 @@ function updateRealtimeAccuracy() {
     updateTraceBar('trace-ko-acc-bar', 'trace-ko-acc-text', koAcc);
   }
   
-  // Auto pass if both are >= 80 (since we made F1 score perfectly fair now)
+  // Enable next button if both are >= 80
+  const nextBtn = document.getElementById('trace-next-btn');
   if (enAcc >= 80 && koAcc >= 80) {
     const fb = document.getElementById('trace-feedback');
     if (!fb.classList.contains('correct-fb')) { // Prevent multiple triggers
-      fb.textContent = '✅ 완벽하게 썼습니다!';
+      fb.textContent = '✅ 잘 썼습니다! 다음으로 넘어가세요.';
       fb.className = 'short-feedback show-feedback correct-fb';
-      testCorrect++;
-      
-      // Auto transition
-      setTimeout(() => {
-        const traceScreen = document.getElementById('test-trace');
-        traceScreen.classList.add('card-slide-out');
-        setTimeout(() => {
-          traceScreen.classList.remove('card-slide-out');
-          testIndex++;
-          showTraceCard();
-        }, 200);
-      }, 600);
+      if (nextBtn) nextBtn.disabled = false;
     }
+  } else {
+    if (nextBtn) nextBtn.disabled = true;
+    const fb = document.getElementById('trace-feedback');
+    fb.className = 'short-feedback'; // Hide if drops below 80
   }
 }
 
@@ -3455,6 +3449,34 @@ document.getElementById('trace-en-clear-btn')?.addEventListener('click', () => {
 
 document.getElementById('trace-ko-clear-btn')?.addEventListener('click', () => {
   clearTraceCanvas(activeKoCanvas, activeKoCtx);
+  if (typeof updateRealtimeAccuracy === "function") updateRealtimeAccuracy();
+});
+
+// Trace Next Button
+document.getElementById('trace-next-btn')?.addEventListener('click', () => {
+  testCorrect++; // They passed
+  const traceScreen = document.getElementById('test-trace');
+  traceScreen.classList.add('card-slide-out');
+  setTimeout(() => {
+    traceScreen.classList.remove('card-slide-out');
+    testIndex++;
+    showTraceCard();
+  }, 200);
+});
+
+// Global modal close button fix
+document.addEventListener('click', (e) => {
+  const closeBtn = e.target.closest('.sheet-close-btn');
+  if (closeBtn) {
+    const modal = closeBtn.closest('.modal-screen');
+    if (modal) {
+      if (modal.id === 'test-modal') {
+        closeTest();
+      } else {
+        closeModal(modal);
+      }
+    }
+  }
 });
 
 function calculateTraceAccuracy(canvas, ctx, maskData) {
