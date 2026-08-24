@@ -3320,34 +3320,42 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // 1. Draw THICK version for the mask (matching user's 15px stroke)
   ctx.fillStyle = 'rgba(255, 255, 255, 1)';
   ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-  ctx.lineWidth = 15; // Same as user's brush
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  
+  // 1. Get expected pixel count (perfect trace with 15px brush)
+  ctx.lineWidth = 15;
   ctx.fillText(text, w / 2, h / 2);
   ctx.strokeText(text, w / 2, h / 2);
   
-  // Create a mask of the thick guide pixels for accuracy calculation
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imgData.data;
-  const mask = new Uint8Array(canvas.width * canvas.height);
-  let targetPixelCount = 0;
-  
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] > 20) {
-      mask[i / 4] = 1;
-      targetPixelCount++;
+  let expectedPixelCount = 0;
+  let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    if (imgData.data[i + 3] > 20) {
+      expectedPixelCount++;
     }
   }
   
-  // 2. Clear and draw the actual VISUAL guide (thin)
+  // 2. Get forgiving mask (thick 35px boundary)
+  ctx.lineWidth = 35;
+  ctx.strokeText(text, w / 2, h / 2);
+  
+  const mask = new Uint8Array(canvas.width * canvas.height);
+  imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    if (imgData.data[i + 3] > 20) {
+      mask[i / 4] = 1;
+    }
+  }
+  
+  // 3. Clear and draw the actual VISUAL guide (thin)
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = 'rgba(150, 150, 150, 0.6)'; // Much more visible for thin fonts
   ctx.fillText(text, w / 2, h / 2);
   
-  return { mask, targetPixelCount, w, h, fontSize };
+  return { mask, targetPixelCount: expectedPixelCount, w, h, fontSize };
 }
 
 // Global auto-grading function
@@ -3510,7 +3518,11 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   
   const f1 = 2 * (precision * recall) / (precision + recall);
   
-  return Math.max(0, Math.min(100, Math.round(f1 * 100)));
+  // Calibrate score: mathematical F1 is too strict for human perception.
+  // 1.3x multiplier makes it feel much more natural and rewarding.
+  const calibrated = f1 * 1.3;
+  
+  return Math.max(0, Math.min(100, Math.round(calibrated * 100)));
 }
 
 function updateTraceBar(barId, textId, acc) {
