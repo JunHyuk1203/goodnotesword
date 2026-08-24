@@ -3325,37 +3325,41 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
-  // 1. Get expected pixel count (perfect trace with 15px brush)
+  // === MASK 1: Narrow mask (15px) - measures how much of the stroke was covered ===
+  ctx.clearRect(0, 0, w, h);
   ctx.lineWidth = 15;
   ctx.fillText(text, w / 2, h / 2);
   ctx.strokeText(text, w / 2, h / 2);
   
-  let expectedPixelCount = 0;
   let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const narrowMask = new Uint8Array(canvas.width * canvas.height);
+  let narrowPixelCount = 0;
   for (let i = 0; i < imgData.data.length; i += 4) {
     if (imgData.data[i + 3] > 20) {
-      expectedPixelCount++;
+      narrowMask[i / 4] = 1;
+      narrowPixelCount++;
     }
   }
   
-  // 2. Get forgiving mask (thick 35px boundary)
-  ctx.lineWidth = 35;
+  // === MASK 2: Allow mask (25px) - generous boundary for overflow detection ===
+  // Build by expanding narrowMask with extra strokeText at 25px
+  ctx.lineWidth = 25;
   ctx.strokeText(text, w / 2, h / 2);
   
-  const mask = new Uint8Array(canvas.width * canvas.height);
   imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const allowMask = new Uint8Array(canvas.width * canvas.height);
   for (let i = 0; i < imgData.data.length; i += 4) {
     if (imgData.data[i + 3] > 20) {
-      mask[i / 4] = 1;
+      allowMask[i / 4] = 1;
     }
   }
   
-  // 3. Clear and draw the actual VISUAL guide (thin)
+  // === VISUAL: Draw the visible guide (thin, semi-transparent) ===
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(150, 150, 150, 0.6)'; // Much more visible for thin fonts
+  ctx.fillStyle = 'rgba(150, 150, 150, 0.6)';
   ctx.fillText(text, w / 2, h / 2);
   
-  return { mask, targetPixelCount: expectedPixelCount, w, h, fontSize };
+  return { narrowMask, allowMask, narrowPixelCount, w, h, fontSize };
 }
 
 // Global auto-grading function
@@ -3490,37 +3494,35 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imgData.data;
   
-  let hitCount = 0;
+  let hitNarrow = 0;     // User pixels inside the narrow (15px) mask
+  let hitAllow = 0;      // User pixels inside the allow (25px) mask
   let userPixelCount = 0;
   
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
-    // User draws with near-full opacity (alpha ~255)
     if (a > 100) {
       userPixelCount++;
-      if (maskData.mask[i / 4] === 1) {
-        hitCount++; // User drew on the guide
-      }
+      const pixIdx = i / 4;
+      if (maskData.narrowMask[pixIdx] === 1) hitNarrow++;
+      if (maskData.allowMask[pixIdx] === 1)  hitAllow++;
     }
   }
   
-  if (maskData.targetPixelCount === 0) return 100;
+  if (maskData.narrowPixelCount === 0) return 100;
   if (userPixelCount === 0) return 0;
   
-  // F1-Score calculation
-  // Recall: how much of the guide did they cover?
-  const recall = hitCount / maskData.targetPixelCount;
+  // === Recall: how much of the narrow stroke path did they cover? ===
+  const recall = hitNarrow / maskData.narrowPixelCount;
   
-  // Precision: how much of their stroke was on the guide?
-  const precision = hitCount / userPixelCount;
+  // === Overflow penalty: fraction of user's pixels that fell OUTSIDE the allow mask ===
+  const overflowRatio = (userPixelCount - hitAllow) / userPixelCount;
+  const penalty = overflowRatio * 1.5; // Amplify: even small overflow = big penalty
   
-  if (precision + recall === 0) return 0;
+  // === Final score ===
+  const raw = recall * (1 - penalty);
   
-  const f1 = 2 * (precision * recall) / (precision + recall);
-  
-  // Calibrate score: mathematical F1 is too strict for human perception.
-  // 1.3x multiplier makes it feel much more natural and rewarding.
-  const calibrated = f1 * 1.3;
+  // Boost score 1.2x to compensate for natural imprecision of hand-drawing
+  const calibrated = raw * 1.2;
   
   return Math.max(0, Math.min(100, Math.round(calibrated * 100)));
 }
