@@ -3220,6 +3220,7 @@ function initTraceCanvas(canvas) {
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
+    let lastUpdateTime = 0;
 
     function getPos(e) {
       const r = clone.getBoundingClientRect();
@@ -3259,11 +3260,17 @@ function initTraceCanvas(canvas) {
       ctx.stroke();
       lastX = pos.x;
       lastY = pos.y;
+      
+      if (Date.now() - lastUpdateTime > 100) {
+        if (typeof updateRealtimeAccuracy === "function") updateRealtimeAccuracy();
+        lastUpdateTime = Date.now();
+      }
     }
 
     function stopDrawing() {
       isDrawing = false;
       ctx.beginPath();
+      if (typeof updateRealtimeAccuracy === "function") updateRealtimeAccuracy();
     }
 
     // Add pointer events (works for mouse, touch, and pen)
@@ -3297,11 +3304,6 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   
   ctx.clearRect(0, 0, w, h);
   
-  // Draw guide text
-  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
   const fontFamily = isKo ? "'Nanum Pen Script', cursive, sans-serif" : "'Comic Neue', cursive, sans-serif";
   const fontWeight = isKo ? "400" : "700";
   
@@ -3315,23 +3317,71 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   fontSize = Math.max(10, Math.min(fontSize, 600));
   
   ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-  ctx.fillText(text, w / 2, h / 2);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
   
-  // Create a mask of the guide pixels for accuracy calculation
+  // 1. Draw THICK version for the mask (matching user's 15px stroke)
+  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+  ctx.lineWidth = 15; // Same as user's brush
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.fillText(text, w / 2, h / 2);
+  ctx.strokeText(text, w / 2, h / 2);
+  
+  // Create a mask of the thick guide pixels for accuracy calculation
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imgData.data;
   const mask = new Uint8Array(canvas.width * canvas.height);
   let targetPixelCount = 0;
   
   for (let i = 0; i < data.length; i += 4) {
-    const a = data[i + 3];
-    if (a > 20) {
+    if (data[i + 3] > 20) {
       mask[i / 4] = 1;
       targetPixelCount++;
     }
   }
   
+  // 2. Clear and draw the actual VISUAL guide (thin)
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide
+  ctx.fillText(text, w / 2, h / 2);
+  
   return { mask, targetPixelCount, w, h, fontSize };
+}
+
+// Global auto-grading function
+function updateRealtimeAccuracy() {
+  if (!activeEnCanvas || !activeEnCtx || !targetMaskEn) return;
+  const enAcc = calculateTraceAccuracy(activeEnCanvas, activeEnCtx, targetMaskEn);
+  updateTraceBar('trace-en-acc-bar', 'trace-en-acc-text', enAcc);
+  
+  let koAcc = 100;
+  if (targetMaskKo) {
+    koAcc = calculateTraceAccuracy(activeKoCanvas, activeKoCtx, targetMaskKo);
+    updateTraceBar('trace-ko-acc-bar', 'trace-ko-acc-text', koAcc);
+  }
+  
+  // Auto pass if both are >= 80 (since we made F1 score perfectly fair now)
+  if (enAcc >= 80 && koAcc >= 80) {
+    const fb = document.getElementById('trace-feedback');
+    if (!fb.classList.contains('correct-fb')) { // Prevent multiple triggers
+      fb.textContent = '✅ 완벽하게 썼습니다!';
+      fb.className = 'short-feedback show-feedback correct-fb';
+      testCorrect++;
+      
+      // Auto transition
+      setTimeout(() => {
+        const traceScreen = document.getElementById('test-trace');
+        traceScreen.classList.add('card-slide-out');
+        setTimeout(() => {
+          traceScreen.classList.remove('card-slide-out');
+          testIndex++;
+          showTraceCard();
+        }, 200);
+      }, 600);
+    }
+  }
 }
 
 function showTraceCard() {
