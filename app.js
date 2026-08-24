@@ -3344,7 +3344,7 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
   
   // 2. Clear and draw the actual VISUAL guide (thin)
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(180, 180, 180, 0.15)'; // Light gray guide
+  ctx.fillStyle = 'rgba(150, 150, 150, 0.6)'; // Much more visible for thin fonts
   ctx.fillText(text, w / 2, h / 2);
   
   return { mask, targetPixelCount, w, h, fontSize };

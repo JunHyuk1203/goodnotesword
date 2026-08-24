@@ -3240,3 +3240,41 @@ body[data-theme='light'] .sheet-drag-bar {
 .trace-acc-label { font-size: 12px; color: var(--text-muted); }
 .trace-acc-bar-bg { width: 100%; height: 6px; background: var(--bg-hover); border-radius: 3px; overflow: hidden; }
 .trace-acc-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s ease, background-color 0.3s ease; }
+
+/* Premium Next Button */
+.premium-next-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  border-radius: 100px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #007aff, #34c759);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.premium-next-btn:active {
+  transform: scale(0.96);
+}
+.premium-next-btn:disabled {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+}
+.premium-next-btn svg {
+  transition: transform 0.3s ease;
+}
+.premium-next-btn:not(:disabled):hover svg {
+  transform: translateX(4px);
+}
