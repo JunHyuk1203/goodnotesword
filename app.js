@@ -3390,7 +3390,6 @@ function showTraceCard() {
   }
   
   traceFailCount = 0;
-  document.getElementById('trace-skip-btn').classList.add('hidden');
   document.getElementById('trace-feedback').textContent = '';
   document.getElementById('trace-feedback').className = 'short-feedback';
   document.getElementById('trace-en-acc-bar').style.width = '0%';
