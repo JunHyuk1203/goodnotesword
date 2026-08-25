@@ -3340,9 +3340,9 @@ function renderTraceGuide(canvas, ctx, text, isKo) {
     }
   }
   
-  // === 2. Allow Mask (35px brush) ===
+  // === 2. Allow Mask (45px brush) ===
   // Generous boundary to prevent penalizing natural hand jitter
-  ctx.lineWidth = 35;
+  ctx.lineWidth = 45;
   ctx.strokeText(text, w / 2, h / 2);
   
   imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -3511,15 +3511,16 @@ function calculateTraceAccuracy(canvas, ctx, maskData) {
   if (validUserArea + overflowArea === 0) return 0;
   
   // 1. Completion: How much of the target area did they cover?
-  // Because they can draw messily inside the allowMask, validUserArea roughly matches targetArea for a full trace.
-  const completion = validUserArea / maskData.targetArea;
+  // Humans naturally skip serifs, loops, and thick joints in fonts when writing quickly.
+  // Covering 60% of the mathematical 15px font area is practically a "perfect" human trace.
+  const completion = Math.min(1.0, validUserArea / (maskData.targetArea * 0.6));
   
-  // 2. Overflow penalty: Deduct points for drawing outside the allowMask.
-  const overflowPenalty = (overflowArea / maskData.targetArea) * 1.5;
+  // 2. Overflow penalty: Deduct points for drawing outside the allowMask (45px boundary).
+  const overflowPenalty = overflowArea / maskData.targetArea;
   
   // 3. Excess ink penalty (Anti-coloring): Deduct points heavily if they scribble inside the allowMask to fill it up.
-  // 1.3x targetArea is a normal margin for overlapping strokes. Beyond that is coloring.
-  const excessPenalty = Math.max(0, (validUserArea - maskData.targetArea * 1.3) / maskData.targetArea) * 2.5;
+  // 1.2x targetArea is a normal margin for overlapping strokes. Beyond that is coloring.
+  const excessPenalty = Math.max(0, (validUserArea - maskData.targetArea * 1.2) / maskData.targetArea) * 2.0;
   
   // Final calculation
   let rawScore = completion - overflowPenalty - excessPenalty;
