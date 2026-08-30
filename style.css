@@ -1222,7 +1222,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: linear-gradient(to bottom, transparent 32px, #2C2C2E 32px, #2C2C2E 33px, #1C1C1E 33px);
+  background: transparent;
   border-top: none;
   border-left: none;
   border-right: none;
@@ -1246,6 +1246,21 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 }
 .modal-screen.hidden .modal-screen-content {
   transform: translateY(100%);
+}
+
+/* Background layer for rounded corners */
+.modal-screen-content::after {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #1C1C1E;
+  border-top: 1px solid #2C2C2E;
+  border-radius: 26px 26px 0 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Drag Handle */
@@ -2041,9 +2056,6 @@ body.shorts-mode-active .shorts-only {
 
 /* ??? Test Modal ??? */
 .test-modal-box {
-  background: #0f1029;
-  border: 1px solid rgba(108, 99, 255, 0.25);
-  border-radius: var(--radius-xl);
   padding: 2.5rem;
   max-width: 580px;
   width: 100%;
