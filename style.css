@@ -1181,7 +1181,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 1);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   display: flex;
@@ -1196,7 +1196,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-screen {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 1);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   z-index: 2000;
@@ -1263,7 +1263,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 /* Sheet inner scroll area */
 .modal-screen-content > *:not(:first-child),
 .modal-screen-content > h3 {
-  padding: 0 20px;
+  padding: 0 0;
   overflow-y: auto;
 }
 
@@ -2799,10 +2799,57 @@ button:active:not(:disabled) {
 .word-section-word, .word-section-meaning, .word-section-example, .word-section-related {
   transition: filter 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
+/* ── Granular Hide States ── */
+
+/* Example hide: blur the entire example section (both English + Korean) */
+.hide-example-state .word-section-example .ex-en,
+.hide-example-state .word-section-example .ex-ko {
+  filter: blur(5px) grayscale(50%);
+  opacity: 0.35;
+  user-select: none;
+  cursor: pointer;
+  will-change: filter, opacity;
+}
+/* Keep section-level interaction affordance (click to peek on section) */
+.hide-example-state .word-section-example {
+  cursor: pointer;
+  transform: scale(0.98);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Meaning hide: blur meaning section + the Korean translation lines in examples */
+.hide-meaning-state .word-section-meaning {
+  filter: blur(5px) grayscale(50%);
+  opacity: 0.35;
+  user-select: none;
+  cursor: pointer;
+  transform: scale(0.98) translate3d(0, 0, 0);
+  will-change: filter, opacity, transform;
+}
+.hide-meaning-state .word-section-example .ex-ko {
+  filter: blur(5px) grayscale(50%);
+  opacity: 0.35;
+  user-select: none;
+}
+
+/* Word hide: blur word+etymology sections + the highlighted word inside English examples */
 .hide-word-state .word-section-word,
-.hide-word-state .word-section-etymology,
-.hide-meaning-state .word-section-meaning,
-.hide-example-state .word-section-example,
+.hide-word-state .word-section-etymology {
+  filter: blur(5px) grayscale(50%);
+  opacity: 0.35;
+  user-select: none;
+  cursor: pointer;
+  transform: scale(0.98) translate3d(0, 0, 0);
+  will-change: filter, opacity, transform;
+}
+.hide-word-state .word-section-example .ex-en strong {
+  filter: blur(5px);
+  opacity: 0.35;
+  display: inline-block;
+  user-select: none;
+}
+
+/* Related hide */
 .hide-related-state .word-section-related {
   filter: blur(5px) grayscale(50%);
   opacity: 0.35;
@@ -2812,6 +2859,7 @@ button:active:not(:disabled) {
   will-change: filter, opacity, transform;
 }
 
+/* Peeking (tap to reveal) — restore all blurred elements */
 .hide-word-state .word-section-word.peeking,
 .hide-word-state .word-section-etymology.peeking,
 .hide-meaning-state .word-section-meaning.peeking,
@@ -2821,6 +2869,15 @@ button:active:not(:disabled) {
   opacity: 1 !important;
   transform: scale(1) !important;
   transition: filter 0.2s ease-out, opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+/* Peeking also clears inline-element blurs */
+.hide-word-state .word-section-word.peeking ~ * .ex-en strong,
+.hide-word-state .word-section-example.peeking .ex-en strong,
+.hide-meaning-state .word-section-meaning.peeking ~ * .ex-ko,
+.hide-example-state .word-section-example.peeking .ex-en,
+.hide-example-state .word-section-example.peeking .ex-ko {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 .custom-toast {
@@ -2902,7 +2959,7 @@ button:active {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 20px 8px calc(16px + env(safe-area-inset-bottom));
+  padding: 20px 0 calc(16px + env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0;
   background: transparent;
   position: relative;

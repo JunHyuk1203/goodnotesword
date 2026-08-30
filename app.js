@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 // superword - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log("GoodNotes Vocab App Loaded - v11.0 (Apple HIG Design System)");
@@ -1691,6 +1691,7 @@ CRITICAL TRANSCRIBING RULES:
 1. Act purely as an OCR engine, EXCEPT for the POS (Part of Speech). You MUST use your dictionary knowledge to infer and add the correct POS (e.g., 명, 동, 형) for the main word, synonyms, antonyms, and related words if they are not explicitly present in the text.
 2. For the "meaning" field, you MUST copy the text EXACTLY as it appears. DO NOT summarize.
 3. DO NOT use the tilde symbol (~) anywhere in your output. If a Korean meaning requires a placeholder (like "~하다"), use "..." instead (e.g., "...하다"). Tildes cause markdown strikethrough bugs.
+4. For the "examples" field: If the source includes a Korean translation for an example sentence, copy it EXACTLY and format as "English sentence (한국어 해석)". If the source has NO Korean translation for an example, you MUST GENERATE a natural Korean translation yourself and append it in the same format. Every example MUST include a Korean translation.
 
 OUTPUT FORMAT:
 You MUST output a valid JSON array of objects.
@@ -1699,7 +1700,7 @@ Each object MUST have the following keys:
 - "pos": Part of speech (e.g., 명, 동, 형) (required)
 - "pronunciation": Pronunciation symbol (optional)
 - "meaning": The Korean meaning exactly as written (required)
-- "examples": Array of example sentences (optional)
+- "examples": Array of example sentences. Format MUST be "English sentence (한국어 해석)" — ALWAYS include translation.
 - "synonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "antonyms": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
 - "related": Array of strings (optional). MUST format as "English_word [POS]: Korean_meaning".
