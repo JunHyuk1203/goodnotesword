@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════════════════════════
 // superword - app.js v3.0 (Study Edition)
 // ═══════════════════════════════════════════════════════════════════════════════
 console.log("GoodNotes Vocab App Loaded - v11.0 (Apple HIG Design System)");
@@ -1723,6 +1723,50 @@ if (copyPromptBtn) {
       const orgText = copyPromptBtn.textContent;
       copyPromptBtn.textContent = '✅ 복사 완료!';
       setTimeout(() => copyPromptBtn.textContent = orgText, 2000);
+    } catch (e) {
+      alert('복사 실패! 브라우저 권한을 확인해주세요.');
+    }
+  });
+}
+
+// ─── ENRICHED PROMPT (AI generates rich vocab data from bare word list) ───
+const enrichPromptOutput = document.getElementById('enrich-prompt-output');
+const copyEnrichPromptBtn = document.getElementById('copy-enrich-prompt-btn');
+
+const ENRICH_PROMPT = `You are an expert English vocabulary educator creating premium study cards for Korean learners.
+
+I will give you a list of English words. For EACH word, you MUST generate rich, high-quality vocabulary data entirely from your own knowledge - do NOT extract from images; CREATE the data.
+
+FOR EACH WORD, generate:
+- "word": The exact English word
+- "pos": Part of speech in Korean abbreviation (명, 동, 형, 부, 전, 접, 감)
+- "pronunciation": IPA phonetic symbol (e.g., /wərd/)
+- "meaning": Clear Korean meaning (2-3 words per sense; add multiple senses if important)
+- "examples": Array of 2 English sentences each with Korean translation. Format: "English. / 한국어."
+- "synonyms": 2-3 synonyms. Format: "word [POS]: Korean"
+- "antonyms": 1-2 antonyms if exist. Format: "word [POS]: Korean"
+- "related": 2-3 related words or collocations. Format: "word [POS]: Korean"
+- "etymology": Array of morphemes. Format: "morpheme(Korean_meaning)". E.g. for 'preview': ["pre(미리)","view(보다)"]. Use [] if none.
+
+CRITICAL RULES:
+1. Generate data for EVERY word - skip NONE.
+2. NEVER use the tilde (~) character. Use "..." instead (e.g. "...하다").
+3. Output MUST be a RAW minified JSON array on a SINGLE LINE.
+4. NO markdown code blocks, NO explanatory text.
+5. Output starts with [ and ends with ].
+
+Here are the words (paste one per line below):
+[단어 목록을 여기에 붙여넣으세요 — 예: apple / banana / surrender]`;
+
+if (enrichPromptOutput) enrichPromptOutput.value = ENRICH_PROMPT;
+
+if (copyEnrichPromptBtn) {
+  copyEnrichPromptBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(ENRICH_PROMPT);
+      const orgText = copyEnrichPromptBtn.textContent;
+      copyEnrichPromptBtn.textContent = '✅ 복사 완료!';
+      setTimeout(() => copyEnrichPromptBtn.textContent = orgText, 2000);
     } catch (e) {
       alert('복사 실패! 브라우저 권한을 확인해주세요.');
     }
