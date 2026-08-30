@@ -1222,7 +1222,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: linear-gradient(to bottom, transparent 32px, #1C1C1E 32px);
+  background: linear-gradient(to bottom, transparent 32px, #2C2C2E 32px, #2C2C2E 33px, #1C1C1E 33px);
   border-top: none;
   border-left: none;
   border-right: none;
@@ -2961,7 +2961,6 @@ button:active {
   box-sizing: border-box;
   padding: 20px 0 calc(16px + env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0;
-  background: transparent;
   position: relative;
   display: flex;
   flex-direction: column;
