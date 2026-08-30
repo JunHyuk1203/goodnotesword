@@ -1222,7 +1222,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: linear-gradient(to bottom, transparent 32px, #2C2C2E 32px, #2C2C2E 33px, #1C1C1E 33px);
+  background: linear-gradient(to bottom, #1C1C1E 32px, #2C2C2E 32px, #2C2C2E 33px, transparent 33px);
   border-top: none;
   border-left: none;
   border-right: none;
