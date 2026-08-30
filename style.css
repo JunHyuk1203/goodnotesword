@@ -1222,11 +1222,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: transparent;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
+  background: #1C1C1E;
+  border-radius: 20px;
   border-radius: 26px 26px 0 0;
   width: 100%;
   max-width: 100%;
@@ -1248,8 +1245,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   transform: translateY(100%);
 }
 
-/* Background layer for rounded corners */
-.modal-screen-content::after {
+/* Background layer for rounded corners (only for sheet modals) */
+.sheet-modal::after {
   content: '';
   position: absolute;
   top: 32px;
@@ -1263,8 +1260,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   pointer-events: none;
 }
 
-/* Drag Handle */
-.modal-screen-content::before {
+/* Drag Handle (only for sheet modals) */
+.sheet-modal::before {
   content: '';
   display: block;
   width: 36px;
@@ -2973,6 +2970,7 @@ button:active {
   box-sizing: border-box;
   padding: 20px 0 calc(16px + env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0;
+  background: transparent; /* overridden from .modal-screen-content */
   position: relative;
   display: flex;
   flex-direction: column;
