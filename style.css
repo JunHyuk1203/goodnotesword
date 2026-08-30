@@ -2056,14 +2056,39 @@ body.shorts-mode-active #view-words {
 }
 
 #swipe-counter,
+.shorts-divider,
 .shorts-only {
-  display: none !important;
-}
-body.shorts-mode-active #swipe-counter,
-body.shorts-mode-active .shorts-only {
-  display: inline-flex !important;
+  opacity: 0;
+  max-width: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-width: 0 !important;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+body.shorts-mode-active #swipe-counter,
+body.shorts-mode-active .shorts-divider,
+body.shorts-mode-active .shorts-only {
+  opacity: 1;
+  max-width: 100px;
+}
+
+body.shorts-mode-active .hide-toggle-btn.shorts-only {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+body.shorts-mode-active .shorts-divider {
+  margin-left: 4px !important;
+  margin-right: 4px !important;
+  opacity: 0.3;
 }
 
 /* Edit mode: show actions panel, Card mode: hide it */
