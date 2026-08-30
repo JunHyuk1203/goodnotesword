@@ -632,8 +632,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   gap: 12px;
 }
 .option-card {
-  background: #1C1C1E;
-  border: 1px solid #2C2C2E;
+  background: #2C2C2E;
+  border: 1px solid #3A3A3C;
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   display: flex;
@@ -1222,7 +1222,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: #121212;
+  background: #1C1C1E;
   border-top: 1px solid #2C2C2E;
   border-left: none;
   border-right: none;
@@ -2902,7 +2902,7 @@ button:active {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+  padding: 20px 8px calc(16px + env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0;
   background: transparent;
   position: relative;
