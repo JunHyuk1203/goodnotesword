@@ -632,8 +632,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   gap: 12px;
 }
 .option-card {
-  background: rgba(0,0,0,0.25);
-  border: 1px solid var(--border);
+  background: #1C1C1E;
+  border: 1px solid #2C2C2E;
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   display: flex;
@@ -1181,9 +1181,9 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   display: flex;
   align-items: flex-end;  /* bottom sheet default */
   justify-content: center;
@@ -1196,9 +1196,9 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 .modal-screen {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -1222,14 +1222,17 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Sheet content slides up */
 .modal-screen-content {
-  background: var(--bg-secondary, #1c1c1e);
-  border: none;
-  border-radius: 24px 24px 0 0;
+  background: #121212;
+  border-top: 1px solid #2C2C2E;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 26px 26px 0 0;
   width: 100%;
   max-width: 100%;
   max-height: 92vh;
   padding: 0 0 env(safe-area-inset-bottom, 16px);
-  box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
+  box-shadow: none;
   transform: translateY(100%);
   opacity: 1;
   will-change: transform;
@@ -1251,7 +1254,7 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
   display: block;
   width: 36px;
   height: 5px;
-  background: rgba(128, 128, 128, 0.5);
+  background: #3A3A3C;
   border-radius: 3px;
   margin: 12px auto 8px;
   flex-shrink: 0;
@@ -1271,8 +1274,8 @@ body[data-theme="light"] .bg-orb { opacity: 0.12; }
 
 /* Alert modal (centered, not sheet) */
 .modal-box {
-  background: var(--bg-secondary, #1c1c1e);
-  border: 0.5px solid var(--border);
+  background: #1C1C1E;
+  border: 0.5px solid #2C2C2E;
   border-radius: 20px;
   padding: 24px;
   max-width: 320px;
@@ -2896,12 +2899,12 @@ button:active {
 /* Unified Modal Sheet Styles (Apple HIG) */
 .sheet-modal {
   margin: 0 auto;
-  width: calc(100% - 32px);
-  max-width: 480px;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
-  padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
-  border-radius: 24px 24px 0 0;
-  background: var(--bg-surface);
+  padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0;
+  background: transparent;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -2910,13 +2913,13 @@ button:active {
 .sheet-drag-bar {
   width: 36px;
   height: 5px;
-  background: rgba(255, 255, 255, 0.3);
+  background: #3A3A3C;
   border-radius: 3px;
   margin: -4px auto 16px; /* -4px to pull it up slightly closer to the top edge */
 }
 
 body[data-theme='light'] .sheet-drag-bar {
-  background: rgba(0, 0, 0, 0.2);
+  background: #3A3A3C;
 }
 
 .sheet-header {
@@ -2936,14 +2939,15 @@ body[data-theme='light'] .sheet-drag-bar {
 
 .sheet-close-btn {
   /* Visible icon is 28px but tap area is 44x44 for reliable touch */
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #2C2C2E;
   border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  opacity: 0.6;
+  color: #EBEBF5;
+  opacity: 1;
   cursor: pointer;
-  padding: 8px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2960,9 +2964,9 @@ body[data-theme='light'] .sheet-drag-bar {
 }
 
 .sheet-close-btn svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
+  width: 16px;
+  height: 16px;
+  fill: none;
   pointer-events: none;
 }
 
